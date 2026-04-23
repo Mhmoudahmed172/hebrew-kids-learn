@@ -1,0 +1,109 @@
+import { Button } from "@/components/ui/button";
+import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
+import heroKid from "@/assets/hero-kid.png";
+
+const Hero = () => {
+  return (
+    <section className="relative overflow-hidden bg-hero-gradient pt-12 pb-24 lg:pt-20 lg:pb-32">
+      {/* Decorative blobs */}
+      <div className="blob bg-primary w-[500px] h-[500px] -top-40 -right-40" />
+      <div className="blob bg-accent w-[400px] h-[400px] top-40 -left-40" />
+      <div className="blob bg-secondary w-[300px] h-[300px] bottom-0 right-1/3" />
+
+      {/* Floating Hebrew letters */}
+      <div className="absolute top-32 right-[15%] text-5xl font-display text-primary/30 animate-float-slow hidden md:block">א</div>
+      <div className="absolute top-1/2 left-[10%] text-6xl font-display text-pink/40 animate-float-fast hidden md:block">ב</div>
+      <div className="absolute bottom-32 right-1/4 text-4xl font-display text-accent/50 animate-wiggle hidden md:block">ג</div>
+
+      <div className="container relative">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Text */}
+          <div className="text-center lg:text-right space-y-8 animate-pop-in">
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full border border-primary/10 shadow-soft">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-sm font-bold text-foreground/80">منصة #1 لتعليم العبرية للأطفال</span>
+            </div>
+
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15]">
+              حوّل تعلم العبرية إلى{" "}
+              <span className="text-gradient-fun">تجربة ممتعة</span>{" "}
+              لطفلك
+            </h1>
+
+            <p className="text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              دروس تفاعلية، فيديوهات ممتعة، ونظام تحفيزي يساعد طفلك يتعلم بسهولة — مصمم خصيصاً للأطفال من 5 إلى 10 سنوات.
+            </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button variant="hero" size="xl">
+                <Sparkles /> ابدأ التجربة المجانية
+              </Button>
+              <Button variant="outline" size="xl">
+                <PlayCircle /> شاهد كيف تعمل
+              </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2 space-x-reverse">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className={`w-9 h-9 rounded-full border-2 border-background ${
+                      ['bg-primary','bg-accent','bg-secondary','bg-pink'][i-1]
+                    }`} />
+                  ))}
+                </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1">
+                    {[1,2,3,4,5].map(i => <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" />)}
+                  </div>
+                  <p className="text-xs text-muted-foreground font-medium">+10,000 طفل سعيد</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Hero image */}
+          <div className="relative animate-pop-in">
+            <div className="relative">
+              {/* Glow background */}
+              <div className="absolute inset-0 bg-primary-gradient rounded-[3rem] blur-3xl opacity-30 scale-90" />
+
+              {/* Image card */}
+              <div className="relative bg-white/60 backdrop-blur-sm rounded-[3rem] p-6 shadow-glow border border-white">
+                <img src={heroKid} alt="طفل سعيد يتعلم العبرية" width={1024} height={1024} className="w-full h-auto" />
+              </div>
+
+              {/* Floating badges */}
+              <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-slow">
+                <div className="w-12 h-12 rounded-xl bg-sun-gradient flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-display font-extrabold text-lg leading-none">+50</p>
+                  <p className="text-xs text-muted-foreground">نجمة اليوم</p>
+                </div>
+              </div>
+
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-fast">
+                <div className="w-12 h-12 rounded-xl bg-sky-gradient flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-display font-extrabold text-lg leading-none">7 أيام</p>
+                  <p className="text-xs text-muted-foreground">سلسلة متواصلة</p>
+                </div>
+              </div>
+
+              <div className="absolute top-1/3 -left-6 bg-pink rounded-2xl shadow-pink p-3 animate-wiggle">
+                <span className="font-display font-extrabold text-2xl text-white">שלום</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default Hero;
