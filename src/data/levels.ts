@@ -1,4 +1,4 @@
-export type LessonType = "video" | "game" | "pronunciation" | "song" | "quiz";
+export type LessonType = "video" | "game" | "song" | "quiz";
 
 export interface Lesson {
   id: string;
@@ -9,6 +9,7 @@ export interface Lesson {
   locked?: boolean;
   stars?: number;
   description?: string;
+  videoUrl?: string;
 }
 
 export interface Level {
