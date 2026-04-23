@@ -1,12 +1,6 @@
 import { Lock, Star, Trophy, Crown } from "lucide-react";
-
-const levels = [
-  { n: 1, title: "الحروف العبرية", icon: "א", color: "from-mint to-secondary", unlocked: true, stars: 3, lessons: 12 },
-  { n: 2, title: "الكلمات الأولى", icon: "ב", color: "from-secondary to-primary", unlocked: true, stars: 2, lessons: 15 },
-  { n: 3, title: "الجمل البسيطة", icon: "ג", color: "from-primary to-pink", unlocked: true, stars: 1, lessons: 18 },
-  { n: 4, title: "المحادثات", icon: "ד", color: "from-pink to-accent", unlocked: false, stars: 0, lessons: 20 },
-  { n: 5, title: "القراءة", icon: "ה", color: "from-accent to-mint", unlocked: false, stars: 0, lessons: 22 },
-];
+import { Link } from "react-router-dom";
+import { levels } from "@/data/levels";
 
 const Levels = () => {
   return (
@@ -25,29 +19,20 @@ const Levels = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {levels.map((lvl) => (
-            <div
-              key={lvl.n}
-              className={`relative group ${lvl.unlocked ? "" : "opacity-60"}`}
-            >
-              <div className={`relative bg-card rounded-3xl p-6 border-2 ${lvl.unlocked ? "border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2" : "border-border"} transition-bounce text-center`}>
-                {/* Hebrew letter */}
+          {levels.map((lvl) => {
+            const Inner = (
+              <div className={`relative bg-card rounded-3xl p-6 border-2 ${lvl.unlocked ? "border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2 cursor-pointer" : "border-border"} transition-bounce text-center h-full`}>
                 <div className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${lvl.color} flex items-center justify-center shadow-medium`}>
                   <span className="font-display text-5xl text-white">{lvl.icon}</span>
                 </div>
-
                 <p className="text-xs font-bold text-muted-foreground mb-1">المستوى {lvl.n}</p>
                 <h3 className="font-display text-lg mb-3">{lvl.title}</h3>
-
-                {/* Stars */}
                 <div className="flex items-center justify-center gap-1 mb-2">
                   {[1,2,3].map(i => (
                     <Star key={i} className={`w-4 h-4 ${i <= lvl.stars ? "fill-accent text-accent" : "text-muted"}`} />
                   ))}
                 </div>
-
-                <p className="text-xs text-muted-foreground">{lvl.lessons} درس</p>
-
+                <p className="text-xs text-muted-foreground">{lvl.totalLessons} درس</p>
                 {!lvl.unlocked && (
                   <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-muted-foreground/20 flex items-center justify-center">
                     <Lock className="w-4 h-4 text-muted-foreground" />
@@ -59,8 +44,17 @@ const Levels = () => {
                   </div>
                 )}
               </div>
-            </div>
-          ))}
+            );
+            return (
+              <div key={lvl.n} className={`relative group ${lvl.unlocked ? "" : "opacity-60"}`}>
+                {lvl.unlocked ? (
+                  <Link to={`/level/${lvl.slug}`} className="block h-full">{Inner}</Link>
+                ) : (
+                  Inner
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {/* Stats bar */}
