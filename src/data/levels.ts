@@ -1,4 +1,4 @@
-export type LessonType = "video" | "game" | "pronunciation" | "song" | "quiz";
+export type LessonType = "video" | "game" | "song" | "quiz";
 
 export interface Lesson {
   id: string;
@@ -9,6 +9,7 @@ export interface Lesson {
   locked?: boolean;
   stars?: number;
   description?: string;
+  videoUrl?: string;
 }
 
 export interface Level {
@@ -26,7 +27,6 @@ export interface Level {
   badges: { name: string; emoji: string; earned: boolean }[];
   videos: Lesson[];
   games: Lesson[];
-  pronunciation: Lesson[];
   songs: Lesson[];
   quizzes: Lesson[];
 }
@@ -81,12 +81,6 @@ export const levels: Level[] = [
       { title: "اختر الكلمة الصحيحة", duration: "لعبة" },
       { title: "اسمع واختر الإجابة", duration: "لعبة" },
     ], 4),
-    pronunciation: makeLessons("pronunciation", [
-      { title: "نطق Aleph א", duration: "تمرين" },
-      { title: "نطق Bet ב", duration: "تمرين" },
-      { title: "نطق Gimel ג", duration: "تمرين" },
-      { title: "نطق Dalet ד", duration: "تمرين" },
-    ], 3),
     songs: makeLessons("song", [
       { title: "أغنية الأبجدية", duration: "2:50", description: "تعلّم الحروف بالغناء" },
       { title: "أنشودة الحروف الملونة", duration: "3:10" },
@@ -127,10 +121,6 @@ export const levels: Level[] = [
       { title: "ذاكرة المفردات", duration: "لعبة" },
       { title: "ترتيب أحرف الكلمة", duration: "لعبة" },
     ], 2),
-    pronunciation: makeLessons("pronunciation", [
-      { title: "نطق كلمات الأسرة", duration: "تمرين" },
-      { title: "نطق الألوان", duration: "تمرين" },
-    ], 1),
     songs: makeLessons("song", [
       { title: "أغنية الألوان", duration: "2:40" },
       { title: "أغنية الطعام اللذيذ", duration: "3:00" },
@@ -163,7 +153,7 @@ export const levels: Level[] = [
       { title: "السؤال والجواب", duration: "4:50" },
     ], 1),
     games: makeLessons("game", [{ title: "بناء الجمل", duration: "لعبة" }], 1),
-    pronunciation: makeLessons("pronunciation", [{ title: "نطق الجمل", duration: "تمرين" }], 1),
+    
     songs: makeLessons("song", [{ title: "أغنية الجمل اليومية", duration: "3:00" }], 1),
     quizzes: makeLessons("quiz", [{ title: "اختبار الجمل", duration: "10 أسئلة" }], 1),
   },
@@ -187,7 +177,6 @@ export const levels: Level[] = [
     ],
     videos: [],
     games: [],
-    pronunciation: [],
     songs: [],
     quizzes: [],
   },
@@ -211,7 +200,6 @@ export const levels: Level[] = [
     ],
     videos: [],
     games: [],
-    pronunciation: [],
     songs: [],
     quizzes: [],
   },

@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Play, Lock, Star, Trophy, Sparkles, Gamepad2, Mic, Music, ClipboardCheck, Video, CheckCircle2, Crown, Flame, Target } from "lucide-react";
+import { ArrowRight, Play, Lock, Star, Trophy, Sparkles, Gamepad2, Music, ClipboardCheck, Video, CheckCircle2, Crown, Flame, Target } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
@@ -10,17 +10,20 @@ import Footer from "@/components/landing/Footer";
 const typeMeta: Record<LessonType, { icon: any; label: string; color: string; bg: string }> = {
   video: { icon: Video, label: "فيديو", color: "text-secondary", bg: "bg-secondary-soft" },
   game: { icon: Gamepad2, label: "لعبة", color: "text-pink", bg: "bg-pink-soft" },
-  pronunciation: { icon: Mic, label: "نطق", color: "text-primary", bg: "bg-primary-soft" },
   song: { icon: Music, label: "أغنية", color: "text-accent-foreground", bg: "bg-accent-soft" },
   quiz: { icon: ClipboardCheck, label: "اختبار", color: "text-mint", bg: "bg-mint-soft" },
 };
 
-const LessonCard = ({ lesson }: { lesson: Lesson }) => {
+const LessonCard = ({ lesson, slug }: { lesson: Lesson; slug: string }) => {
   const meta = typeMeta[lesson.type];
   const Icon = meta.icon;
+  const isPlayableVideo = lesson.type === "video" && !lesson.locked;
+  const Wrapper: any = isPlayableVideo ? Link : "div";
+  const wrapperProps = isPlayableVideo ? { to: `/level/${slug}/video/${lesson.id}` } : {};
   return (
-    <div
-      className={`group relative bg-card rounded-3xl p-5 border-2 ${
+    <Wrapper
+      {...wrapperProps}
+      className={`group relative bg-card rounded-3xl p-5 border-2 block ${
         lesson.locked ? "border-border opacity-60" : "border-border/60 hover:border-primary/40 hover:-translate-y-1 hover:shadow-medium"
       } transition-bounce`}
     >
@@ -55,7 +58,7 @@ const LessonCard = ({ lesson }: { lesson: Lesson }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 };
 
@@ -86,7 +89,6 @@ const LevelDetail = () => {
   const sections: { key: string; label: string; icon: any; lessons: Lesson[]; emoji: string }[] = [
     { key: "videos", label: "فيديوهات", icon: Video, lessons: level.videos, emoji: "🎬" },
     { key: "games", label: "ألعاب", icon: Gamepad2, lessons: level.games, emoji: "🎮" },
-    { key: "pronunciation", label: "النطق", icon: Mic, lessons: level.pronunciation, emoji: "🎤" },
     { key: "songs", label: "أغاني", icon: Music, lessons: level.songs, emoji: "🎵" },
     { key: "quizzes", label: "اختبارات", icon: ClipboardCheck, lessons: level.quizzes, emoji: "🧪" },
   ];
@@ -208,7 +210,7 @@ const LevelDetail = () => {
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {s.lessons.map((lesson) => (
-                      <LessonCard key={lesson.id} lesson={lesson} />
+                      <LessonCard key={lesson.id} lesson={lesson} slug={level.slug} />
                     ))}
                   </div>
                 )}
