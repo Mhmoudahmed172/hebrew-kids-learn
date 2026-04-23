@@ -14,12 +14,16 @@ const typeMeta: Record<LessonType, { icon: any; label: string; color: string; bg
   quiz: { icon: ClipboardCheck, label: "اختبار", color: "text-mint", bg: "bg-mint-soft" },
 };
 
-const LessonCard = ({ lesson }: { lesson: Lesson }) => {
+const LessonCard = ({ lesson, slug }: { lesson: Lesson; slug: string }) => {
   const meta = typeMeta[lesson.type];
   const Icon = meta.icon;
+  const isPlayableVideo = lesson.type === "video" && !lesson.locked;
+  const Wrapper: any = isPlayableVideo ? Link : "div";
+  const wrapperProps = isPlayableVideo ? { to: `/level/${slug}/video/${lesson.id}` } : {};
   return (
-    <div
-      className={`group relative bg-card rounded-3xl p-5 border-2 ${
+    <Wrapper
+      {...wrapperProps}
+      className={`group relative bg-card rounded-3xl p-5 border-2 block ${
         lesson.locked ? "border-border opacity-60" : "border-border/60 hover:border-primary/40 hover:-translate-y-1 hover:shadow-medium"
       } transition-bounce`}
     >
@@ -54,7 +58,7 @@ const LessonCard = ({ lesson }: { lesson: Lesson }) => {
           </div>
         </div>
       </div>
-    </div>
+    </Wrapper>
   );
 };
 
