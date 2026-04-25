@@ -198,10 +198,17 @@ const initialVideos = [
 const VideosSection = () => {
   const [videos, setVideos] = useState(initialVideos);
   const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any | null>(null);
 
   const remove = (id: number) => {
     setVideos(v => v.filter(x => x.id !== id));
     toast({ title: "تم الحذف", description: "تم حذف الفيديو بنجاح" });
+  };
+
+  const saveEdit = (updated: any) => {
+    setVideos(vs => vs.map(v => v.id === updated.id ? updated : v));
+    setEditing(null);
+    toast({ title: "تم الحفظ", description: "تم تحديث بيانات الفيديو" });
   };
 
   return (
