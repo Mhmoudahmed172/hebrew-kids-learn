@@ -324,6 +324,8 @@ const EditVideoDialog = ({ video, onSave }: { video: any; onSave: (v: any) => vo
     </DialogContent>
   );
 };
+
+const UploadVideoDialog = ({ onDone }: { onDone: (v: any) => void }) => {
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState("الحروف العبرية");
   const [duration, setDuration] = useState("");
