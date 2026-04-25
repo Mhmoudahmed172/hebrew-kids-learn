@@ -380,12 +380,20 @@ const initialUsers = [
   { id: 5, name: "يوسف عمر", email: "yousef@mail.com", role: "طفل", age: 6, parent: "عمر يوسف", status: "نشط" },
 ];
 
+type UserRow = { id: number; name: string; email: string; role: string; age: number; parent: string; status: string };
+
+const emptyUser: UserRow = { id: 0, name: "", email: "", role: "طفل", age: 7, parent: "", status: "نشط" };
+
 const UsersSection = () => {
-  const [users, setUsers] = useState(initialUsers);
+  const [users, setUsers] = useState<UserRow[]>(initialUsers);
   const [filter, setFilter] = useState<"all" | "child" | "parent">("all");
+  const [editing, setEditing] = useState<UserRow | null>(null);
+  const [adding, setAdding] = useState(false);
 
   const filtered = users.filter(u => filter === "all" ? true : filter === "child" ? u.role === "طفل" : u.role === "ولي أمر");
   const remove = (id: number) => { setUsers(u => u.filter(x => x.id !== id)); toast({ title: "تم الحذف" }); };
+  const saveEdit = (u: UserRow) => { setUsers(us => us.map(x => x.id === u.id ? u : x)); setEditing(null); toast({ title: "تم الحفظ", description: "تم تحديث بيانات المستخدم" }); };
+  const addUser = (u: UserRow) => { setUsers(us => [{ ...u, id: Date.now() }, ...us]); setAdding(false); toast({ title: "تمت الإضافة", description: "تم إضافة المستخدم بنجاح" }); };
 
   return (
     <div className="space-y-6">
@@ -415,7 +423,7 @@ const UsersSection = () => {
             <Search className="w-4 h-4 text-muted-foreground" />
             <input className="bg-transparent outline-none text-sm flex-1" placeholder="بحث عن مستخدم..." />
           </div>
-          <Button variant="hero" size="sm"><Plus className="w-4 h-4 ml-1" /> إضافة مستخدم</Button>
+          <Button variant="hero" size="sm" onClick={() => setAdding(true)}><Plus className="w-4 h-4 ml-1" /> إضافة مستخدم</Button>
         </div>
         <Table>
           <TableHeader>
@@ -451,7 +459,7 @@ const UsersSection = () => {
                 </TableCell>
                 <TableCell>
                   <div className="flex items-center gap-1">
-                    <Button size="icon" variant="ghost"><Pencil className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => setEditing(u)}><Pencil className="w-4 h-4" /></Button>
                     <Button size="icon" variant="ghost" onClick={() => remove(u.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </div>
                 </TableCell>
@@ -460,7 +468,77 @@ const UsersSection = () => {
           </TableBody>
         </Table>
       </Card>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        {editing && <UserDialog title="تعديل مستخدم" submitLabel="حفظ التغييرات" initial={editing} onSubmit={saveEdit} />}
+      </Dialog>
+      <Dialog open={adding} onOpenChange={setAdding}>
+        {adding && <UserDialog title="إضافة مستخدم جديد" submitLabel="إضافة" initial={emptyUser} onSubmit={addUser} />}
+      </Dialog>
     </div>
+  );
+};
+
+const UserDialog = ({ title, submitLabel, initial, onSubmit }: { title: string; submitLabel: string; initial: UserRow; onSubmit: (u: UserRow) => void }) => {
+  const [u, setU] = useState<UserRow>(initial);
+  const upd = <K extends keyof UserRow>(k: K, v: UserRow[K]) => setU(prev => ({ ...prev, [k]: v }));
+  return (
+    <DialogContent dir="rtl" className="sm:max-w-lg rounded-3xl">
+      <DialogHeader><DialogTitle className="font-display text-2xl">{title}</DialogTitle></DialogHeader>
+      <div className="space-y-4 py-2">
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>الاسم الكامل</Label>
+            <Input value={u.name} onChange={e => upd("name", e.target.value)} placeholder="الاسم" />
+          </div>
+          <div className="space-y-2">
+            <Label>البريد الإلكتروني</Label>
+            <Input type="email" value={u.email} onChange={e => upd("email", e.target.value)} placeholder="user@mail.com" />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>الدور</Label>
+            <Select value={u.role} onValueChange={v => upd("role", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="طفل">طفل</SelectItem>
+                <SelectItem value="ولي أمر">ولي أمر</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>العمر</Label>
+            <Input type="number" value={u.age} onChange={e => upd("age", Number(e.target.value))} />
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>ولي الأمر</Label>
+            <Input value={u.parent} onChange={e => upd("parent", e.target.value)} placeholder="— إن لم يوجد" />
+          </div>
+          <div className="space-y-2">
+            <Label>الحالة</Label>
+            <Select value={u.status} onValueChange={v => upd("status", v)}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="نشط">نشط</SelectItem>
+                <SelectItem value="موقوف">موقوف</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="hero" onClick={() => {
+          if (!u.name.trim() || !u.email.trim()) {
+            toast({ title: "حقول ناقصة", description: "يرجى إدخال الاسم والبريد" });
+            return;
+          }
+          onSubmit({ ...u, parent: u.parent || "—" });
+        }}>{submitLabel}</Button>
+      </DialogFooter>
+    </DialogContent>
   );
 };
 
