@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Search, Plus, Pencil, Trash2, Eye, MoreVertical, ArrowRight,
-  TrendingUp, PlayCircle, UserCheck, Award, Filter, Download, Baby, UserCog, Crown
+  TrendingUp, PlayCircle, UserCheck, Award, Filter, Download, Baby, UserCog, Crown,
+  CheckCircle2, X, GripVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -543,18 +544,28 @@ const UserDialog = ({ title, submitLabel, initial, onSubmit }: { title: string; 
 };
 
 /* ---------------- Content ---------------- */
+type ContentItem = { id: number; title: string; type: string; lessons: number; status: string };
+const initialContent: ContentItem[] = [
+  { id: 1, title: "الحروف العبرية", type: "مستوى", lessons: 12, status: "منشور" },
+  { id: 2, title: "الكلمات الأولى", type: "مستوى", lessons: 15, status: "منشور" },
+  { id: 3, title: "الجمل البسيطة", type: "مستوى", lessons: 18, status: "منشور" },
+  { id: 4, title: "المحادثات", type: "مستوى", lessons: 20, status: "مسودة" },
+];
+
 const ContentSection = () => {
-  const items = [
-    { id: 1, title: "الحروف العبرية", type: "مستوى", lessons: 12, status: "منشور" },
-    { id: 2, title: "الكلمات الأولى", type: "مستوى", lessons: 15, status: "منشور" },
-    { id: 3, title: "الجمل البسيطة", type: "مستوى", lessons: 18, status: "منشور" },
-    { id: 4, title: "المحادثات", type: "مستوى", lessons: 20, status: "مسودة" },
-  ];
+  const [items, setItems] = useState<ContentItem[]>(initialContent);
+  const [editing, setEditing] = useState<ContentItem | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const remove = (id: number) => { setItems(l => l.filter(x => x.id !== id)); toast({ title: "تم الحذف" }); };
+  const save = (it: ContentItem) => { setItems(ls => ls.map(x => x.id === it.id ? it : x)); setEditing(null); toast({ title: "تم الحفظ", description: "تم تحديث المستوى" }); };
+  const add = (it: ContentItem) => { setItems(ls => [{ ...it, id: Date.now() }, ...ls]); setAdding(false); toast({ title: "تمت الإضافة" }); };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-muted-foreground">عدّل المستويات والدروس وأعد ترتيب المحتوى</p>
-        <Button variant="hero" size="lg"><Plus /> مستوى جديد</Button>
+        <Button variant="hero" size="lg" onClick={() => setAdding(true)}><Plus /> مستوى جديد</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {items.map(it => (
@@ -570,57 +581,74 @@ const ContentSection = () => {
                   <Badge className={`mt-3 ${it.status === "منشور" ? "bg-mint-soft text-mint" : "bg-accent-soft text-accent-foreground"} border-0`}>{it.status}</Badge>
                 </div>
               </div>
-              <Button size="icon" variant="ghost"><MoreVertical className="w-4 h-4" /></Button>
             </div>
             <div className="flex gap-2 mt-5">
-              <Button variant="soft" size="sm" className="flex-1"><Pencil className="w-4 h-4 ml-1" /> تعديل</Button>
-              <Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button>
+              <Button variant="soft" size="sm" className="flex-1" onClick={() => setEditing(it)}><Pencil className="w-4 h-4 ml-1" /> تعديل</Button>
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4" /></Button>
             </div>
           </Card>
         ))}
       </div>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        {editing && <ContentDialog title="تعديل المستوى" submitLabel="حفظ" initial={editing} onSubmit={save} />}
+      </Dialog>
+      <Dialog open={adding} onOpenChange={setAdding}>
+        {adding && <ContentDialog title="مستوى جديد" submitLabel="إضافة" initial={{ id: 0, title: "", type: "مستوى", lessons: 0, status: "مسودة" }} onSubmit={add} />}
+      </Dialog>
     </div>
   );
 };
 
-/* ---------------- Quizzes / Songs / Games ---------------- */
+const ContentDialog = ({ title, submitLabel, initial, onSubmit }: { title: string; submitLabel: string; initial: ContentItem; onSubmit: (i: ContentItem) => void }) => {
+  const [it, setIt] = useState<ContentItem>(initial);
+  return (
+    <DialogContent dir="rtl" className="sm:max-w-lg rounded-3xl">
+      <DialogHeader><DialogTitle className="font-display text-2xl">{title}</DialogTitle></DialogHeader>
+      <div className="space-y-4 py-2">
+        <div className="space-y-2"><Label>اسم المستوى</Label><Input value={it.title} onChange={e => setIt({ ...it, title: e.target.value })} /></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2"><Label>عدد الدروس</Label><Input type="number" value={it.lessons} onChange={e => setIt({ ...it, lessons: Number(e.target.value) })} /></div>
+          <div className="space-y-2">
+            <Label>الحالة</Label>
+            <Select value={it.status} onValueChange={v => setIt({ ...it, status: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="منشور">منشور</SelectItem><SelectItem value="مسودة">مسودة</SelectItem></SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="hero" onClick={() => { if (!it.title.trim()) { toast({ title: "أدخل اسم المستوى" }); return; } onSubmit(it); }}>{submitLabel}</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+};
+
+/* ---------------- Songs / Games (generic list with edit) ---------------- */
+type ListItem = { id: number; title: string; meta: string; level: string };
+
 const SimpleListSection = ({
   emptyTitle, items, icon: Icon, color, addLabel, fields,
 }: {
   emptyTitle: string;
-  items: { id: number; title: string; meta: string; level: string }[];
+  items: ListItem[];
   icon: any; color: string; addLabel: string;
-  fields: { label: string; placeholder: string }[];
+  fields: { key: "title" | "meta" | "level"; label: string; placeholder: string }[];
 }) => {
-  const [list, setList] = useState(items);
-  const [open, setOpen] = useState(false);
+  const [list, setList] = useState<ListItem[]>(items);
+  const [editing, setEditing] = useState<ListItem | null>(null);
+  const [adding, setAdding] = useState(false);
+
   const remove = (id: number) => { setList(l => l.filter(x => x.id !== id)); toast({ title: "تم الحذف" }); };
+  const save = (it: ListItem) => { setList(ls => ls.map(x => x.id === it.id ? it : x)); setEditing(null); toast({ title: "تم الحفظ" }); };
+  const add = (it: ListItem) => { setList(ls => [{ ...it, id: Date.now() }, ...ls]); setAdding(false); toast({ title: "تمت الإضافة" }); };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-muted-foreground">{emptyTitle}</p>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild><Button variant="hero" size="lg"><Plus /> {addLabel}</Button></DialogTrigger>
-          <DialogContent dir="rtl" className="rounded-3xl">
-            <DialogHeader><DialogTitle className="font-display text-2xl">{addLabel}</DialogTitle></DialogHeader>
-            <div className="space-y-4 py-2">
-              <div className="border-2 border-dashed border-primary/30 rounded-2xl p-6 text-center bg-primary-soft/40 cursor-pointer">
-                <Upload className="w-8 h-8 mx-auto text-primary mb-2" />
-                <p className="text-sm font-bold">اسحب الملف هنا أو انقر للاختيار</p>
-              </div>
-              {fields.map(f => (
-                <div key={f.label} className="space-y-2">
-                  <Label>{f.label}</Label>
-                  <Input placeholder={f.placeholder} />
-                </div>
-              ))}
-            </div>
-            <DialogFooter>
-              <Button variant="hero" onClick={() => { setList(p => [{ id: Date.now(), title: "عنصر جديد", meta: "—", level: "الحروف العبرية" }, ...p]); setOpen(false); toast({ title: "تمت الإضافة" }); }}>إضافة</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+        <Button variant="hero" size="lg" onClick={() => setAdding(true)}><Plus /> {addLabel}</Button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -633,34 +661,52 @@ const SimpleListSection = ({
             <div className="text-sm text-muted-foreground mt-1">{it.meta}</div>
             <Badge className="mt-3 bg-primary-soft text-primary border-0">{it.level}</Badge>
             <div className="flex gap-2 mt-5">
-              <Button variant="soft" size="sm" className="flex-1"><Pencil className="w-4 h-4 ml-1" /> تعديل</Button>
+              <Button variant="soft" size="sm" className="flex-1" onClick={() => setEditing(it)}><Pencil className="w-4 h-4 ml-1" /> تعديل</Button>
               <Button variant="ghost" size="sm" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
             </div>
           </Card>
         ))}
       </div>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        {editing && <ListItemDialog title={`تعديل: ${editing.title}`} submitLabel="حفظ" initial={editing} fields={fields} onSubmit={save} />}
+      </Dialog>
+      <Dialog open={adding} onOpenChange={setAdding}>
+        {adding && <ListItemDialog title={addLabel} submitLabel="إضافة" initial={{ id: 0, title: "", meta: "", level: "الحروف العبرية" }} fields={fields} onSubmit={add} showUpload />}
+      </Dialog>
     </div>
   );
 };
 
-const QuizzesSection = () => (
-  <SimpleListSection
-    emptyTitle="ارفع وعدّل الاختبارات النهائية وأسئلة الدروس"
-    addLabel="رفع اختبار جديد"
-    icon={ClipboardCheck}
-    color="from-mint to-secondary"
-    fields={[
-      { label: "اسم الاختبار", placeholder: "اختبار الحروف الأولى" },
-      { label: "عدد الأسئلة", placeholder: "10" },
-      { label: "نوع الاختبار", placeholder: "اختيار من متعدد / توصيل / استماع" },
-    ]}
-    items={[
-      { id: 1, title: "اختبار الحروف الأولى", meta: "10 أسئلة • اختيار من متعدد", level: "الحروف العبرية" },
-      { id: 2, title: "اختبار الاستماع", meta: "6 أسئلة • صوتي", level: "الحروف العبرية" },
-      { id: 3, title: "اختبار المفردات", meta: "10 أسئلة • توصيل", level: "الكلمات الأولى" },
-    ]}
-  />
-);
+const ListItemDialog = ({ title, submitLabel, initial, fields, onSubmit, showUpload }: {
+  title: string; submitLabel: string; initial: ListItem;
+  fields: { key: "title" | "meta" | "level"; label: string; placeholder: string }[];
+  onSubmit: (i: ListItem) => void; showUpload?: boolean;
+}) => {
+  const [it, setIt] = useState<ListItem>(initial);
+  return (
+    <DialogContent dir="rtl" className="rounded-3xl">
+      <DialogHeader><DialogTitle className="font-display text-2xl">{title}</DialogTitle></DialogHeader>
+      <div className="space-y-4 py-2">
+        {showUpload && (
+          <div className="border-2 border-dashed border-primary/30 rounded-2xl p-6 text-center bg-primary-soft/40 cursor-pointer">
+            <Upload className="w-8 h-8 mx-auto text-primary mb-2" />
+            <p className="text-sm font-bold">اسحب الملف هنا أو انقر للاختيار</p>
+          </div>
+        )}
+        {fields.map(f => (
+          <div key={f.key} className="space-y-2">
+            <Label>{f.label}</Label>
+            <Input placeholder={f.placeholder} value={it[f.key]} onChange={e => setIt({ ...it, [f.key]: e.target.value })} />
+          </div>
+        ))}
+      </div>
+      <DialogFooter>
+        <Button variant="hero" onClick={() => { if (!it.title.trim()) { toast({ title: "أدخل العنوان" }); return; } onSubmit(it); }}>{submitLabel}</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+};
 
 const SongsSection = () => (
   <SimpleListSection
@@ -669,8 +715,9 @@ const SongsSection = () => (
     icon={Music}
     color="from-accent to-pink"
     fields={[
-      { label: "اسم الأغنية", placeholder: "أغنية الأبجدية" },
-      { label: "المدة", placeholder: "2:50" },
+      { key: "title", label: "اسم الأغنية", placeholder: "أغنية الأبجدية" },
+      { key: "meta", label: "المدة / الصيغة", placeholder: "2:50 • صوت" },
+      { key: "level", label: "المستوى", placeholder: "الحروف العبرية" },
     ]}
     items={[
       { id: 1, title: "أغنية الأبجدية", meta: "2:50 • صوت", level: "الحروف العبرية" },
@@ -687,8 +734,9 @@ const GamesSection = () => (
     icon={Gamepad2}
     color="from-pink to-primary"
     fields={[
-      { label: "اسم اللعبة", placeholder: "مطابقة الحروف" },
-      { label: "نوع اللعبة", placeholder: "مطابقة / ذاكرة / ترتيب" },
+      { key: "title", label: "اسم اللعبة", placeholder: "مطابقة الحروف" },
+      { key: "meta", label: "النوع", placeholder: "مطابقة / ذاكرة / ترتيب" },
+      { key: "level", label: "المستوى", placeholder: "الحروف العبرية" },
     ]}
     items={[
       { id: 1, title: "مطابقة الحروف", meta: "لعبة مطابقة", level: "الحروف العبرية" },
@@ -697,5 +745,223 @@ const GamesSection = () => (
     ]}
   />
 );
+
+/* ---------------- Quizzes (MCQ Builder) ---------------- */
+type Question = { id: number; text: string; options: string[]; correct: number };
+type Quiz = { id: number; title: string; level: string; questions: Question[] };
+
+const initialQuizzes: Quiz[] = [
+  {
+    id: 1, title: "اختبار الحروف الأولى", level: "الحروف العبرية",
+    questions: [
+      { id: 1, text: "ما هو أول حرف في الأبجدية العبرية؟", options: ["א (Aleph)", "ב (Bet)", "ג (Gimel)", "ד (Dalet)"], correct: 0 },
+      { id: 2, text: "أي حرف يقابل صوت B؟", options: ["א", "ב", "ג", "ד"], correct: 1 },
+    ],
+  },
+  {
+    id: 2, title: "اختبار الكلمات الأولى", level: "الكلمات الأولى",
+    questions: [
+      { id: 1, text: "ما معنى كلمة 'שלום'؟", options: ["مرحبا", "وداعا", "شكرا", "نعم"], correct: 0 },
+    ],
+  },
+];
+
+const QuizzesSection = () => {
+  const [quizzes, setQuizzes] = useState<Quiz[]>(initialQuizzes);
+  const [editing, setEditing] = useState<Quiz | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const remove = (id: number) => { setQuizzes(q => q.filter(x => x.id !== id)); toast({ title: "تم حذف الاختبار" }); };
+  const save = (q: Quiz) => { setQuizzes(qs => qs.map(x => x.id === q.id ? q : x)); setEditing(null); toast({ title: "تم الحفظ", description: "تم تحديث الاختبار" }); };
+  const add = (q: Quiz) => { setQuizzes(qs => [{ ...q, id: Date.now() }, ...qs]); setAdding(false); toast({ title: "تم الإنشاء", description: "تم إضافة الاختبار بنجاح" }); };
+
+  const blank: Quiz = { id: 0, title: "", level: "الحروف العبرية", questions: [] };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-muted-foreground">أنشئ اختبارات اختيار من متعدد — أضف الأسئلة، الخيارات، وحدّد الإجابة الصحيحة</p>
+        <Button variant="hero" size="lg" onClick={() => setAdding(true)}><Plus /> إنشاء اختبار جديد</Button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {quizzes.map(q => (
+          <Card key={q.id} className="p-5 rounded-3xl border-2 border-border/60 hover:border-primary/30 hover:-translate-y-1 transition-bounce">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-mint to-secondary flex items-center justify-center text-primary-foreground shadow-soft mb-4">
+              <ClipboardCheck className="w-7 h-7" />
+            </div>
+            <div className="font-display font-extrabold text-lg">{q.title}</div>
+            <div className="text-sm text-muted-foreground mt-1">{q.questions.length} سؤال • اختيار من متعدد</div>
+            <Badge className="mt-3 bg-primary-soft text-primary border-0">{q.level}</Badge>
+            <div className="flex gap-2 mt-5">
+              <Button variant="soft" size="sm" className="flex-1" onClick={() => setEditing(q)}><Pencil className="w-4 h-4 ml-1" /> تعديل الأسئلة</Button>
+              <Button variant="ghost" size="sm" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+            </div>
+          </Card>
+        ))}
+      </div>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        {editing && <QuizBuilderDialog title="تعديل الاختبار" submitLabel="حفظ التغييرات" initial={editing} onSubmit={save} />}
+      </Dialog>
+      <Dialog open={adding} onOpenChange={setAdding}>
+        {adding && <QuizBuilderDialog title="إنشاء اختبار جديد" submitLabel="إنشاء الاختبار" initial={blank} onSubmit={add} />}
+      </Dialog>
+    </div>
+  );
+};
+
+const QuizBuilderDialog = ({ title, submitLabel, initial, onSubmit }: { title: string; submitLabel: string; initial: Quiz; onSubmit: (q: Quiz) => void }) => {
+  const [quiz, setQuiz] = useState<Quiz>(initial);
+
+  const addQuestion = () => setQuiz(q => ({
+    ...q,
+    questions: [...q.questions, { id: Date.now(), text: "", options: ["", "", "", ""], correct: 0 }],
+  }));
+
+  const updateQuestion = (qid: number, patch: Partial<Question>) =>
+    setQuiz(q => ({ ...q, questions: q.questions.map(x => x.id === qid ? { ...x, ...patch } : x) }));
+
+  const updateOption = (qid: number, idx: number, value: string) =>
+    setQuiz(q => ({
+      ...q,
+      questions: q.questions.map(x => x.id === qid ? { ...x, options: x.options.map((o, i) => i === idx ? value : o) } : x),
+    }));
+
+  const addOption = (qid: number) =>
+    setQuiz(q => ({ ...q, questions: q.questions.map(x => x.id === qid && x.options.length < 6 ? { ...x, options: [...x.options, ""] } : x) }));
+
+  const removeOption = (qid: number, idx: number) =>
+    setQuiz(q => ({
+      ...q,
+      questions: q.questions.map(x => {
+        if (x.id !== qid || x.options.length <= 2) return x;
+        const newOptions = x.options.filter((_, i) => i !== idx);
+        const newCorrect = x.correct === idx ? 0 : x.correct > idx ? x.correct - 1 : x.correct;
+        return { ...x, options: newOptions, correct: newCorrect };
+      }),
+    }));
+
+  const removeQuestion = (qid: number) =>
+    setQuiz(q => ({ ...q, questions: q.questions.filter(x => x.id !== qid) }));
+
+  const submit = () => {
+    if (!quiz.title.trim()) { toast({ title: "أدخل اسم الاختبار" }); return; }
+    if (quiz.questions.length === 0) { toast({ title: "أضف سؤالاً واحداً على الأقل" }); return; }
+    for (const q of quiz.questions) {
+      if (!q.text.trim()) { toast({ title: "اكتب نص جميع الأسئلة" }); return; }
+      if (q.options.some(o => !o.trim())) { toast({ title: "املأ كل الخيارات" }); return; }
+    }
+    onSubmit(quiz);
+  };
+
+  return (
+    <DialogContent dir="rtl" className="sm:max-w-3xl rounded-3xl max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle className="font-display text-2xl">{title}</DialogTitle>
+      </DialogHeader>
+
+      <div className="space-y-5 py-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>اسم الاختبار</Label>
+            <Input value={quiz.title} onChange={e => setQuiz({ ...quiz, title: e.target.value })} placeholder="اختبار الحروف الأولى" />
+          </div>
+          <div className="space-y-2">
+            <Label>المستوى</Label>
+            <Select value={quiz.level} onValueChange={v => setQuiz({ ...quiz, level: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="الحروف العبرية">الحروف العبرية</SelectItem>
+                <SelectItem value="الكلمات الأولى">الكلمات الأولى</SelectItem>
+                <SelectItem value="الجمل البسيطة">الجمل البسيطة</SelectItem>
+                <SelectItem value="المحادثات">المحادثات</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h4 className="font-display font-extrabold text-lg">الأسئلة ({quiz.questions.length})</h4>
+            <Button variant="soft" size="sm" onClick={addQuestion}><Plus className="w-4 h-4 ml-1" /> إضافة سؤال</Button>
+          </div>
+
+          {quiz.questions.length === 0 && (
+            <div className="text-center py-10 border-2 border-dashed border-border rounded-2xl text-muted-foreground">
+              لا توجد أسئلة بعد — اضغط "إضافة سؤال" للبدء
+            </div>
+          )}
+
+          {quiz.questions.map((q, qIdx) => (
+            <Card key={q.id} className="p-5 rounded-2xl border-2 border-border/60 space-y-4">
+              <div className="flex items-start gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary-gradient flex items-center justify-center text-primary-foreground font-bold text-sm shrink-0 mt-1">
+                  {qIdx + 1}
+                </div>
+                <div className="flex-1 space-y-2">
+                  <Label>نص السؤال</Label>
+                  <Textarea
+                    value={q.text}
+                    onChange={e => updateQuestion(q.id, { text: e.target.value })}
+                    placeholder="مثال: ما هو أول حرف في الأبجدية العبرية؟"
+                    rows={2}
+                  />
+                </div>
+                <Button size="icon" variant="ghost" onClick={() => removeQuestion(q.id)}>
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                </Button>
+              </div>
+
+              <div className="space-y-2 pr-11">
+                <div className="flex items-center justify-between">
+                  <Label>الخيارات (انقر على ✓ لتحديد الإجابة الصحيحة)</Label>
+                  {q.options.length < 6 && (
+                    <Button variant="ghost" size="sm" onClick={() => addOption(q.id)}>
+                      <Plus className="w-3 h-3 ml-1" /> خيار
+                    </Button>
+                  )}
+                </div>
+                {q.options.map((opt, oIdx) => {
+                  const isCorrect = q.correct === oIdx;
+                  return (
+                    <div key={oIdx} className={`flex items-center gap-2 p-2 rounded-xl border-2 transition-bounce ${isCorrect ? "border-mint bg-mint-soft" : "border-border/60 bg-background"}`}>
+                      <button
+                        type="button"
+                        onClick={() => updateQuestion(q.id, { correct: oIdx })}
+                        className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-bounce ${isCorrect ? "bg-mint text-white shadow-soft" : "bg-muted text-muted-foreground hover:bg-mint/30"}`}
+                        title="تحديد كإجابة صحيحة"
+                      >
+                        <CheckCircle2 className="w-5 h-5" />
+                      </button>
+                      <Input
+                        value={opt}
+                        onChange={e => updateOption(q.id, oIdx, e.target.value)}
+                        placeholder={`الخيار ${oIdx + 1}`}
+                        className="border-0 bg-transparent focus-visible:ring-0"
+                      />
+                      {q.options.length > 2 && (
+                        <Button size="icon" variant="ghost" onClick={() => removeOption(q.id, oIdx)}>
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+                <p className="text-xs text-muted-foreground">
+                  الإجابة الصحيحة: <span className="font-bold text-mint">الخيار {q.correct + 1}</span>
+                </p>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </div>
+
+      <DialogFooter>
+        <Button variant="hero" onClick={submit}>{submitLabel}</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+};
 
 export default Admin;
