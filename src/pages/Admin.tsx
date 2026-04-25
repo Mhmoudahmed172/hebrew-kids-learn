@@ -543,18 +543,28 @@ const UserDialog = ({ title, submitLabel, initial, onSubmit }: { title: string; 
 };
 
 /* ---------------- Content ---------------- */
+type ContentItem = { id: number; title: string; type: string; lessons: number; status: string };
+const initialContent: ContentItem[] = [
+  { id: 1, title: "الحروف العبرية", type: "مستوى", lessons: 12, status: "منشور" },
+  { id: 2, title: "الكلمات الأولى", type: "مستوى", lessons: 15, status: "منشور" },
+  { id: 3, title: "الجمل البسيطة", type: "مستوى", lessons: 18, status: "منشور" },
+  { id: 4, title: "المحادثات", type: "مستوى", lessons: 20, status: "مسودة" },
+];
+
 const ContentSection = () => {
-  const items = [
-    { id: 1, title: "الحروف العبرية", type: "مستوى", lessons: 12, status: "منشور" },
-    { id: 2, title: "الكلمات الأولى", type: "مستوى", lessons: 15, status: "منشور" },
-    { id: 3, title: "الجمل البسيطة", type: "مستوى", lessons: 18, status: "منشور" },
-    { id: 4, title: "المحادثات", type: "مستوى", lessons: 20, status: "مسودة" },
-  ];
+  const [items, setItems] = useState<ContentItem[]>(initialContent);
+  const [editing, setEditing] = useState<ContentItem | null>(null);
+  const [adding, setAdding] = useState(false);
+
+  const remove = (id: number) => { setItems(l => l.filter(x => x.id !== id)); toast({ title: "تم الحذف" }); };
+  const save = (it: ContentItem) => { setItems(ls => ls.map(x => x.id === it.id ? it : x)); setEditing(null); toast({ title: "تم الحفظ", description: "تم تحديث المستوى" }); };
+  const add = (it: ContentItem) => { setItems(ls => [{ ...it, id: Date.now() }, ...ls]); setAdding(false); toast({ title: "تمت الإضافة" }); };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-muted-foreground">عدّل المستويات والدروس وأعد ترتيب المحتوى</p>
-        <Button variant="hero" size="lg"><Plus /> مستوى جديد</Button>
+        <Button variant="hero" size="lg" onClick={() => setAdding(true)}><Plus /> مستوى جديد</Button>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {items.map(it => (
@@ -570,16 +580,47 @@ const ContentSection = () => {
                   <Badge className={`mt-3 ${it.status === "منشور" ? "bg-mint-soft text-mint" : "bg-accent-soft text-accent-foreground"} border-0`}>{it.status}</Badge>
                 </div>
               </div>
-              <Button size="icon" variant="ghost"><MoreVertical className="w-4 h-4" /></Button>
             </div>
             <div className="flex gap-2 mt-5">
-              <Button variant="soft" size="sm" className="flex-1"><Pencil className="w-4 h-4 ml-1" /> تعديل</Button>
-              <Button variant="ghost" size="sm" className="text-destructive"><Trash2 className="w-4 h-4" /></Button>
+              <Button variant="soft" size="sm" className="flex-1" onClick={() => setEditing(it)}><Pencil className="w-4 h-4 ml-1" /> تعديل</Button>
+              <Button variant="ghost" size="sm" className="text-destructive" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4" /></Button>
             </div>
           </Card>
         ))}
       </div>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        {editing && <ContentDialog title="تعديل المستوى" submitLabel="حفظ" initial={editing} onSubmit={save} />}
+      </Dialog>
+      <Dialog open={adding} onOpenChange={setAdding}>
+        {adding && <ContentDialog title="مستوى جديد" submitLabel="إضافة" initial={{ id: 0, title: "", type: "مستوى", lessons: 0, status: "مسودة" }} onSubmit={add} />}
+      </Dialog>
     </div>
+  );
+};
+
+const ContentDialog = ({ title, submitLabel, initial, onSubmit }: { title: string; submitLabel: string; initial: ContentItem; onSubmit: (i: ContentItem) => void }) => {
+  const [it, setIt] = useState<ContentItem>(initial);
+  return (
+    <DialogContent dir="rtl" className="sm:max-w-lg rounded-3xl">
+      <DialogHeader><DialogTitle className="font-display text-2xl">{title}</DialogTitle></DialogHeader>
+      <div className="space-y-4 py-2">
+        <div className="space-y-2"><Label>اسم المستوى</Label><Input value={it.title} onChange={e => setIt({ ...it, title: e.target.value })} /></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2"><Label>عدد الدروس</Label><Input type="number" value={it.lessons} onChange={e => setIt({ ...it, lessons: Number(e.target.value) })} /></div>
+          <div className="space-y-2">
+            <Label>الحالة</Label>
+            <Select value={it.status} onValueChange={v => setIt({ ...it, status: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent><SelectItem value="منشور">منشور</SelectItem><SelectItem value="مسودة">مسودة</SelectItem></SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="hero" onClick={() => { if (!it.title.trim()) { toast({ title: "أدخل اسم المستوى" }); return; } onSubmit(it); }}>{submitLabel}</Button>
+      </DialogFooter>
+    </DialogContent>
   );
 };
 
