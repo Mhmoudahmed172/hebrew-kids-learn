@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Search, Plus, Pencil, Trash2, Eye, MoreVertical, ArrowRight,
-  TrendingUp, PlayCircle, UserCheck, Award, Filter, Download, Baby, UserCog, Crown
+  TrendingUp, PlayCircle, UserCheck, Award, Filter, Download, Baby, UserCog, Crown,
+  CheckCircle2, X, GripVertical
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
