@@ -260,7 +260,7 @@ const VideosSection = () => {
                 <TableCell>
                   <div className="flex items-center gap-1">
                     <Button size="icon" variant="ghost"><Eye className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost"><Pencil className="w-4 h-4" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => setEditing(v)}><Pencil className="w-4 h-4" /></Button>
                     <Button size="icon" variant="ghost" onClick={() => remove(v.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </div>
                 </TableCell>
@@ -269,11 +269,61 @@ const VideosSection = () => {
           </TableBody>
         </Table>
       </Card>
+
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        {editing && <EditVideoDialog video={editing} onSave={saveEdit} />}
+      </Dialog>
     </div>
   );
 };
 
-const UploadVideoDialog = ({ onDone }: { onDone: (v: any) => void }) => {
+const EditVideoDialog = ({ video, onSave }: { video: any; onSave: (v: any) => void }) => {
+  const [title, setTitle] = useState(video.title);
+  const [level, setLevel] = useState(video.level);
+  const [duration, setDuration] = useState(video.duration);
+  const [status, setStatus] = useState(video.status);
+  return (
+    <DialogContent dir="rtl" className="sm:max-w-lg rounded-3xl">
+      <DialogHeader><DialogTitle className="font-display text-2xl">تعديل الفيديو</DialogTitle></DialogHeader>
+      <div className="space-y-4 py-2">
+        <div className="space-y-2">
+          <Label>عنوان الفيديو</Label>
+          <Input value={title} onChange={e => setTitle(e.target.value)} />
+        </div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="space-y-2">
+            <Label>المستوى</Label>
+            <Select value={level} onValueChange={setLevel}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="الحروف العبرية">الحروف العبرية</SelectItem>
+                <SelectItem value="الكلمات الأولى">الكلمات الأولى</SelectItem>
+                <SelectItem value="الجمل البسيطة">الجمل البسيطة</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>المدة</Label>
+            <Input value={duration} onChange={e => setDuration(e.target.value)} />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <Label>الحالة</Label>
+          <Select value={status} onValueChange={setStatus}>
+            <SelectTrigger><SelectValue /></SelectTrigger>
+            <SelectContent>
+              <SelectItem value="منشور">منشور</SelectItem>
+              <SelectItem value="مسودة">مسودة</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      <DialogFooter>
+        <Button variant="hero" onClick={() => onSave({ ...video, title, level, duration, status })}>حفظ التغييرات</Button>
+      </DialogFooter>
+    </DialogContent>
+  );
+};
   const [title, setTitle] = useState("");
   const [level, setLevel] = useState("الحروف العبرية");
   const [duration, setDuration] = useState("");
