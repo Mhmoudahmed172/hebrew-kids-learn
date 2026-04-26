@@ -1,4 +1,4 @@
-import { Lock, Star, Trophy, Crown } from "lucide-react";
+import { Star, Trophy, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { levels } from "@/data/levels";
 
@@ -19,9 +19,9 @@ const Levels = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
-          {levels.map((lvl) => {
-            const Inner = (
-              <div className={`relative bg-card rounded-3xl p-6 border-2 ${lvl.unlocked ? "border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2 cursor-pointer" : "border-border"} transition-bounce text-center h-full`}>
+          {levels.map((lvl) => (
+            <Link key={lvl.n} to={`/level/${lvl.slug}`} className="block h-full group">
+              <div className="relative bg-card rounded-3xl p-6 border-2 border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2 cursor-pointer transition-bounce text-center h-full">
                 <div className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${lvl.color} flex items-center justify-center shadow-medium`}>
                   <span className="font-display text-5xl text-white">{lvl.icon}</span>
                 </div>
@@ -33,28 +33,14 @@ const Levels = () => {
                   ))}
                 </div>
                 <p className="text-xs text-muted-foreground">{lvl.totalLessons} درس</p>
-                {!lvl.unlocked && (
-                  <div className="absolute top-3 left-3 w-8 h-8 rounded-full bg-muted-foreground/20 flex items-center justify-center">
-                    <Lock className="w-4 h-4 text-muted-foreground" />
-                  </div>
-                )}
-                {lvl.unlocked && lvl.stars === 3 && (
+                {lvl.stars === 3 && (
                   <div className="absolute -top-2 -right-2 w-9 h-9 rounded-full bg-sun-gradient flex items-center justify-center shadow-yellow">
                     <Crown className="w-5 h-5 text-white" />
                   </div>
                 )}
               </div>
-            );
-            return (
-              <div key={lvl.n} className={`relative group ${lvl.unlocked ? "" : "opacity-60"}`}>
-                {lvl.unlocked ? (
-                  <Link to={`/level/${lvl.slug}`} className="block h-full">{Inner}</Link>
-                ) : (
-                  Inner
-                )}
-              </div>
-            );
-          })}
+            </Link>
+          ))}
         </div>
 
         {/* Stats bar */}

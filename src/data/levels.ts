@@ -34,7 +34,7 @@ export interface Level {
 const makeLessons = (
   type: LessonType,
   items: { title: string; duration: string; description?: string }[],
-  unlockedCount = 99,
+  completedCount = 0,
 ): Lesson[] =>
   items.map((it, i) => ({
     id: `${type}-${i}`,
@@ -42,9 +42,9 @@ const makeLessons = (
     title: it.title,
     duration: it.duration,
     description: it.description,
-    completed: i < Math.max(0, unlockedCount - 2),
-    locked: i >= unlockedCount,
-    stars: i < unlockedCount - 2 ? 3 : i === unlockedCount - 2 ? 2 : 0,
+    completed: i < completedCount,
+    locked: false,
+    stars: i < completedCount ? 3 : i === completedCount ? 1 : 0,
   }));
 
 export const levels: Level[] = [
@@ -72,7 +72,7 @@ export const levels: Level[] = [
       { title: "حرف Gimel ג وقصته", duration: "5:10" },
       { title: "حرف Dalet ד مع أمثلة", duration: "4:30" },
       { title: "مراجعة الحروف الأربعة", duration: "6:00" },
-    ], 4),
+    ], 3),
     games: makeLessons("game", [
       { title: "مطابقة الحروف", duration: "لعبة", description: "طابق الحرف العبري مع نطقه" },
       { title: "لعبة الذاكرة", duration: "لعبة", description: "اقلب البطاقات وتذكّر الحروف" },
@@ -80,7 +80,7 @@ export const levels: Level[] = [
       { title: "بناء الجمل البسيطة", duration: "لعبة" },
       { title: "اختر الكلمة الصحيحة", duration: "لعبة" },
       { title: "اسمع واختر الإجابة", duration: "لعبة" },
-    ], 4),
+    ], 3),
     songs: makeLessons("song", [
       { title: "أغنية الأبجدية", duration: "2:50", description: "تعلّم الحروف بالغناء" },
       { title: "أنشودة الحروف الملونة", duration: "3:10" },
@@ -115,12 +115,13 @@ export const levels: Level[] = [
       { title: "كلمات الأسرة بالعبرية", duration: "5:00" },
       { title: "كلمات الألوان", duration: "4:15" },
       { title: "كلمات الطعام", duration: "5:30" },
+      { title: "كلمات الحيوانات", duration: "4:45" },
     ], 2),
     games: makeLessons("game", [
       { title: "مطابقة الصورة بالكلمة", duration: "لعبة" },
       { title: "ذاكرة المفردات", duration: "لعبة" },
       { title: "ترتيب أحرف الكلمة", duration: "لعبة" },
-    ], 2),
+    ], 1),
     songs: makeLessons("song", [
       { title: "أغنية الألوان", duration: "2:40" },
       { title: "أغنية الطعام اللذيذ", duration: "3:00" },
@@ -128,7 +129,7 @@ export const levels: Level[] = [
     quizzes: makeLessons("quiz", [
       { title: "اختبار المفردات", duration: "10 أسئلة" },
       { title: "اختبار المستوى النهائي", duration: "15 سؤال" },
-    ], 1),
+    ], 0),
   },
   {
     n: 3,
@@ -151,11 +152,20 @@ export const levels: Level[] = [
     videos: makeLessons("video", [
       { title: "تكوين جملة بسيطة", duration: "5:20" },
       { title: "السؤال والجواب", duration: "4:50" },
+      { title: "ضمائر الملكية", duration: "6:00" },
     ], 1),
-    games: makeLessons("game", [{ title: "بناء الجمل", duration: "لعبة" }], 1),
-    
-    songs: makeLessons("song", [{ title: "أغنية الجمل اليومية", duration: "3:00" }], 1),
-    quizzes: makeLessons("quiz", [{ title: "اختبار الجمل", duration: "10 أسئلة" }], 1),
+    games: makeLessons("game", [
+      { title: "بناء الجمل", duration: "لعبة" },
+      { title: "رتّب الكلمات", duration: "لعبة" },
+    ], 0),
+    songs: makeLessons("song", [
+      { title: "أغنية الجمل اليومية", duration: "3:00" },
+      { title: "أنشودة السؤال والجواب", duration: "2:45" },
+    ], 0),
+    quizzes: makeLessons("quiz", [
+      { title: "اختبار الجمل", duration: "10 أسئلة" },
+      { title: "الاختبار النهائي", duration: "15 سؤال" },
+    ], 0),
   },
   {
     n: 4,
@@ -164,7 +174,7 @@ export const levels: Level[] = [
     subtitle: "تحدّث بالعبرية في مواقف يومية",
     icon: "ד",
     color: "from-pink to-accent",
-    unlocked: false,
+    unlocked: true,
     stars: 0,
     totalLessons: 20,
     progress: 0,
@@ -175,10 +185,23 @@ export const levels: Level[] = [
       { name: "خبير المحادثة", emoji: "🌟", earned: false },
       { name: "ملك العبرية", emoji: "👑", earned: false },
     ],
-    videos: [],
-    games: [],
-    songs: [],
-    quizzes: [],
+    videos: makeLessons("video", [
+      { title: "التحية والسلام", duration: "4:30" },
+      { title: "التعريف بالنفس", duration: "5:15" },
+      { title: "في المطعم", duration: "6:00" },
+      { title: "في السوق", duration: "5:40" },
+    ], 0),
+    games: makeLessons("game", [
+      { title: "محادثة تفاعلية", duration: "لعبة" },
+      { title: "اختر الرد المناسب", duration: "لعبة" },
+    ], 0),
+    songs: makeLessons("song", [
+      { title: "أغنية التحية", duration: "2:30" },
+      { title: "أنشودة الأصدقاء", duration: "3:10" },
+    ], 0),
+    quizzes: makeLessons("quiz", [
+      { title: "اختبار المحادثة", duration: "12 سؤال" },
+    ], 0),
   },
   {
     n: 5,
@@ -187,7 +210,7 @@ export const levels: Level[] = [
     subtitle: "اقرأ نصوصاً عبرية كاملة",
     icon: "ה",
     color: "from-accent to-mint",
-    unlocked: false,
+    unlocked: true,
     stars: 0,
     totalLessons: 22,
     progress: 0,
@@ -198,10 +221,22 @@ export const levels: Level[] = [
       { name: "خبير النصوص", emoji: "🎓", earned: false },
       { name: "أسطورة القراءة", emoji: "👑", earned: false },
     ],
-    videos: [],
-    games: [],
-    songs: [],
-    quizzes: [],
+    videos: makeLessons("video", [
+      { title: "قراءة قصة قصيرة", duration: "6:20" },
+      { title: "قراءة الأخبار البسيطة", duration: "7:00" },
+      { title: "قصص الأطفال بالعبرية", duration: "8:15" },
+    ], 0),
+    games: makeLessons("game", [
+      { title: "اقرأ واختر الصورة", duration: "لعبة" },
+      { title: "أكمل النص", duration: "لعبة" },
+    ], 0),
+    songs: makeLessons("song", [
+      { title: "أنشودة القارئ الصغير", duration: "3:00" },
+    ], 0),
+    quizzes: makeLessons("quiz", [
+      { title: "اختبار الفهم القرائي", duration: "15 سؤال" },
+      { title: "الاختبار الشامل", duration: "25 سؤال" },
+    ], 0),
   },
 ];
 

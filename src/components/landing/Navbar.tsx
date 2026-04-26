@@ -1,24 +1,25 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import mascot from "@/assets/mascot-owl.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const links = [
-    { label: "المنصة", href: "#features" },
-    { label: "كيف تعمل", href: "#how" },
-    { label: "المستويات", href: "#levels" },
-    { label: "الأسعار", href: "#pricing" },
-    { label: "الأسئلة", href: "#faq" },
+    { label: "المنصة", href: "/#features" },
+    { label: "كيف تعمل", href: "/#how" },
+    { label: "المستويات", href: "/#levels" },
+    { label: "الأسعار", href: "/#pricing" },
+    { label: "الأسئلة", href: "/#faq" },
   ];
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/70 border-b border-border/40">
       <div className="container flex items-center justify-between h-20">
-        <a href="#" className="flex items-center gap-2 font-display font-extrabold text-xl">
+        <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-xl">
           <img src={mascot} alt="" width={40} height={40} className="w-10 h-10" />
           <span className="text-gradient">منصة عبرية</span>
-        </a>
+        </Link>
         <nav className="hidden lg:flex items-center gap-8">
           {links.map(l => (
             <a key={l.href} href={l.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
@@ -27,9 +28,13 @@ const Navbar = () => {
           ))}
         </nav>
         <div className="hidden lg:flex items-center gap-3">
-          <Button variant="ghost" size="lg">تسجيل الدخول</Button>
-          <Button variant="hero" size="lg">
-            <Sparkles className="ml-1" /> ابدأ مجاناً
+          <Button variant="ghost" size="lg" asChild>
+            <Link to="/login">تسجيل الدخول</Link>
+          </Button>
+          <Button variant="hero" size="lg" asChild>
+            <Link to="/signup">
+              <Sparkles className="ml-1" /> ابدأ مجاناً
+            </Link>
           </Button>
         </div>
         <button className="lg:hidden p-2" onClick={() => setOpen(!open)} aria-label="القائمة">
@@ -44,7 +49,12 @@ const Navbar = () => {
                 {l.label}
               </a>
             ))}
-            <Button variant="hero" size="lg" className="mt-2">ابدأ مجاناً</Button>
+            <Button variant="outline" size="lg" asChild>
+              <Link to="/login" onClick={() => setOpen(false)}>تسجيل الدخول</Link>
+            </Button>
+            <Button variant="hero" size="lg" asChild>
+              <Link to="/signup" onClick={() => setOpen(false)}>ابدأ مجاناً</Link>
+            </Button>
           </div>
         </div>
       )}
