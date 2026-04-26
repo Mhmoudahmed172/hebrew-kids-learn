@@ -1,4 +1,4 @@
-import { Lock, Star, Trophy, Crown } from "lucide-react";
+import { Star, Trophy, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { levels } from "@/data/levels";
 
