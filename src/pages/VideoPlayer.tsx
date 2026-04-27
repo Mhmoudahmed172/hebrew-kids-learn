@@ -1,238 +1,99 @@
+import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Play, CheckCircle2, Star, Lock, Video as VideoIcon, ListVideo, Sparkles, Trophy } from "lucide-react";
+import { ArrowRight, ArrowLeft, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { getLevelBySlug, type Lesson } from "@/data/levels";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
-
-const SAMPLE_VIDEO = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4";
 
 const VideoPlayer = () => {
   const { slug, videoId } = useParams();
   const navigate = useNavigate();
-  const level = slug ? getLevelBySlug(slug) : undefined;
+  const [level, setLevel] = useState<any>(null);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  if (!level) {
-    return (
-      <main className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="font-display text-2xl mb-4">المستوى غير موجود</p>
-          <Button onClick={() => navigate("/")} variant="hero">العودة للرئيسية</Button>
-        </div>
-      </main>
-    );
-  }
+  useEffect(() => {
+    (async () => {
+      if (!slug) return;
+      const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
+      setLevel(lv);
+      if (lv) {
+        const { data: vids } = await supabase.from("videos").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order");
+        setVideos(vids || []);
+      }
+      setLoading(false);
+    })();
+  }, [slug]);
 
-  const videos: Lesson[] = level.videos;
-  const currentIndex = videos.findIndex((v) => v.id === videoId);
-  const current = videos[currentIndex];
+  if (loading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  if (!level) return <div className="min-h-screen flex items-center justify-center">المستوى غير موجود</div>;
 
-  if (!current) {
-    return (
-      <main className="min-h-screen bg-background">
-        <Navbar />
-        <div className="container py-32 text-center">
-          <p className="font-display text-2xl mb-4">الفيديو غير موجود</p>
-          <Button onClick={() => navigate(`/level/${slug}`)} variant="hero">العودة للمستوى</Button>
-        </div>
-      </main>
-    );
-  }
+  const idx = videos.findIndex((v) => v.id === videoId);
+  const current = videos[idx];
+  if (!current) return (
+    <main dir="rtl" className="min-h-screen">
+      <Navbar />
+      <div className="container py-32 text-center">
+        <p className="font-display text-2xl mb-4">الفيديو غير موجود</p>
+        <Button variant="hero" onClick={() => navigate(`/level/${slug}`)}>العودة للمستوى</Button>
+      </div>
+    </main>
+  );
 
-  const prev = currentIndex > 0 ? videos[currentIndex - 1] : null;
-  const next = currentIndex < videos.length - 1 ? videos[currentIndex + 1] : null;
-  const videoUrl = current.videoUrl || SAMPLE_VIDEO;
-
-  const goTo = (lesson: Lesson | null) => {
-    if (!lesson || lesson.locked) return;
-    navigate(`/level/${slug}/video/${lesson.id}`);
-  };
+  const prev = idx > 0 ? videos[idx - 1] : null;
+  const next = idx < videos.length - 1 ? videos[idx + 1] : null;
 
   return (
-    <main className="min-h-screen bg-background">
+    <main dir="rtl" className="min-h-screen bg-background">
       <Navbar />
+      <section className="container py-8">
+        <Link to={`/level/${slug}`} className="inline-flex items-center gap-2 text-sm font-bold text-primary mb-6 hover:underline">
+          <ArrowRight className="w-4 h-4 rotate-180" /> العودة لـ {level.title}
+        </Link>
 
-      {/* Header */}
-      <section className="bg-hero-gradient pt-28 pb-8 relative overflow-hidden">
-        <div className="blob bg-primary/30 w-72 h-72 -top-10 -right-10" />
-        <div className="container relative">
-          <Link
-            to={`/level/${slug}`}
-            className="inline-flex items-center gap-2 text-sm font-bold text-primary hover:gap-3 transition-all mb-4"
-          >
-            <ArrowRight className="w-4 h-4" /> رجوع للمستوى
-          </Link>
-          <div className="flex flex-wrap items-center gap-3 mb-2">
-            <span className="inline-flex items-center gap-2 bg-secondary-soft text-secondary px-3 py-1 rounded-full text-xs font-bold">
-              <VideoIcon className="w-3 h-3" /> فيديو {currentIndex + 1} من {videos.length}
-            </span>
-            <span className="inline-flex items-center gap-2 bg-card px-3 py-1 rounded-full text-xs font-bold shadow-soft">
-              {level.icon} {level.title}
-            </span>
-          </div>
-          <h1 className="font-display text-3xl lg:text-4xl">{current.title}</h1>
-          {current.description && (
-            <p className="text-muted-foreground mt-2 max-w-2xl">{current.description}</p>
-          )}
-        </div>
-      </section>
-
-      {/* Player + Sidebar */}
-      <section className="py-10">
-        <div className="container grid lg:grid-cols-[1fr,360px] gap-8">
-          {/* Player */}
-          <div>
-            <div className="rounded-3xl overflow-hidden bg-black shadow-glow border-4 border-card">
-              <video
-                key={current.id}
-                src={videoUrl}
-                controls
-                autoPlay
-                className="w-full aspect-video"
-              />
+        <div className="grid lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            <div className="rounded-3xl overflow-hidden bg-black aspect-video shadow-medium">
+              <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full" />
+            </div>
+            <div className="mt-4">
+              <h1 className="font-display text-2xl lg:text-3xl mb-2">{current.title}</h1>
+              {current.description && <p className="text-muted-foreground">{current.description}</p>}
             </div>
 
-            {/* Prev / Next controls */}
-            <div className="grid sm:grid-cols-2 gap-4 mt-6">
-              <button
-                onClick={() => goTo(prev)}
-                disabled={!prev || prev.locked}
-                className={`group bg-card rounded-2xl p-4 border-2 text-right flex items-center gap-3 transition-bounce ${
-                  !prev || prev.locked
-                    ? "opacity-50 cursor-not-allowed border-border"
-                    : "border-border/60 hover:border-primary/40 hover:-translate-y-1 hover:shadow-medium"
-                }`}
-              >
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-primary-soft flex items-center justify-center">
-                  <ArrowRight className="w-5 h-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground font-bold mb-0.5">الفيديو السابق</p>
-                  <p className="font-display text-sm truncate">{prev?.title || "لا يوجد"}</p>
-                </div>
-              </button>
-
-              <button
-                onClick={() => goTo(next)}
-                disabled={!next || next.locked}
-                className={`group bg-card rounded-2xl p-4 border-2 text-right flex items-center gap-3 transition-bounce ${
-                  !next || next.locked
-                    ? "opacity-50 cursor-not-allowed border-border"
-                    : "border-secondary/40 hover:border-secondary hover:-translate-y-1 hover:shadow-medium"
-                }`}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground font-bold mb-0.5">الفيديو التالي</p>
-                  <p className="font-display text-sm truncate">{next?.title || "نهاية القائمة"}</p>
-                </div>
-                <div className="shrink-0 w-12 h-12 rounded-xl bg-secondary-soft flex items-center justify-center">
-                  <ArrowLeft className="w-5 h-5 text-secondary" />
-                </div>
-              </button>
-            </div>
-
-            {/* Encouragement banner */}
-            <div className="mt-8 bg-fun-gradient rounded-3xl p-6 text-white shadow-glow relative overflow-hidden">
-              <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/10 blur-2xl" />
-              <div className="relative flex items-center gap-4">
-                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center shrink-0">
-                  <Sparkles className="w-7 h-7" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-display text-lg mb-1">أحسنت! 🎉</p>
-                  <p className="text-sm text-white/90">
-                    أكمل مشاهدة الفيديو واحصل على ⭐⭐⭐ نجوم ونقاط جديدة!
-                  </p>
-                </div>
-                {next && !next.locked && (
-                  <Button variant="sun" size="lg" onClick={() => goTo(next)} className="shrink-0 hidden sm:flex">
-                    التالي <ArrowLeft />
-                  </Button>
-                )}
-              </div>
+            <div className="flex justify-between mt-6 gap-3">
+              <Button variant="outline" disabled={!prev} onClick={() => prev && navigate(`/level/${slug}/video/${prev.id}`)}>
+                <ArrowRight className="w-4 h-4" /> السابق
+              </Button>
+              <span className="text-sm text-muted-foreground self-center">{idx + 1} / {videos.length}</span>
+              <Button variant="hero" disabled={!next} onClick={() => next && navigate(`/level/${slug}/video/${next.id}`)}>
+                التالي <ArrowLeft className="w-4 h-4" />
+              </Button>
             </div>
           </div>
 
-          {/* Sidebar - all videos */}
-          <aside className="lg:sticky lg:top-24 self-start">
-            <div className="bg-card rounded-3xl p-5 border-2 border-border/60 shadow-soft">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-9 h-9 rounded-xl bg-secondary-soft flex items-center justify-center">
-                    <ListVideo className="w-5 h-5 text-secondary" />
+          <aside className="lg:col-span-1">
+            <h3 className="font-display text-lg mb-3">قائمة الفيديوهات</h3>
+            <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+              {videos.map((v, i) => (
+                <Link key={v.id} to={`/level/${slug}/video/${v.id}`}
+                  className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-bounce ${
+                    v.id === current.id ? "border-primary bg-primary-soft" : "border-border/60 hover:border-primary/40"
+                  }`}>
+                  <div className="w-10 h-10 rounded-xl bg-secondary-soft flex items-center justify-center text-secondary font-bold">
+                    {i + 1}
                   </div>
-                  <div>
-                    <p className="font-display text-base leading-none">قائمة الفيديوهات</p>
-                    <p className="text-xs text-muted-foreground mt-1">{videos.length} درس مرئي</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm truncate">{v.title}</p>
                   </div>
-                </div>
-                <Trophy className="w-5 h-5 text-accent" />
-              </div>
-
-              <div className="mb-4">
-                <Progress value={((currentIndex + 1) / videos.length) * 100} className="h-2" />
-                <p className="text-xs text-muted-foreground mt-2 text-center">
-                  أنت في الفيديو {currentIndex + 1} من {videos.length}
-                </p>
-              </div>
-
-              <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1">
-                {videos.map((v, i) => {
-                  const active = v.id === current.id;
-                  const disabled = v.locked;
-                  return (
-                    <button
-                      key={v.id}
-                      onClick={() => !disabled && goTo(v)}
-                      disabled={disabled}
-                      className={`w-full text-right flex items-center gap-3 p-3 rounded-2xl border-2 transition-bounce ${
-                        active
-                          ? "border-primary bg-primary-soft"
-                          : disabled
-                          ? "border-border opacity-50 cursor-not-allowed"
-                          : "border-transparent hover:border-border hover:bg-muted/50"
-                      }`}
-                    >
-                      <div
-                        className={`shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold ${
-                          active
-                            ? "bg-primary text-primary-foreground"
-                            : v.completed
-                            ? "bg-mint-soft text-mint"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {disabled ? <Lock className="w-4 h-4" /> : v.completed ? <CheckCircle2 className="w-4 h-4" /> : i + 1}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className={`text-sm font-bold truncate ${active ? "text-primary" : ""}`}>
-                          {v.title}
-                        </p>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <span className="text-xs text-muted-foreground">{v.duration}</span>
-                          <div className="flex items-center gap-0.5">
-                            {[1, 2, 3].map((s) => (
-                              <Star
-                                key={s}
-                                className={`w-3 h-3 ${
-                                  s <= (v.stars || 0) ? "fill-accent text-accent" : "text-muted"
-                                }`}
-                              />
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      {active && <Play className="w-4 h-4 text-primary shrink-0" />}
-                    </button>
-                  );
-                })}
-              </div>
+                  {v.id === current.id && <Play className="w-4 h-4 text-primary" />}
+                </Link>
+              ))}
             </div>
           </aside>
         </div>
       </section>
-
       <Footer />
     </main>
   );
