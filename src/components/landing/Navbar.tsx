@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Menu, X, LayoutDashboard, LogOut, User, Trophy, Star } from "lucide-react";
+import { Sparkles, Menu, X, LayoutDashboard, LogOut, User, Trophy, Star, Users, KeyRound } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
