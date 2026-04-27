@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
+import { useKidSessionTracker } from "@/hooks/useKidSessionTracker";
+import { ParentalLimitGate } from "@/components/ParentalLimitGate";
 import Index from "./pages/Index.tsx";
 import LevelDetail from "./pages/LevelDetail.tsx";
 import VideoPlayer from "./pages/VideoPlayer.tsx";
@@ -14,9 +16,13 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Profile from "./pages/Profile.tsx";
 import Leaderboard from "./pages/Leaderboard.tsx";
+import ParentDashboard from "./pages/ParentDashboard.tsx";
+import LinkParent from "./pages/LinkParent.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
+
+const SessionTracker = () => { useKidSessionTracker(); return null; };
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -25,11 +31,12 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <BrowserRouter>
+          <SessionTracker />
           <Routes>
             <Route path="/" element={<Index />} />
-            <Route path="/level/:slug" element={<LevelDetail />} />
-            <Route path="/level/:slug/video/:videoId" element={<VideoPlayer />} />
-            <Route path="/quiz/:id" element={<Quiz />} />
+            <Route path="/level/:slug" element={<ParentalLimitGate><LevelDetail /></ParentalLimitGate>} />
+            <Route path="/level/:slug/video/:videoId" element={<ParentalLimitGate><VideoPlayer /></ParentalLimitGate>} />
+            <Route path="/quiz/:id" element={<ParentalLimitGate><Quiz /></ParentalLimitGate>} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/signup" element={<Auth mode="signup" />} />
@@ -37,6 +44,8 @@ const App = () => (
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/leaderboard" element={<Leaderboard />} />
+            <Route path="/parent" element={<ParentDashboard />} />
+            <Route path="/link-parent" element={<LinkParent />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
