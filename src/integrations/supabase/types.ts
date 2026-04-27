@@ -19,7 +19,9 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          level_id: string | null
           published: boolean
+          sort_order: number | null
           title: string
           url: string | null
         }
@@ -27,7 +29,9 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          level_id?: string | null
           published?: boolean
+          sort_order?: number | null
           title: string
           url?: string | null
         }
@@ -35,11 +39,21 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
+          level_id?: string | null
           published?: boolean
+          sort_order?: number | null
           title?: string
           url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "games_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       levels: {
         Row: {
@@ -177,26 +191,43 @@ export type Database = {
       songs: {
         Row: {
           created_at: string
+          description: string | null
           id: string
+          level_id: string | null
           published: boolean
+          sort_order: number | null
           title: string
           url: string | null
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
+          level_id?: string | null
           published?: boolean
+          sort_order?: number | null
           title: string
           url?: string | null
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
+          level_id?: string | null
           published?: boolean
+          sort_order?: number | null
           title?: string
           url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "songs_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
