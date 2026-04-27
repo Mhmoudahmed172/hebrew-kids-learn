@@ -10,14 +10,11 @@ interface AuthCtx {
   loading: boolean;
   roles: Role[];
   isAdmin: boolean;
-  isParent: boolean;
-  isKid: boolean;
   signOut: () => Promise<void>;
 }
 
 const Ctx = createContext<AuthCtx>({
-  user: null, session: null, loading: true, roles: [],
-  isAdmin: false, isParent: false, isKid: false,
+  user: null, session: null, loading: true, roles: [], isAdmin: false,
   signOut: async () => {},
 });
 
@@ -56,8 +53,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     <Ctx.Provider value={{
       user, session, loading, roles,
       isAdmin: roles.includes("admin"),
-      isParent: roles.includes("parent") || roles.includes("admin"),
-      isKid: roles.includes("kid"),
       signOut: async () => { await supabase.auth.signOut(); },
     }}>
       {children}

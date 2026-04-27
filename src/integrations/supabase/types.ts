@@ -88,63 +88,6 @@ export type Database = {
           },
         ]
       }
-      kid_invite_codes: {
-        Row: {
-          code: string
-          created_at: string
-          expires_at: string
-          id: string
-          parent_id: string
-          used_at: string | null
-          used_by: string | null
-        }
-        Insert: {
-          code: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          parent_id: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Update: {
-          code?: string
-          created_at?: string
-          expires_at?: string
-          id?: string
-          parent_id?: string
-          used_at?: string | null
-          used_by?: string | null
-        }
-        Relationships: []
-      }
-      kid_sessions: {
-        Row: {
-          duration_seconds: number
-          ended_at: string | null
-          id: string
-          kid_id: string
-          session_date: string
-          started_at: string
-        }
-        Insert: {
-          duration_seconds?: number
-          ended_at?: string | null
-          id?: string
-          kid_id: string
-          session_date?: string
-          started_at?: string
-        }
-        Update: {
-          duration_seconds?: number
-          ended_at?: string | null
-          id?: string
-          kid_id?: string
-          session_date?: string
-          started_at?: string
-        }
-        Relationships: []
-      }
       levels: {
         Row: {
           color: string | null
@@ -178,54 +121,6 @@ export type Database = {
           sort_order?: number | null
           title?: string
           updated_at?: string
-        }
-        Relationships: []
-      }
-      parent_kid_links: {
-        Row: {
-          created_at: string
-          id: string
-          kid_id: string
-          parent_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          kid_id: string
-          parent_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          kid_id?: string
-          parent_id?: string
-        }
-        Relationships: []
-      }
-      parental_settings: {
-        Row: {
-          daily_limit_minutes: number
-          kid_id: string
-          rest_day_enabled: boolean
-          restrictions_enabled: boolean
-          updated_at: string
-          updated_by: string | null
-        }
-        Insert: {
-          daily_limit_minutes?: number
-          kid_id: string
-          rest_day_enabled?: boolean
-          restrictions_enabled?: boolean
-          updated_at?: string
-          updated_by?: string | null
-        }
-        Update: {
-          daily_limit_minutes?: number
-          kid_id?: string
-          rest_day_enabled?: boolean
-          restrictions_enabled?: boolean
-          updated_at?: string
-          updated_by?: string | null
         }
         Relationships: []
       }
@@ -526,8 +421,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      create_kid_invite_code: { Args: never; Returns: string }
-      get_kid_today_minutes: { Args: { p_kid_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -535,7 +428,6 @@ export type Database = {
         }
         Returns: boolean
       }
-      link_kid_with_code: { Args: { invite_code: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "parent" | "kid"
