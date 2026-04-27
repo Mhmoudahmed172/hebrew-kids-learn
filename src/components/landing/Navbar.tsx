@@ -1,11 +1,14 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Menu, X } from "lucide-react";
+import { Sparkles, Menu, X, LayoutDashboard, LogOut, User } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import mascot from "@/assets/mascot-owl.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const { user, isAdmin, signOut } = useAuth();
+  const navigate = useNavigate();
   const links = [
     { label: "المنصة", href: "/#features" },
     { label: "كيف تعمل", href: "/#how" },
@@ -13,6 +16,9 @@ const Navbar = () => {
     { label: "الأسعار", href: "/#pricing" },
     { label: "الأسئلة", href: "/#faq" },
   ];
+
+  const handleLogout = async () => { await signOut(); navigate("/"); };
+
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/70 border-b border-border/40">
       <div className="container flex items-center justify-between h-20">
@@ -28,14 +34,25 @@ const Navbar = () => {
           ))}
         </nav>
         <div className="hidden lg:flex items-center gap-3">
-          <Button variant="ghost" size="lg" asChild>
-            <Link to="/login">تسجيل الدخول</Link>
-          </Button>
-          <Button variant="hero" size="lg" asChild>
-            <Link to="/signup">
-              <Sparkles className="ml-1" /> ابدأ مجاناً
-            </Link>
-          </Button>
+          {user ? (
+            <>
+              {isAdmin && (
+                <Button variant="soft" size="lg" asChild>
+                  <Link to="/admin"><LayoutDashboard className="ml-1" /> لوحة التحكم</Link>
+                </Button>
+              )}
+              <Button variant="ghost" size="lg" onClick={handleLogout}>
+                <LogOut className="ml-1" /> خروج
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button variant="ghost" size="lg" asChild><Link to="/login">تسجيل الدخول</Link></Button>
+              <Button variant="hero" size="lg" asChild>
+                <Link to="/signup"><Sparkles className="ml-1" /> ابدأ مجاناً</Link>
+              </Button>
+            </>
+          )}
         </div>
         <button className="lg:hidden p-2" onClick={() => setOpen(!open)} aria-label="القائمة">
           {open ? <X /> : <Menu />}
@@ -49,12 +66,17 @@ const Navbar = () => {
                 {l.label}
               </a>
             ))}
-            <Button variant="outline" size="lg" asChild>
-              <Link to="/login" onClick={() => setOpen(false)}>تسجيل الدخول</Link>
-            </Button>
-            <Button variant="hero" size="lg" asChild>
-              <Link to="/signup" onClick={() => setOpen(false)}>ابدأ مجاناً</Link>
-            </Button>
+            {user ? (
+              <>
+                {isAdmin && <Button variant="soft" size="lg" asChild><Link to="/admin" onClick={() => setOpen(false)}>لوحة التحكم</Link></Button>}
+                <Button variant="outline" size="lg" onClick={() => { setOpen(false); handleLogout(); }}>خروج</Button>
+              </>
+            ) : (
+              <>
+                <Button variant="outline" size="lg" asChild><Link to="/login" onClick={() => setOpen(false)}>تسجيل الدخول</Link></Button>
+                <Button variant="hero" size="lg" asChild><Link to="/signup" onClick={() => setOpen(false)}>ابدأ مجاناً</Link></Button>
+              </>
+            )}
           </div>
         </div>
       )}
