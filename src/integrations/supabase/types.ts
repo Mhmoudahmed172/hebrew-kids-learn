@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      badges: {
+        Row: {
+          code: string
+          description: string | null
+          emoji: string
+          id: string
+          name: string
+          sort_order: number | null
+          threshold_type: string
+          threshold_value: number
+        }
+        Insert: {
+          code: string
+          description?: string | null
+          emoji?: string
+          id?: string
+          name: string
+          sort_order?: number | null
+          threshold_type: string
+          threshold_value?: number
+        }
+        Update: {
+          code?: string
+          description?: string | null
+          emoji?: string
+          id?: string
+          name?: string
+          sort_order?: number | null
+          threshold_type?: string
+          threshold_value?: number
+        }
+        Relationships: []
+      }
       games: {
         Row: {
           created_at: string
@@ -228,6 +261,89 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_badges: {
+        Row: {
+          badge_id: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_id: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_id?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_badges_badge_id_fkey"
+            columns: ["badge_id"]
+            isOneToOne: false
+            referencedRelation: "badges"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_points: {
+        Row: {
+          current_level: number
+          total_points: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_level?: number
+          total_points?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_level?: number
+          total_points?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_progress: {
+        Row: {
+          completed_at: string
+          content_id: string
+          content_type: string
+          id: string
+          level_id: string | null
+          max_score: number | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string
+          content_id: string
+          content_type: string
+          id?: string
+          level_id?: string | null
+          max_score?: number | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          completed_at?: string
+          content_id?: string
+          content_type?: string
+          id?: string
+          level_id?: string | null
+          max_score?: number | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {

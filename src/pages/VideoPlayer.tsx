@@ -3,15 +3,30 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowRight, ArrowLeft, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { recordProgress } from "@/hooks/useUserPoints";
+import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
 const VideoPlayer = () => {
   const { slug, videoId } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [level, setLevel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // تسجيل المشاهدة عند فتح الفيديو
+  useEffect(() => {
+    if (!user || !videoId || !level) return;
+    recordProgress({
+      userId: user.id,
+      contentType: "video",
+      contentId: videoId,
+      levelId: level.id,
+    }).then(({ error }) => { if (!error) toast.success("+10 نقاط 🎬"); });
+  }, [user, videoId, level]);
 
   useEffect(() => {
     (async () => {

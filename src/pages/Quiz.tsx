@@ -3,6 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle2, XCircle, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { recordProgress } from "@/hooks/useUserPoints";
+import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import { cn } from "@/lib/utils";
@@ -10,6 +13,7 @@ import { cn } from "@/lib/utils";
 const Quiz = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,9 +46,20 @@ const Quiz = () => {
     if (selected === q.correct_index) setScore((s) => s + 1);
   };
 
-  const next = () => {
+  const next = async () => {
     if (current + 1 >= total) {
       setDone(true);
+      if (user && quiz) {
+        const { error } = await recordProgress({
+          userId: user.id,
+          contentType: "quiz",
+          contentId: quiz.id,
+          levelId: quiz.level_id,
+          score,
+          maxScore: total,
+        });
+        if (!error) toast.success(`+${score * 5} نقطة! 🎉`);
+      }
     } else {
       setCurrent(current + 1);
       setSelected(null);

@@ -1,13 +1,15 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, Menu, X, LayoutDashboard, LogOut, User } from "lucide-react";
+import { Sparkles, Menu, X, LayoutDashboard, LogOut, User, Trophy, Star } from "lucide-react";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import { useUserPoints } from "@/hooks/useUserPoints";
 import mascot from "@/assets/mascot-owl.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { user, isAdmin, signOut } = useAuth();
+  const { points } = useUserPoints();
   const navigate = useNavigate();
   const links = [
     { label: "المنصة", href: "/#features" },
@@ -36,6 +38,15 @@ const Navbar = () => {
         <div className="hidden lg:flex items-center gap-3">
           {user ? (
             <>
+              <Link to="/profile" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-soft text-primary text-sm font-bold hover:bg-primary/20 transition-colors">
+                <Star className="w-4 h-4 fill-primary" /> {points}
+              </Link>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/leaderboard"><Trophy className="ml-1 w-4 h-4" /> المتصدرون</Link>
+              </Button>
+              <Button variant="ghost" size="sm" asChild>
+                <Link to="/profile"><User className="ml-1 w-4 h-4" /> ملفي</Link>
+              </Button>
               {isAdmin && (
                 <Button variant="soft" size="lg" asChild>
                   <Link to="/admin"><LayoutDashboard className="ml-1" /> لوحة التحكم</Link>
@@ -68,6 +79,8 @@ const Navbar = () => {
             ))}
             {user ? (
               <>
+                <Button variant="soft" size="lg" asChild><Link to="/profile" onClick={() => setOpen(false)}><Star className="ml-1 w-4 h-4 fill-primary-foreground" /> ملفي ({points} نقطة)</Link></Button>
+                <Button variant="outline" size="lg" asChild><Link to="/leaderboard" onClick={() => setOpen(false)}><Trophy className="ml-1 w-4 h-4" /> المتصدرون</Link></Button>
                 {isAdmin && <Button variant="soft" size="lg" asChild><Link to="/admin" onClick={() => setOpen(false)}>لوحة التحكم</Link></Button>}
                 <Button variant="outline" size="lg" onClick={() => { setOpen(false); handleLogout(); }}>خروج</Button>
               </>
