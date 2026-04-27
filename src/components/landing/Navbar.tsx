@@ -47,6 +47,16 @@ const Navbar = () => {
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/profile"><User className="ml-1 w-4 h-4" /> ملفي</Link>
               </Button>
+              {isParent && (
+                <Button variant="soft" size="sm" asChild>
+                  <Link to="/parent"><Users className="ml-1 w-4 h-4" /> لوحة الأهل</Link>
+                </Button>
+              )}
+              {isKid && !isParent && (
+                <Button variant="ghost" size="sm" asChild>
+                  <Link to="/link-parent"><KeyRound className="ml-1 w-4 h-4" /> ربط بأهلي</Link>
+                </Button>
+              )}
               {isAdmin && (
                 <Button variant="soft" size="lg" asChild>
                   <Link to="/admin"><LayoutDashboard className="ml-1" /> لوحة التحكم</Link>
