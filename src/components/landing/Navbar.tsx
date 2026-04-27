@@ -8,7 +8,7 @@ import mascot from "@/assets/mascot-owl.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
-  const { user, isAdmin, signOut } = useAuth();
+  const { user, isAdmin, isParent, isKid, signOut } = useAuth();
   const { points } = useUserPoints();
   const navigate = useNavigate();
   const links = [
