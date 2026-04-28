@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { Star, Quote } from "lucide-react";
+import { Star, RotateCcw, Check } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
 
 type T = {
   id: string;
@@ -12,18 +13,14 @@ type T = {
   card_color: string | null;
 };
 
-const SPEED_PX_PER_SEC = 60; // سرعة اللوب التلقائي
+const MESSAGE_DELAY = 1600; // ms بين كل رسالة وأخرى
 
 const Testimonials = () => {
   const [items, setItems] = useState<T[]>([]);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const offsetRef = useRef(0); // الإزاحة الحالية
-  const halfWidthRef = useRef(0); // عرض نصف الشريط (نسخة واحدة)
-  const pausedRef = useRef(false);
-  const draggingRef = useRef(false);
-  const dragStartXRef = useRef(0);
-  const dragStartOffsetRef = useRef(0);
+  const [visibleCount, setVisibleCount] = useState(0);
+  const [finished, setFinished] = useState(false);
+  const [runId, setRunId] = useState(0);
+  const bottomRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase
@@ -34,116 +31,41 @@ const Testimonials = () => {
       .then(({ data }) => setItems((data as T[]) || []));
   }, []);
 
-  // اللوب التلقائي عبر requestAnimationFrame
+  // التشغيل التدريجي
   useEffect(() => {
     if (items.length === 0) return;
+    setVisibleCount(0);
+    setFinished(false);
 
-    const measure = () => {
-      if (trackRef.current) {
-        halfWidthRef.current = trackRef.current.scrollWidth / 2;
-      }
-    };
-    // قياس بعد render فعلي
-    requestAnimationFrame(measure);
-    window.addEventListener("resize", measure);
-
-    let last = performance.now();
-    let raf = 0;
-
-    const tick = (now: number) => {
-      const dt = (now - last) / 1000;
-      last = now;
-
-      if (halfWidthRef.current === 0) {
-        measure();
-      }
-
-      if (!pausedRef.current && !draggingRef.current && halfWidthRef.current > 0) {
-        offsetRef.current -= SPEED_PX_PER_SEC * dt;
-        if (offsetRef.current <= -halfWidthRef.current) {
-          offsetRef.current += halfWidthRef.current;
+    const timers: number[] = [];
+    items.forEach((_, idx) => {
+      const t = window.setTimeout(() => {
+        setVisibleCount(idx + 1);
+        if (idx === items.length - 1) {
+          window.setTimeout(() => setFinished(true), 700);
         }
-        if (trackRef.current) {
-          trackRef.current.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
-        }
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
+      }, MESSAGE_DELAY * (idx + 1));
+      timers.push(t);
+    });
 
-    return () => {
-      cancelAnimationFrame(raf);
-      window.removeEventListener("resize", measure);
-    };
-  }, [items.length]);
+    return () => timers.forEach((t) => window.clearTimeout(t));
+  }, [items, runId]);
+
+  // تمرير تلقائي للأسفل عند ظهور رسالة جديدة
+  useEffect(() => {
+    if (visibleCount > 0) {
+      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [visibleCount, finished]);
 
   if (items.length === 0) return null;
 
-  const loop = [...items, ...items];
-
-  const DRAG_THRESHOLD = 5;
-
-  // Handlers
-  const handleMouseEnter = () => {
-    pausedRef.current = true;
-  };
-  const handleMouseLeave = () => {
-    pausedRef.current = false;
-    draggingRef.current = false;
-  };
-  const handleMouseDown = (e: React.MouseEvent) => {
-    draggingRef.current = true;
-    dragStartXRef.current = e.clientX;
-    dragStartOffsetRef.current = offsetRef.current;
-  };
-  const handleMouseUp = () => {
-    draggingRef.current = false;
-  };
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!draggingRef.current) return;
-    const delta = e.clientX - dragStartXRef.current;
-    if (Math.abs(delta) < DRAG_THRESHOLD) return;
-    const half = halfWidthRef.current;
-    if (half <= 0) return;
-    let next = dragStartOffsetRef.current + delta;
-    while (next <= -half) next += half;
-    while (next > 0) next -= half;
-    offsetRef.current = next;
-    if (trackRef.current) {
-      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
-    }
-  };
-
-  // Touch (موبايل)
-  const handleTouchStart = (e: React.TouchEvent) => {
-    pausedRef.current = true;
-    draggingRef.current = true;
-    dragStartXRef.current = e.touches[0].clientX;
-    dragStartOffsetRef.current = offsetRef.current;
-  };
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!draggingRef.current) return;
-    const delta = e.touches[0].clientX - dragStartXRef.current;
-    if (Math.abs(delta) < DRAG_THRESHOLD) return;
-    const half = halfWidthRef.current;
-    if (half <= 0) return;
-    let next = dragStartOffsetRef.current + delta;
-    while (next <= -half) next += half;
-    while (next > 0) next -= half;
-    offsetRef.current = next;
-    if (trackRef.current) {
-      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
-    }
-  };
-  const handleTouchEnd = () => {
-    draggingRef.current = false;
-    pausedRef.current = false;
-  };
+  const replay = () => setRunId((r) => r + 1);
 
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="container">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-12">
           <span className="inline-block bg-mint-soft text-mint px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             ⭐ آراء العائلات
           </span>
@@ -151,69 +73,131 @@ const Testimonials = () => {
             عائلات سعيدة <span className="text-gradient">تتحدث عنا</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            انضم لآلاف العائلات اللي اختارت منصتنا لتعليم أطفالها العبرية.
+            رسائل حقيقية من أهالي أطفالنا 💬
           </p>
         </div>
-      </div>
 
-      <div
-        ref={containerRef}
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing select-none"
-        style={{
-          maskImage:
-            "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
-          WebkitMaskImage:
-            "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
-        }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-        onMouseDown={handleMouseDown}
-        onMouseUp={handleMouseUp}
-        onMouseMove={handleMouseMove}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-      >
-        <div
-          ref={trackRef}
-          dir="ltr"
-          className="flex gap-6 w-max will-change-transform"
-          style={{ transform: "translate3d(0,0,0)" }}
-        >
-          {loop.map((t, i) => (
-            <div
-              key={`${t.id}-${i}`}
-              className="relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft w-[360px] shrink-0 pointer-events-auto"
-            >
-              <Quote className="absolute top-4 left-4 w-8 h-8 text-primary/10" />
-
-              <div className="flex items-center gap-1 mb-3">
-                {Array.from({ length: t.rating || 5 }).map((_, s) => (
-                  <Star key={s} className="w-4 h-4 fill-accent text-accent" />
-                ))}
-              </div>
-
-              <p className="text-foreground/90 leading-relaxed mb-4 relative z-10 line-clamp-4">
-                "{t.text}"
+        {/* إطار الدردشة */}
+        <div className="max-w-2xl mx-auto bg-gradient-to-b from-primary-soft/40 to-background rounded-3xl border border-border/50 shadow-soft overflow-hidden">
+          {/* هيدر شات */}
+          <div className="flex items-center gap-3 px-5 py-3 bg-card border-b border-border/50">
+            <div className="w-10 h-10 rounded-full bg-primary-gradient flex items-center justify-center text-white font-display">
+              ع
+            </div>
+            <div className="flex-1">
+              <p className="font-bold text-sm">عائلاتنا</p>
+              <p className="text-xs text-mint flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-mint inline-block" />
+                {visibleCount < items.length ? "يكتب الآن…" : "متصل الآن"}
               </p>
+            </div>
+          </div>
 
-              <div className="flex items-center gap-3 pt-3 border-t border-border/50">
+          {/* الرسائل */}
+          <div
+            className="px-4 sm:px-6 py-6 space-y-4 max-h-[560px] overflow-y-auto"
+            style={{
+              backgroundImage:
+                "radial-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px)",
+              backgroundSize: "18px 18px",
+            }}
+          >
+            {items.slice(0, visibleCount).map((t, i) => {
+              const isRight = i % 2 === 0; // يمين / شمال بالتناوب
+              return (
                 <div
-                  className={`w-11 h-11 rounded-full ${
-                    t.avatar_color || "bg-primary-gradient"
-                  } flex items-center justify-center text-white font-display text-lg`}
+                  key={`${runId}-${t.id}`}
+                  className={`flex items-end gap-2 animate-fade-in ${
+                    isRight ? "justify-end" : "justify-start"
+                  }`}
                 >
-                  {t.name[0]}
-                </div>
-                <div>
-                  <p className="font-bold text-sm">{t.name}</p>
-                  {t.role && (
-                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  {!isRight && (
+                    <div
+                      className={`w-8 h-8 rounded-full ${
+                        t.avatar_color || "bg-primary-gradient"
+                      } flex items-center justify-center text-white text-xs font-bold shrink-0`}
+                    >
+                      {t.name[0]}
+                    </div>
+                  )}
+
+                  <div
+                    className={`relative max-w-[78%] px-4 py-2.5 shadow-soft ${
+                      isRight
+                        ? "bg-primary-gradient text-primary-foreground rounded-2xl rounded-br-sm"
+                        : "bg-card text-foreground rounded-2xl rounded-bl-sm border border-border/50"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-1">
+                      <p className={`font-bold text-xs ${isRight ? "text-white/90" : "text-primary"}`}>
+                        {t.name}
+                        {t.role && (
+                          <span className={`font-normal mx-1 ${isRight ? "text-white/70" : "text-muted-foreground"}`}>
+                            · {t.role}
+                          </span>
+                        )}
+                      </p>
+                      <div className="flex items-center gap-0.5">
+                        {Array.from({ length: t.rating || 5 }).map((_, s) => (
+                          <Star
+                            key={s}
+                            className={`w-3 h-3 ${
+                              isRight ? "fill-white text-white" : "fill-accent text-accent"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm leading-relaxed">{t.text}</p>
+                    <div
+                      className={`flex items-center gap-1 justify-end mt-1 text-[10px] ${
+                        isRight ? "text-white/70" : "text-muted-foreground"
+                      }`}
+                    >
+                      <span>الآن</span>
+                      <Check className="w-3 h-3" />
+                      <Check className="w-3 h-3 -mr-2" />
+                    </div>
+                  </div>
+
+                  {isRight && (
+                    <div
+                      className={`w-8 h-8 rounded-full ${
+                        t.avatar_color || "bg-primary-gradient"
+                      } flex items-center justify-center text-white text-xs font-bold shrink-0`}
+                    >
+                      {t.name[0]}
+                    </div>
                   )}
                 </div>
+              );
+            })}
+
+            {/* مؤشر "يكتب الآن" */}
+            {visibleCount < items.length && (
+              <div className="flex items-end gap-2 animate-fade-in">
+                <div className="bg-card border border-border/50 rounded-2xl rounded-bl-sm px-4 py-3 shadow-soft">
+                  <div className="flex gap-1">
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.3s]" />
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.15s]" />
+                    <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" />
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            )}
+
+            {/* زر إعادة التشغيل */}
+            {finished && (
+              <div className="flex justify-center pt-4 animate-fade-in">
+                <Button variant="soft" size="sm" onClick={replay} className="gap-2">
+                  <RotateCcw className="w-4 h-4" />
+                  شاهد من البداية
+                </Button>
+              </div>
+            )}
+
+            <div ref={bottomRef} />
+          </div>
         </div>
       </div>
     </section>
