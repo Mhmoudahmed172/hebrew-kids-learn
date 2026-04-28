@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { Star, RotateCcw, Check } from "lucide-react";
+import { Star, Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 
 type T = {
   id: string;
@@ -13,14 +12,18 @@ type T = {
   card_color: string | null;
 };
 
-const MESSAGE_DELAY = 1600; // ms بين كل رسالة وأخرى
+const SPEED_PX_PER_SEC = 55;
 
 const Testimonials = () => {
   const [items, setItems] = useState<T[]>([]);
-  const [visibleCount, setVisibleCount] = useState(0);
-  const [finished, setFinished] = useState(false);
-  const [runId, setRunId] = useState(0);
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const halfWidthRef = useRef(0);
+  const pausedRef = useRef(false);
+  const draggingRef = useRef(false);
+  const dragStartXRef = useRef(0);
+  const dragStartOffsetRef = useRef(0);
 
   useEffect(() => {
     supabase
@@ -31,170 +34,175 @@ const Testimonials = () => {
       .then(({ data }) => setItems((data as T[]) || []));
   }, []);
 
-  // التشغيل التدريجي + إعادة تلقائية
   useEffect(() => {
     if (items.length === 0) return;
-    setVisibleCount(0);
-    setFinished(false);
 
-    const timers: number[] = [];
-    items.forEach((_, idx) => {
-      const t = window.setTimeout(() => {
-        setVisibleCount(idx + 1);
-        if (idx === items.length - 1) {
-          window.setTimeout(() => setFinished(true), 700);
+    const measure = () => {
+      if (trackRef.current) {
+        halfWidthRef.current = trackRef.current.scrollWidth / 2;
+      }
+    };
+    requestAnimationFrame(measure);
+    window.addEventListener("resize", measure);
+
+    let last = performance.now();
+    let raf = 0;
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+      if (halfWidthRef.current === 0) measure();
+
+      if (!pausedRef.current && !draggingRef.current && halfWidthRef.current > 0) {
+        offsetRef.current -= SPEED_PX_PER_SEC * dt;
+        if (offsetRef.current <= -halfWidthRef.current) {
+          offsetRef.current += halfWidthRef.current;
         }
-      }, MESSAGE_DELAY * (idx + 1));
-      timers.push(t);
-    });
+        if (trackRef.current) {
+          trackRef.current.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
 
-    // إعادة تلقائية بعد انتهاء كل الرسائل
-    const restart = window.setTimeout(() => {
-      setRunId((r) => r + 1);
-    }, MESSAGE_DELAY * items.length + 3500);
-    timers.push(restart);
-
-    return () => timers.forEach((t) => window.clearTimeout(t));
-  }, [items, runId]);
-
-  // تمرير تلقائي للأسفل عند ظهور رسالة جديدة
-  useEffect(() => {
-    if (visibleCount > 0) {
-      bottomRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
-    }
-  }, [visibleCount, finished]);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("resize", measure);
+    };
+  }, [items.length]);
 
   if (items.length === 0) return null;
 
-  
+  const loop = [...items, ...items];
+  const DRAG_THRESHOLD = 5;
+
+  const onEnter = () => (pausedRef.current = true);
+  const onLeave = () => {
+    pausedRef.current = false;
+    draggingRef.current = false;
+  };
+  const onDown = (x: number) => {
+    draggingRef.current = true;
+    dragStartXRef.current = x;
+    dragStartOffsetRef.current = offsetRef.current;
+  };
+  const onMove = (x: number) => {
+    if (!draggingRef.current) return;
+    const delta = x - dragStartXRef.current;
+    if (Math.abs(delta) < DRAG_THRESHOLD) return;
+    const half = halfWidthRef.current;
+    if (half <= 0) return;
+    let next = dragStartOffsetRef.current + delta;
+    while (next <= -half) next += half;
+    while (next > 0) next -= half;
+    offsetRef.current = next;
+    if (trackRef.current) {
+      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
+    }
+  };
+  const onUp = () => (draggingRef.current = false);
 
   return (
     <section className="py-24 relative overflow-hidden">
+      {/* خلفية ناعمة */}
+      <div className="absolute inset-0 -z-10 opacity-60">
+        <div className="absolute top-10 right-1/4 w-72 h-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute bottom-10 left-1/4 w-72 h-72 rounded-full bg-accent/10 blur-3xl" />
+      </div>
+
       <div className="container">
-        <div className="text-center max-w-3xl mx-auto mb-12">
-          <span className="inline-block bg-mint-soft text-mint px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+        <div className="text-center max-w-3xl mx-auto mb-14">
+          <span className="inline-block bg-mint-soft text-mint px-4 py-1.5 rounded-full text-sm font-bold mb-4 animate-fade-in">
             ⭐ آراء العائلات
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
             عائلات سعيدة <span className="text-gradient">تتحدث عنا</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            رسائل حقيقية من أهالي أطفالنا 💬
+            انضم لآلاف العائلات اللي اختارت منصتنا لتعليم أطفالها العبرية.
           </p>
         </div>
+      </div>
 
-        {/* إطار الدردشة */}
-        <div className="max-w-2xl mx-auto bg-gradient-to-b from-primary-soft/40 to-background rounded-3xl border border-border/50 shadow-soft overflow-hidden">
-          {/* هيدر شات */}
-          <div className="flex items-center gap-3 px-5 py-3 bg-card border-b border-border/50">
-            <div className="w-10 h-10 rounded-full bg-primary-gradient flex items-center justify-center text-white font-display">
-              ع
-            </div>
-            <div className="flex-1">
-              <p className="font-bold text-sm">عائلاتنا</p>
-              <p className="text-xs text-mint flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-mint inline-block" />
-                {visibleCount < items.length ? "يكتب الآن…" : "متصل الآن"}
-              </p>
-            </div>
-          </div>
+      <div
+        ref={containerRef}
+        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing select-none py-4"
+        style={{
+          maskImage:
+            "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
+        }}
+        onMouseEnter={onEnter}
+        onMouseLeave={onLeave}
+        onMouseDown={(e) => onDown(e.clientX)}
+        onMouseUp={onUp}
+        onMouseMove={(e) => onMove(e.clientX)}
+        onTouchStart={(e) => {
+          pausedRef.current = true;
+          onDown(e.touches[0].clientX);
+        }}
+        onTouchMove={(e) => onMove(e.touches[0].clientX)}
+        onTouchEnd={() => {
+          onUp();
+          pausedRef.current = false;
+        }}
+      >
+        <div
+          ref={trackRef}
+          dir="ltr"
+          className="flex gap-6 w-max will-change-transform"
+          style={{ transform: "translate3d(0,0,0)" }}
+        >
+          {loop.map((t, i) => (
+            <div
+              key={`${t.id}-${i}`}
+              className="group relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft hover:shadow-glow w-[360px] shrink-0 pointer-events-auto transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:scale-[1.02]"
+            >
+              {/* تدرّج زخرفي يظهر عند الـ hover */}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-          {/* الرسائل */}
-          <div
-            className="px-4 sm:px-6 py-6 space-y-4 max-h-[560px] overflow-y-auto"
-            style={{
-              backgroundImage:
-                "radial-gradient(hsl(var(--primary) / 0.06) 1px, transparent 1px)",
-              backgroundSize: "18px 18px",
-            }}
-          >
-            {items.slice(0, visibleCount).map((t, i) => {
-              const isRight = i % 2 === 0; // يمين / شمال بالتناوب
-              return (
-                <div
-                  key={`${runId}-${t.id}`}
-                  className={`flex items-end gap-2 animate-fade-in ${
-                    isRight ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  {!isRight && (
-                    <div
-                      className={`w-8 h-8 rounded-full ${
-                        t.avatar_color || "bg-primary-gradient"
-                      } flex items-center justify-center text-white text-xs font-bold shrink-0`}
-                    >
-                      {t.name[0]}
-                    </div>
-                  )}
+              {/* أيقونة الاقتباس */}
+              <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-primary-gradient flex items-center justify-center shadow-soft transform rotate-0 group-hover:rotate-12 transition-transform duration-500">
+                <Quote className="w-5 h-5 text-white" />
+              </div>
 
-                  <div
-                    className={`relative max-w-[78%] px-4 py-2.5 shadow-soft ${
-                      isRight
-                        ? "bg-primary-gradient text-primary-foreground rounded-2xl rounded-br-sm"
-                        : "bg-card text-foreground rounded-2xl rounded-bl-sm border border-border/50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between gap-3 mb-1">
-                      <p className={`font-bold text-xs ${isRight ? "text-white/90" : "text-primary"}`}>
-                        {t.name}
-                        {t.role && (
-                          <span className={`font-normal mx-1 ${isRight ? "text-white/70" : "text-muted-foreground"}`}>
-                            · {t.role}
-                          </span>
-                        )}
-                      </p>
-                      <div className="flex items-center gap-0.5">
-                        {Array.from({ length: t.rating || 5 }).map((_, s) => (
-                          <Star
-                            key={s}
-                            className={`w-3 h-3 ${
-                              isRight ? "fill-white text-white" : "fill-accent text-accent"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    <p className="text-sm leading-relaxed">{t.text}</p>
-                    <div
-                      className={`flex items-center gap-1 justify-end mt-1 text-[10px] ${
-                        isRight ? "text-white/70" : "text-muted-foreground"
-                      }`}
-                    >
-                      <span>الآن</span>
-                      <Check className="w-3 h-3" />
-                      <Check className="w-3 h-3 -mr-2" />
-                    </div>
-                  </div>
-
-                  {isRight && (
-                    <div
-                      className={`w-8 h-8 rounded-full ${
-                        t.avatar_color || "bg-primary-gradient"
-                      } flex items-center justify-center text-white text-xs font-bold shrink-0`}
-                    >
-                      {t.name[0]}
-                    </div>
-                  )}
+              <div className="relative">
+                <div className="flex items-center gap-1 mb-3">
+                  {Array.from({ length: t.rating || 5 }).map((_, s) => (
+                    <Star
+                      key={s}
+                      className="w-4 h-4 fill-accent text-accent transition-transform duration-300 group-hover:scale-110"
+                      style={{ transitionDelay: `${s * 40}ms` }}
+                    />
+                  ))}
                 </div>
-              );
-            })}
 
-            {/* مؤشر "يكتب الآن" */}
-            {visibleCount < items.length && (
-              <div className="flex items-end gap-2 animate-fade-in">
-                <div className="bg-card border border-border/50 rounded-2xl rounded-bl-sm px-4 py-3 shadow-soft">
-                  <div className="flex gap-1">
-                    <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.3s]" />
-                    <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce [animation-delay:-0.15s]" />
-                    <span className="w-2 h-2 rounded-full bg-muted-foreground/60 animate-bounce" />
+                <p className="text-foreground/90 leading-relaxed mb-4 line-clamp-4 min-h-[6rem]">
+                  "{t.text}"
+                </p>
+
+                <div className="flex items-center gap-3 pt-3 border-t border-border/50">
+                  <div className="relative">
+                    <div
+                      className={`w-11 h-11 rounded-full ${
+                        t.avatar_color || "bg-primary-gradient"
+                      } flex items-center justify-center text-white font-display text-lg shadow-soft`}
+                    >
+                      {t.name[0]}
+                    </div>
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-mint border-2 border-card" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm">{t.name}</p>
+                    {t.role && (
+                      <p className="text-xs text-muted-foreground">{t.role}</p>
+                    )}
                   </div>
                 </div>
               </div>
-            )}
-
-
-            <div ref={bottomRef} />
-          </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>
