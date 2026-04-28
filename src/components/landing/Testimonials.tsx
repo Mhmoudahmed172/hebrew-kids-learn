@@ -31,7 +31,7 @@ const Testimonials = () => {
       .then(({ data }) => setItems((data as T[]) || []));
   }, []);
 
-  // التشغيل التدريجي
+  // التشغيل التدريجي + إعادة تلقائية
   useEffect(() => {
     if (items.length === 0) return;
     setVisibleCount(0);
@@ -48,6 +48,12 @@ const Testimonials = () => {
       timers.push(t);
     });
 
+    // إعادة تلقائية بعد انتهاء كل الرسائل
+    const restart = window.setTimeout(() => {
+      setRunId((r) => r + 1);
+    }, MESSAGE_DELAY * items.length + 3500);
+    timers.push(restart);
+
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [items, runId]);
 
@@ -60,7 +66,7 @@ const Testimonials = () => {
 
   if (items.length === 0) return null;
 
-  const replay = () => setRunId((r) => r + 1);
+  
 
   return (
     <section className="py-24 relative overflow-hidden">
@@ -186,15 +192,6 @@ const Testimonials = () => {
               </div>
             )}
 
-            {/* زر إعادة التشغيل */}
-            {finished && (
-              <div className="flex justify-center pt-4 animate-fade-in">
-                <Button variant="soft" size="sm" onClick={replay} className="gap-2">
-                  <RotateCcw className="w-4 h-4" />
-                  شاهد من البداية
-                </Button>
-              </div>
-            )}
 
             <div ref={bottomRef} />
           </div>
