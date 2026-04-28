@@ -39,7 +39,15 @@ const Testimonials = () => {
 
     const measure = () => {
       if (trackRef.current) {
-        halfWidthRef.current = trackRef.current.scrollWidth / 2;
+        // العنصر الذي يمثل بداية النسخة الثانية تم وسمه بـ data-loop-mid
+        const mid = trackRef.current.querySelector<HTMLElement>("[data-loop-mid]");
+        if (mid) {
+          // المسافة من بداية التراك حتى بداية أول بطاقة في النسخة الثانية
+          // = عرض النسخة الأولى + الـ gap الذي يفصل بينها وبين النسخة الثانية
+          halfWidthRef.current = mid.offsetLeft;
+        } else {
+          halfWidthRef.current = trackRef.current.scrollWidth / 2;
+        }
       }
     };
     requestAnimationFrame(measure);
@@ -164,6 +172,7 @@ const Testimonials = () => {
           {loop.map((t, i) => (
             <div
               key={`${t.id}-${i}`}
+              {...(i === single.length ? { "data-loop-mid": "true" } : {})}
               className="group relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft hover:shadow-glow w-[360px] shrink-0 pointer-events-auto transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:scale-[1.02]"
             >
               {/* تدرّج زخرفي يظهر عند الـ hover */}
