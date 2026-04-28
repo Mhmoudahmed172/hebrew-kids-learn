@@ -136,41 +136,173 @@ const Admin = () => {
 };
 
 // ============== OVERVIEW ==============
+const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--secondary))", "hsl(var(--accent))", "hsl(var(--pink))", "hsl(var(--mint))"];
+
 const Overview = () => {
-  const [stats, setStats] = useState({ videos: 0, users: 0, levels: 0, quizzes: 0 });
+  const [stats, setStats] = useState({ videos: 0, users: 0, levels: 0, quizzes: 0, songs: 0, games: 0 });
+  const [contentData, setContentData] = useState<{ name: string; value: number }[]>([]);
+  const [statusData, setStatusData] = useState<{ name: string; value: number }[]>([]);
+  const [topUsers, setTopUsers] = useState<{ name: string; points: number }[]>([]);
+  const [activity, setActivity] = useState<{ day: string; count: number }[]>([]);
+
   useEffect(() => {
     (async () => {
-      const [v, u, l, q] = await Promise.all([
+      const [v, u, l, q, s, g] = await Promise.all([
         supabase.from("videos").select("*", { count: "exact", head: true }),
         supabase.from("profiles").select("*", { count: "exact", head: true }),
         supabase.from("levels").select("*", { count: "exact", head: true }),
         supabase.from("quizzes").select("*", { count: "exact", head: true }),
+        supabase.from("songs").select("*", { count: "exact", head: true }),
+        supabase.from("games").select("*", { count: "exact", head: true }),
       ]);
-      setStats({ videos: v.count || 0, users: u.count || 0, levels: l.count || 0, quizzes: q.count || 0 });
+      const counts = {
+        videos: v.count || 0, users: u.count || 0, levels: l.count || 0,
+        quizzes: q.count || 0, songs: s.count || 0, games: g.count || 0,
+      };
+      setStats(counts);
+      setContentData([
+        { name: "فيديوهات", value: counts.videos },
+        { name: "أغاني", value: counts.songs },
+        { name: "ألعاب", value: counts.games },
+        { name: "اختبارات", value: counts.quizzes },
+        { name: "مستويات", value: counts.levels },
+      ]);
+
+      // user statuses
+      const { data: profs } = await supabase.from("profiles").select("status, full_name, id");
+      const grouped: Record<string, number> = {};
+      (profs || []).forEach((p: any) => { grouped[p.status] = (grouped[p.status] || 0) + 1; });
+      setStatusData(Object.entries(grouped).map(([k, v]) => ({ name: STATUS_LABELS[k] || k, value: v })));
+
+      // top users by points
+      const { data: pts } = await supabase
+        .from("user_points").select("user_id, total_points")
+        .order("total_points", { ascending: false }).limit(5);
+      const nameById: Record<string, string> = {};
+      (profs || []).forEach((p: any) => { nameById[p.id] = p.full_name || "بدون اسم"; });
+      setTopUsers((pts || []).map((p: any) => ({
+        name: nameById[p.user_id] || "مستخدم", points: p.total_points,
+      })));
+
+      // last 7 days progress
+      const since = new Date(); since.setDate(since.getDate() - 6);
+      const { data: prog } = await supabase
+        .from("user_progress").select("completed_at")
+        .gte("completed_at", since.toISOString());
+      const days: { day: string; count: number }[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const key = d.toISOString().slice(0, 10);
+        const label = d.toLocaleDateString("ar-EG", { weekday: "short" });
+        const count = (prog || []).filter((r: any) => r.completed_at.slice(0, 10) === key).length;
+        days.push({ day: label, count });
+      }
+      setActivity(days);
     })();
   }, []);
+
   const cards = [
     { label: "الفيديوهات", val: stats.videos, icon: Video, color: "bg-secondary-soft text-secondary" },
     { label: "المستخدمون", val: stats.users, icon: Users, color: "bg-pink-soft text-pink" },
     { label: "المستويات", val: stats.levels, icon: FileText, color: "bg-mint-soft text-mint" },
     { label: "الاختبارات", val: stats.quizzes, icon: ClipboardCheck, color: "bg-accent-soft text-accent-foreground" },
+    { label: "الأغاني", val: stats.songs, icon: Music, color: "bg-primary-soft text-primary" },
+    { label: "الألعاب", val: stats.games, icon: Gamepad2, color: "bg-pink-soft text-pink" },
   ];
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">نظرة عامة 📊</h1>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <div className="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-8">
         {cards.map((c) => {
           const Icon = c.icon;
           return (
-            <Card key={c.label} className="p-6">
-              <div className={`w-12 h-12 rounded-2xl ${c.color} flex items-center justify-center mb-3`}>
-                <Icon className="w-6 h-6" />
+            <Card key={c.label} className="p-5">
+              <div className={`w-11 h-11 rounded-2xl ${c.color} flex items-center justify-center mb-3`}>
+                <Icon className="w-5 h-5" />
               </div>
-              <div className="font-display text-3xl">{c.val}</div>
-              <div className="text-sm text-muted-foreground">{c.label}</div>
+              <div className="font-display text-2xl">{c.val}</div>
+              <div className="text-xs text-muted-foreground">{c.label}</div>
             </Card>
           );
         })}
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6 mb-6">
+        <Card className="p-6">
+          <h3 className="font-display text-lg mb-1">المحتوى حسب النوع</h3>
+          <p className="text-xs text-muted-foreground mb-4">إجمالي العناصر المتاحة في المنصة</p>
+          <ResponsiveContainer width="100%" height={260}>
+            <BarChart data={contentData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
+              <RTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+              <Bar dataKey="value" radius={[8, 8, 0, 0]}>
+                {contentData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="font-display text-lg mb-1">حالات المستخدمين</h3>
+          <p className="text-xs text-muted-foreground mb-4">توزيع المستخدمين حسب الحالة</p>
+          {statusData.length === 0 ? (
+            <div className="h-[260px] flex items-center justify-center text-muted-foreground">لا بيانات</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <PieChart>
+                <Pie data={statusData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={90} label>
+                  {statusData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                </Pie>
+                <RTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </Card>
+      </div>
+
+      <div className="grid lg:grid-cols-2 gap-6">
+        <Card className="p-6">
+          <h3 className="font-display text-lg mb-1">نشاط آخر 7 أيام</h3>
+          <p className="text-xs text-muted-foreground mb-4">عدد الإنجازات اليومية للمستخدمين</p>
+          <ResponsiveContainer width="100%" height={260}>
+            <AreaChart data={activity}>
+              <defs>
+                <linearGradient id="actGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.6} />
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="day" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+              <YAxis stroke="hsl(var(--muted-foreground))" fontSize={12} allowDecimals={false} />
+              <RTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+              <Area type="monotone" dataKey="count" stroke="hsl(var(--primary))" strokeWidth={2} fill="url(#actGrad)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+
+        <Card className="p-6">
+          <h3 className="font-display text-lg mb-1">أعلى 5 مستخدمين بالنقاط</h3>
+          <p className="text-xs text-muted-foreground mb-4">المتصدرون في المنصة</p>
+          {topUsers.length === 0 ? (
+            <div className="h-[260px] flex items-center justify-center text-muted-foreground">لا بيانات</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={topUsers} layout="vertical">
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis type="number" stroke="hsl(var(--muted-foreground))" fontSize={12} />
+                <YAxis type="category" dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={12} width={90} />
+                <RTooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: 12 }} />
+                <Bar dataKey="points" radius={[0, 8, 8, 0]} fill="hsl(var(--accent))" />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </Card>
       </div>
     </div>
   );
