@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          id: string
+          published: boolean
+          question: string
+          sort_order: number | null
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          question: string
+          sort_order?: number | null
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          question?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       games: {
         Row: {
           created_at: string
@@ -88,6 +118,63 @@ export type Database = {
           },
         ]
       }
+      kid_invite_codes: {
+        Row: {
+          code: string
+          created_at: string
+          expires_at: string
+          id: string
+          parent_id: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          parent_id: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          parent_id?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
+      kid_sessions: {
+        Row: {
+          duration_seconds: number
+          ended_at: string | null
+          id: string
+          kid_id: string
+          session_date: string
+          started_at: string
+        }
+        Insert: {
+          duration_seconds?: number
+          ended_at?: string | null
+          id?: string
+          kid_id: string
+          session_date?: string
+          started_at?: string
+        }
+        Update: {
+          duration_seconds?: number
+          ended_at?: string | null
+          id?: string
+          kid_id?: string
+          session_date?: string
+          started_at?: string
+        }
+        Relationships: []
+      }
       levels: {
         Row: {
           color: string | null
@@ -124,12 +211,63 @@ export type Database = {
         }
         Relationships: []
       }
+      parent_kid_links: {
+        Row: {
+          created_at: string
+          id: string
+          kid_id: string
+          parent_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kid_id: string
+          parent_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kid_id?: string
+          parent_id?: string
+        }
+        Relationships: []
+      }
+      parental_settings: {
+        Row: {
+          daily_limit_minutes: number
+          kid_id: string
+          rest_day_enabled: boolean
+          restrictions_enabled: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          daily_limit_minutes?: number
+          kid_id: string
+          rest_day_enabled?: boolean
+          restrictions_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          daily_limit_minutes?: number
+          kid_id?: string
+          rest_day_enabled?: boolean
+          restrictions_enabled?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           age: number | null
           created_at: string
           full_name: string | null
           id: string
+          status: Database["public"]["Enums"]["user_status"]
+          status_note: string | null
+          status_updated_at: string
           updated_at: string
         }
         Insert: {
@@ -137,6 +275,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          status?: Database["public"]["Enums"]["user_status"]
+          status_note?: string | null
+          status_updated_at?: string
           updated_at?: string
         }
         Update: {
@@ -144,6 +285,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["user_status"]
+          status_note?: string | null
+          status_updated_at?: string
           updated_at?: string
         }
         Relationships: []
@@ -261,6 +405,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      testimonials: {
+        Row: {
+          avatar_color: string | null
+          card_color: string | null
+          created_at: string
+          id: string
+          name: string
+          published: boolean
+          rating: number
+          role: string | null
+          sort_order: number | null
+          text: string
+        }
+        Insert: {
+          avatar_color?: string | null
+          card_color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          published?: boolean
+          rating?: number
+          role?: string | null
+          sort_order?: number | null
+          text: string
+        }
+        Update: {
+          avatar_color?: string | null
+          card_color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          published?: boolean
+          rating?: number
+          role?: string | null
+          sort_order?: number | null
+          text?: string
+        }
+        Relationships: []
       }
       user_badges: {
         Row: {
@@ -421,6 +604,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_kid_invite_code: { Args: never; Returns: string }
+      get_kid_today_minutes: { Args: { p_kid_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -428,9 +613,16 @@ export type Database = {
         }
         Returns: boolean
       }
+      link_kid_with_code: { Args: { invite_code: string }; Returns: string }
     }
     Enums: {
       app_role: "admin" | "parent" | "kid"
+      user_status:
+        | "active"
+        | "inactive"
+        | "pending_payment"
+        | "frozen"
+        | "banned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -559,6 +751,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "parent", "kid"],
+      user_status: [
+        "active",
+        "inactive",
+        "pending_payment",
+        "frozen",
+        "banned",
+      ],
     },
   },
 } as const

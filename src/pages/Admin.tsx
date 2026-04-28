@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
+  MessageSquare, HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import mascot from "@/assets/mascot-owl.png";
 
-type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games";
+type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games" | "testimonials" | "faqs";
 
 const nav: { id: Section; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -30,7 +31,24 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "quizzes", label: "الاختبارات", icon: ClipboardCheck },
   { id: "songs", label: "الأغاني", icon: Music },
   { id: "games", label: "الألعاب", icon: Gamepad2 },
+  { id: "testimonials", label: "آراء العملاء", icon: MessageSquare },
+  { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
+
+const STATUS_LABELS: Record<string, string> = {
+  active: "فعّال",
+  inactive: "غير فعّال",
+  pending_payment: "بانتظار الدفع",
+  frozen: "مجمّد",
+  banned: "محظور",
+};
+const STATUS_COLORS: Record<string, string> = {
+  active: "bg-mint text-white",
+  inactive: "bg-muted text-foreground",
+  pending_payment: "bg-accent text-accent-foreground",
+  frozen: "bg-secondary text-secondary-foreground",
+  banned: "bg-destructive text-destructive-foreground",
+};
 
 const Admin = () => {
   const [active, setActive] = useState<Section>("overview");
@@ -110,6 +128,8 @@ const Admin = () => {
         {active === "quizzes" && <QuizzesSection />}
         {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
         {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
+        {active === "testimonials" && <TestimonialsSection />}
+        {active === "faqs" && <FaqsSection />}
       </main>
     </div>
   );
@@ -345,6 +365,16 @@ const UsersSection = () => {
     load();
   };
 
+  const setStatus = async (userId: string, status: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: status as any, status_updated_at: new Date().toISOString() })
+      .eq("id", userId);
+    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "تم تحديث الحالة" });
+    load();
+  };
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
@@ -354,22 +384,39 @@ const UsersSection = () => {
             <TableHead className="text-right">الاسم</TableHead>
             <TableHead className="text-right">العمر</TableHead>
             <TableHead className="text-right">الدور</TableHead>
+            <TableHead className="text-right">الحالة</TableHead>
             <TableHead className="text-right">تغيير الدور</TableHead>
+            <TableHead className="text-right">تغيير الحالة</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {users.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
+            {users.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
               : users.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
                   <TableCell>{u.age || "-"}</TableCell>
                   <TableCell>{u.roles.map((r: string) => <Badge key={r} className="ml-1">{r}</Badge>)}</TableCell>
                   <TableCell>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${STATUS_COLORS[u.status] || "bg-muted"}`}>
+                      {STATUS_LABELS[u.status] || u.status || "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
                     <Select value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
-                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">مدير</SelectItem>
                         <SelectItem value="parent">ولي أمر</SelectItem>
                         <SelectItem value="kid">طفل</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
+                      <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(STATUS_LABELS).map(([k, l]) => (
+                          <SelectItem key={k} value={k}>{l}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </TableCell>
@@ -702,6 +749,176 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
             <div><Label>العنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
             <div><Label>الرابط</Label><Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" /></div>
             {hasDescription && <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
+            <Button variant="hero" onClick={save}>حفظ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+
+// ============== TESTIMONIALS ==============
+const TestimonialsSection = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const empty = { name: "", role: "", text: "", rating: 5, avatar_color: "bg-primary-gradient", card_color: "bg-primary-soft", sort_order: 0, published: true };
+  const [form, setForm] = useState<any>(empty);
+
+  const load = async () => {
+    const { data } = await supabase.from("testimonials").select("*").order("sort_order");
+    setItems(data || []);
+  };
+  useEffect(() => { load(); }, []);
+  useEffect(() => { setForm(editing ? { ...editing } : empty); }, [editing, open]);
+
+  const save = async () => {
+    if (!form.name || !form.text) { toast({ title: "الاسم والنص مطلوبان", variant: "destructive" }); return; }
+    const payload = { ...form };
+    delete payload.id; delete payload.created_at;
+    const { error } = editing
+      ? await supabase.from("testimonials").update(payload).eq("id", editing.id)
+      : await supabase.from("testimonials").insert(payload);
+    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "تم الحفظ" });
+    setOpen(false); load();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("حذف الرأي؟")) return;
+    await supabase.from("testimonials").delete().eq("id", id);
+    toast({ title: "تم الحذف" }); load();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
+        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4">
+        {items.map((t) => (
+          <Card key={t.id} className="p-5">
+            <div className="flex items-start justify-between mb-2">
+              <div>
+                <h3 className="font-bold">{t.name}</h3>
+                <p className="text-xs text-muted-foreground">{t.role || "—"} • ⭐ {t.rating}</p>
+              </div>
+              <div className="flex gap-1">
+                <Badge variant={t.published ? "default" : "secondary"}>{t.published ? "منشور" : "مخفي"}</Badge>
+                <Button size="icon" variant="ghost" onClick={() => { setEditing(t); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground">{t.text}</p>
+          </Card>
+        ))}
+        {items.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">لا توجد آراء</p>}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent dir="rtl" className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} رأي</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>الاسم *</Label><Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></div>
+            <div><Label>الصفة (مثلاً: أم لـ ليان)</Label><Input value={form.role || ""} onChange={(e) => setForm({ ...form, role: e.target.value })} /></div>
+            <div><Label>نص الرأي *</Label><Textarea value={form.text} rows={4} onChange={(e) => setForm({ ...form, text: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>التقييم (1-5)</Label><Input type="number" min={1} max={5} value={form.rating} onChange={(e) => setForm({ ...form, rating: +e.target.value })} /></div>
+              <div><Label>الترتيب</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: +e.target.value })} /></div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="tpub" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} />
+              <Label htmlFor="tpub">منشور</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
+            <Button variant="hero" onClick={save}>حفظ</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+// ============== FAQS ==============
+const FaqsSection = () => {
+  const [items, setItems] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const empty = { question: "", answer: "", category: "", sort_order: 0, published: true };
+  const [form, setForm] = useState<any>(empty);
+
+  const load = async () => {
+    const { data } = await supabase.from("faqs").select("*").order("sort_order");
+    setItems(data || []);
+  };
+  useEffect(() => { load(); }, []);
+  useEffect(() => { setForm(editing ? { ...editing } : empty); }, [editing, open]);
+
+  const save = async () => {
+    if (!form.question || !form.answer) { toast({ title: "السؤال والجواب مطلوبان", variant: "destructive" }); return; }
+    const payload = { ...form };
+    delete payload.id; delete payload.created_at;
+    const { error } = editing
+      ? await supabase.from("faqs").update(payload).eq("id", editing.id)
+      : await supabase.from("faqs").insert(payload);
+    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "تم الحفظ" });
+    setOpen(false); load();
+  };
+  const remove = async (id: string) => {
+    if (!confirm("حذف السؤال؟")) return;
+    await supabase.from("faqs").delete().eq("id", id);
+    toast({ title: "تم الحذف" }); load();
+  };
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="font-display text-3xl">الأسئلة الشائعة ❓</h1>
+        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>
+      </div>
+      <div className="space-y-3">
+        {items.map((f) => (
+          <Card key={f.id} className="p-5">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <h3 className="font-bold">{f.question}</h3>
+                  {f.category && <Badge variant="secondary">{f.category}</Badge>}
+                </div>
+                <p className="text-sm text-muted-foreground">{f.answer}</p>
+              </div>
+              <div className="flex gap-1 shrink-0">
+                <Badge variant={f.published ? "default" : "secondary"}>{f.published ? "منشور" : "مخفي"}</Badge>
+                <Button size="icon" variant="ghost" onClick={() => { setEditing(f); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                <Button size="icon" variant="ghost" onClick={() => remove(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+              </div>
+            </div>
+          </Card>
+        ))}
+        {items.length === 0 && <p className="text-center text-muted-foreground py-10">لا توجد أسئلة</p>}
+      </div>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent dir="rtl" className="max-w-xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} سؤال</DialogTitle></DialogHeader>
+          <div className="space-y-3">
+            <div><Label>السؤال *</Label><Input value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })} /></div>
+            <div><Label>الجواب *</Label><Textarea value={form.answer} rows={4} onChange={(e) => setForm({ ...form, answer: e.target.value })} /></div>
+            <div className="grid grid-cols-2 gap-3">
+              <div><Label>التصنيف</Label><Input value={form.category || ""} onChange={(e) => setForm({ ...form, category: e.target.value })} /></div>
+              <div><Label>الترتيب</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: +e.target.value })} /></div>
+            </div>
+            <div className="flex items-center gap-2">
+              <input type="checkbox" id="fpub" checked={form.published} onChange={(e) => setForm({ ...form, published: e.target.checked })} />
+              <Label htmlFor="fpub">منشور</Label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
