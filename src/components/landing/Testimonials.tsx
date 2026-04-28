@@ -43,7 +43,8 @@ const Testimonials = () => {
         halfWidthRef.current = trackRef.current.scrollWidth / 2;
       }
     };
-    measure();
+    // قياس بعد render فعلي
+    requestAnimationFrame(measure);
     window.addEventListener("resize", measure);
 
     let last = performance.now();
@@ -53,16 +54,17 @@ const Testimonials = () => {
       const dt = (now - last) / 1000;
       last = now;
 
+      if (halfWidthRef.current === 0) {
+        measure();
+      }
+
       if (!pausedRef.current && !draggingRef.current && halfWidthRef.current > 0) {
         offsetRef.current -= SPEED_PX_PER_SEC * dt;
-        // wrap بسلاسة
         if (offsetRef.current <= -halfWidthRef.current) {
           offsetRef.current += halfWidthRef.current;
-        } else if (offsetRef.current > 0) {
-          offsetRef.current -= halfWidthRef.current;
         }
         if (trackRef.current) {
-          trackRef.current.style.transform = `translateX(${offsetRef.current}px)`;
+          trackRef.current.style.transform = `translate3d(${offsetRef.current}px, 0, 0)`;
         }
       }
       raf = requestAnimationFrame(tick);
@@ -78,6 +80,8 @@ const Testimonials = () => {
   if (items.length === 0) return null;
 
   const loop = [...items, ...items];
+
+  const DRAG_THRESHOLD = 5;
 
   // Handlers
   const handleMouseEnter = () => {
@@ -98,16 +102,15 @@ const Testimonials = () => {
   const handleMouseMove = (e: React.MouseEvent) => {
     if (!draggingRef.current) return;
     const delta = e.clientX - dragStartXRef.current;
-    let next = dragStartOffsetRef.current + delta;
+    if (Math.abs(delta) < DRAG_THRESHOLD) return;
     const half = halfWidthRef.current;
-    if (half > 0) {
-      // الإبقاء على الإزاحة ضمن نطاق نسخة واحدة
-      while (next <= -half) next += half;
-      while (next > 0) next -= half;
-    }
+    if (half <= 0) return;
+    let next = dragStartOffsetRef.current + delta;
+    while (next <= -half) next += half;
+    while (next > 0) next -= half;
     offsetRef.current = next;
     if (trackRef.current) {
-      trackRef.current.style.transform = `translateX(${next}px)`;
+      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
     }
   };
 
@@ -121,15 +124,15 @@ const Testimonials = () => {
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!draggingRef.current) return;
     const delta = e.touches[0].clientX - dragStartXRef.current;
-    let next = dragStartOffsetRef.current + delta;
+    if (Math.abs(delta) < DRAG_THRESHOLD) return;
     const half = halfWidthRef.current;
-    if (half > 0) {
-      while (next <= -half) next += half;
-      while (next > 0) next -= half;
-    }
+    if (half <= 0) return;
+    let next = dragStartOffsetRef.current + delta;
+    while (next <= -half) next += half;
+    while (next > 0) next -= half;
     offsetRef.current = next;
     if (trackRef.current) {
-      trackRef.current.style.transform = `translateX(${next}px)`;
+      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
     }
   };
   const handleTouchEnd = () => {
