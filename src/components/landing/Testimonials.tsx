@@ -192,15 +192,6 @@ const Testimonials = () => {
               </div>
             )}
 
-            {/* زر إعادة التشغيل */}
-            {finished && (
-              <div className="flex justify-center pt-4 animate-fade-in">
-                <Button variant="soft" size="sm" onClick={replay} className="gap-2">
-                  <RotateCcw className="w-4 h-4" />
-                  شاهد من البداية
-                </Button>
-              </div>
-            )}
 
             <div ref={bottomRef} />
           </div>
