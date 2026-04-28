@@ -113,26 +113,12 @@ const Testimonials = () => {
 
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing select-none py-4"
+        className="relative w-full overflow-hidden select-none py-4 pointer-events-none"
         style={{
           maskImage:
             "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
           WebkitMaskImage:
             "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
-        }}
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-        onMouseDown={(e) => onDown(e.clientX)}
-        onMouseUp={onUp}
-        onMouseMove={(e) => onMove(e.clientX)}
-        onTouchStart={(e) => {
-          pausedRef.current = true;
-          onDown(e.touches[0].clientX);
-        }}
-        onTouchMove={(e) => onMove(e.touches[0].clientX)}
-        onTouchEnd={() => {
-          onUp();
-          pausedRef.current = false;
         }}
       >
         <div
