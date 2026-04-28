@@ -176,8 +176,9 @@ const Testimonials = () => {
       >
         <div
           ref={trackRef}
+          dir="ltr"
           className="flex gap-6 w-max will-change-transform"
-          style={{ transform: "translateX(0px)" }}
+          style={{ transform: "translate3d(0,0,0)" }}
         >
           {loop.map((t, i) => (
             <div
