@@ -89,34 +89,6 @@ const Testimonials = () => {
   // نسختان متطابقتان للوب السلس
   const loop = [...single, ...single];
 
-  const DRAG_THRESHOLD = 5;
-
-  const onEnter = () => (pausedRef.current = true);
-  const onLeave = () => {
-    pausedRef.current = false;
-    draggingRef.current = false;
-  };
-  const onDown = (x: number) => {
-    draggingRef.current = true;
-    dragStartXRef.current = x;
-    dragStartOffsetRef.current = offsetRef.current;
-  };
-  const onMove = (x: number) => {
-    if (!draggingRef.current) return;
-    const delta = x - dragStartXRef.current;
-    if (Math.abs(delta) < DRAG_THRESHOLD) return;
-    const half = halfWidthRef.current;
-    if (half <= 0) return;
-    let next = dragStartOffsetRef.current + delta;
-    while (next <= -half) next += half;
-    while (next > 0) next -= half;
-    offsetRef.current = next;
-    if (trackRef.current) {
-      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
-    }
-  };
-  const onUp = () => (draggingRef.current = false);
-
   return (
     <section className="py-24 relative overflow-hidden">
       {/* خلفية ناعمة */}
