@@ -20,10 +20,6 @@ const Testimonials = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const halfWidthRef = useRef(0);
-  const pausedRef = useRef(false);
-  const draggingRef = useRef(false);
-  const dragStartXRef = useRef(0);
-  const dragStartOffsetRef = useRef(0);
 
   useEffect(() => {
     supabase
@@ -60,7 +56,7 @@ const Testimonials = () => {
       last = now;
       if (halfWidthRef.current === 0) measure();
 
-      if (!pausedRef.current && !draggingRef.current && halfWidthRef.current > 0) {
+      if (halfWidthRef.current > 0) {
         offsetRef.current -= SPEED_PX_PER_SEC * dt;
         if (offsetRef.current <= -halfWidthRef.current) {
           offsetRef.current += halfWidthRef.current;
@@ -89,34 +85,6 @@ const Testimonials = () => {
   // نسختان متطابقتان للوب السلس
   const loop = [...single, ...single];
 
-  const DRAG_THRESHOLD = 5;
-
-  const onEnter = () => (pausedRef.current = true);
-  const onLeave = () => {
-    pausedRef.current = false;
-    draggingRef.current = false;
-  };
-  const onDown = (x: number) => {
-    draggingRef.current = true;
-    dragStartXRef.current = x;
-    dragStartOffsetRef.current = offsetRef.current;
-  };
-  const onMove = (x: number) => {
-    if (!draggingRef.current) return;
-    const delta = x - dragStartXRef.current;
-    if (Math.abs(delta) < DRAG_THRESHOLD) return;
-    const half = halfWidthRef.current;
-    if (half <= 0) return;
-    let next = dragStartOffsetRef.current + delta;
-    while (next <= -half) next += half;
-    while (next > 0) next -= half;
-    offsetRef.current = next;
-    if (trackRef.current) {
-      trackRef.current.style.transform = `translate3d(${next}px, 0, 0)`;
-    }
-  };
-  const onUp = () => (draggingRef.current = false);
-
   return (
     <section className="py-24 relative overflow-hidden">
       {/* خلفية ناعمة */}
@@ -141,26 +109,12 @@ const Testimonials = () => {
 
       <div
         ref={containerRef}
-        className="relative w-full overflow-hidden cursor-grab active:cursor-grabbing select-none py-4"
+        className="relative w-full overflow-hidden select-none py-4 pointer-events-none"
         style={{
           maskImage:
             "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
           WebkitMaskImage:
             "linear-gradient(to right, transparent, black 6%, black 94%, transparent)",
-        }}
-        onMouseEnter={onEnter}
-        onMouseLeave={onLeave}
-        onMouseDown={(e) => onDown(e.clientX)}
-        onMouseUp={onUp}
-        onMouseMove={(e) => onMove(e.clientX)}
-        onTouchStart={(e) => {
-          pausedRef.current = true;
-          onDown(e.touches[0].clientX);
-        }}
-        onTouchMove={(e) => onMove(e.touches[0].clientX)}
-        onTouchEnd={() => {
-          onUp();
-          pausedRef.current = false;
         }}
       >
         <div
