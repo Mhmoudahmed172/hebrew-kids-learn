@@ -365,6 +365,16 @@ const UsersSection = () => {
     load();
   };
 
+  const setStatus = async (userId: string, status: string) => {
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: status as any, status_updated_at: new Date().toISOString() })
+      .eq("id", userId);
+    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: "تم تحديث الحالة" });
+    load();
+  };
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
@@ -374,22 +384,39 @@ const UsersSection = () => {
             <TableHead className="text-right">الاسم</TableHead>
             <TableHead className="text-right">العمر</TableHead>
             <TableHead className="text-right">الدور</TableHead>
+            <TableHead className="text-right">الحالة</TableHead>
             <TableHead className="text-right">تغيير الدور</TableHead>
+            <TableHead className="text-right">تغيير الحالة</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {users.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
+            {users.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
               : users.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
                   <TableCell>{u.age || "-"}</TableCell>
                   <TableCell>{u.roles.map((r: string) => <Badge key={r} className="ml-1">{r}</Badge>)}</TableCell>
                   <TableCell>
+                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${STATUS_COLORS[u.status] || "bg-muted"}`}>
+                      {STATUS_LABELS[u.status] || u.status || "—"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
                     <Select value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
-                      <SelectTrigger className="w-32"><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">مدير</SelectItem>
                         <SelectItem value="parent">ولي أمر</SelectItem>
                         <SelectItem value="kid">طفل</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </TableCell>
+                  <TableCell>
+                    <Select value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
+                      <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(STATUS_LABELS).map(([k, l]) => (
+                          <SelectItem key={k} value={k}>{l}</SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </TableCell>
