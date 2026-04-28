@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { Star, Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -18,6 +18,8 @@ const SPEED_PX_PER_SEC = 55;
 const Testimonials = () => {
   const [items, setItems] = useState<T[]>([]);
   const [viewportWidth, setViewportWidth] = useState(1920);
+  const [groupWidth, setGroupWidth] = useState(0);
+  const groupRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase
@@ -37,23 +39,40 @@ const Testimonials = () => {
 
   const group = useMemo(() => {
     if (items.length === 0) return [];
-    const minGroupWidth = viewportWidth + CARD_STEP * 3;
-    const repeats = Math.max(
-      1,
-      Math.ceil(minGroupWidth / (items.length * CARD_STEP))
-    );
+    const minCards = Math.max(18, Math.ceil((viewportWidth * 3) / CARD_STEP));
 
-    return Array.from({ length: repeats }, () => items).flat();
+    return Array.from({ length: minCards }, (_, index) => items[index % items.length]);
   }, [items, viewportWidth]);
 
-  const duration = Math.max(32, (group.length * CARD_STEP) / SPEED_PX_PER_SEC);
+  useEffect(() => {
+    if (!groupRef.current || group.length === 0) return;
+
+    const measure = () => setGroupWidth(groupRef.current?.scrollWidth || 0);
+    measure();
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(groupRef.current);
+    window.addEventListener("resize", measure);
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [group.length]);
+
+  const duration = Math.max(36, groupWidth / SPEED_PX_PER_SEC);
+  const marqueeStyle = {
+    "--marquee-distance": `-${groupWidth}px`,
+    "--marquee-duration": `${duration}s`,
+  } as CSSProperties;
 
   if (items.length === 0) return null;
 
   const renderCard = (t: T, key: string) => (
     <div
       key={key}
-      className="group relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft w-[360px] shrink-0 transition-all duration-500"
+      dir="rtl"
+      className="group relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft w-[360px] shrink-0 select-none text-right transition-all duration-500"
     >
       {/* تدرّج زخرفي يظهر عند الـ hover */}
       <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-primary/5 via-transparent to-accent/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
@@ -64,7 +83,7 @@ const Testimonials = () => {
       </div>
 
       <div className="relative">
-        <div className="flex items-center gap-1 mb-3">
+        <div className="flex items-center justify-start gap-1 mb-3">
           {Array.from({ length: t.rating || 5 }).map((_, s) => (
             <Star
               key={s}
@@ -89,7 +108,7 @@ const Testimonials = () => {
             </div>
             <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-mint border-2 border-card" />
           </div>
-          <div>
+          <div className="text-right">
             <p className="font-bold text-sm">{t.name}</p>
             {t.role && <p className="text-xs text-muted-foreground">{t.role}</p>}
           </div>
@@ -99,7 +118,7 @@ const Testimonials = () => {
   );
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="py-24 relative overflow-hidden select-none" onCopy={(event) => event.preventDefault()}>
       {/* خلفية ناعمة */}
       <div className="absolute inset-0 -z-10 opacity-60">
         <div className="absolute top-10 right-1/4 w-72 h-72 rounded-full bg-primary/10 blur-3xl" />
@@ -132,10 +151,11 @@ const Testimonials = () => {
         <div
           dir="ltr"
           className="testimonials-marquee-track flex w-max will-change-transform"
-          style={{ "--marquee-duration": `${duration}s` } as React.CSSProperties}
+          style={marqueeStyle}
         >
           {[0, 1].map((groupIndex) => (
             <div
+              ref={groupIndex === 0 ? groupRef : undefined}
               key={groupIndex}
               className="flex shrink-0 gap-6 pr-6"
               aria-hidden={groupIndex === 1}
