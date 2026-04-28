@@ -172,6 +172,7 @@ const Testimonials = () => {
           {loop.map((t, i) => (
             <div
               key={`${t.id}-${i}`}
+              {...(i === single.length ? { "data-loop-mid": "true" } : {})}
               className="group relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft hover:shadow-glow w-[360px] shrink-0 pointer-events-auto transition-all duration-500 hover:-translate-y-2 hover:border-primary/40 hover:scale-[1.02]"
             >
               {/* تدرّج زخرفي يظهر عند الـ hover */}
