@@ -20,6 +20,10 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import mascot from "@/assets/mascot-owl.png";
+import {
+  ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip as RTooltip, Cell, PieChart, Pie, Legend, AreaChart, Area,
+} from "recharts";
 
 type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games" | "testimonials" | "faqs";
 
