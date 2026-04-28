@@ -77,9 +77,12 @@ const Testimonials = () => {
 
   if (items.length === 0) return null;
 
-  // كرر العناصر بحيث يكون الشريط أعرض من الشاشة بمراحل، حتى ما يظهر فراغ
-  // كل بطاقة 360px + gap 24px = 384px. نضمن نسخة واحدة على الأقل = 6 بطاقات (~2300px)
-  const MIN_REPEATS = Math.max(2, Math.ceil(6 / items.length));
+  // كل بطاقة 360px + gap 24px = 384px. نحرص أن تكون النسخة الواحدة أعرض من الشاشة
+  // حتى يبقى السلسلة متصلة بدون فراغ مهما كان حجم الشاشة.
+  const CARD_W = 384;
+  const viewportW = typeof window !== "undefined" ? window.innerWidth : 1920;
+  const cardsNeeded = Math.ceil((viewportW + CARD_W) / CARD_W) + 2; // هامش أمان
+  const MIN_REPEATS = Math.max(2, Math.ceil(cardsNeeded / items.length));
   const single: T[] = [];
   for (let i = 0; i < MIN_REPEATS; i++) single.push(...items);
   // نسختان متطابقتان للوب السلس
