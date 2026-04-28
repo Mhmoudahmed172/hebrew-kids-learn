@@ -177,13 +177,13 @@ const Testimonials = () => {
         <div
           ref={trackRef}
           dir="ltr"
-          className="flex gap-6 w-max will-change-transform"
+          className="flex gap-0 w-max will-change-transform"
           style={{ transform: "translate3d(0,0,0)" }}
         >
           {loop.map((t, i) => (
             <div
               key={`${t.id}-${i}`}
-              className="relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft w-[360px] shrink-0 pointer-events-auto"
+              className="relative bg-card p-6 border-y border-l border-border/50 shadow-soft w-[360px] shrink-0 pointer-events-auto first:border-r"
             >
               <Quote className="absolute top-4 left-4 w-8 h-8 text-primary/10" />
 
