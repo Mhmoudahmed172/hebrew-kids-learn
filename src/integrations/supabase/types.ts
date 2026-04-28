@@ -47,6 +47,36 @@ export type Database = {
         }
         Relationships: []
       }
+      faqs: {
+        Row: {
+          answer: string
+          category: string | null
+          created_at: string
+          id: string
+          published: boolean
+          question: string
+          sort_order: number | null
+        }
+        Insert: {
+          answer: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          question: string
+          sort_order?: number | null
+        }
+        Update: {
+          answer?: string
+          category?: string | null
+          created_at?: string
+          id?: string
+          published?: boolean
+          question?: string
+          sort_order?: number | null
+        }
+        Relationships: []
+      }
       games: {
         Row: {
           created_at: string
@@ -235,6 +265,9 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          status: Database["public"]["Enums"]["user_status"]
+          status_note: string | null
+          status_updated_at: string
           updated_at: string
         }
         Insert: {
@@ -242,6 +275,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id: string
+          status?: Database["public"]["Enums"]["user_status"]
+          status_note?: string | null
+          status_updated_at?: string
           updated_at?: string
         }
         Update: {
@@ -249,6 +285,9 @@ export type Database = {
           created_at?: string
           full_name?: string | null
           id?: string
+          status?: Database["public"]["Enums"]["user_status"]
+          status_note?: string | null
+          status_updated_at?: string
           updated_at?: string
         }
         Relationships: []
@@ -366,6 +405,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      testimonials: {
+        Row: {
+          avatar_color: string | null
+          card_color: string | null
+          created_at: string
+          id: string
+          name: string
+          published: boolean
+          rating: number
+          role: string | null
+          sort_order: number | null
+          text: string
+        }
+        Insert: {
+          avatar_color?: string | null
+          card_color?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          published?: boolean
+          rating?: number
+          role?: string | null
+          sort_order?: number | null
+          text: string
+        }
+        Update: {
+          avatar_color?: string | null
+          card_color?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          published?: boolean
+          rating?: number
+          role?: string | null
+          sort_order?: number | null
+          text?: string
+        }
+        Relationships: []
       }
       user_badges: {
         Row: {
@@ -539,6 +617,12 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "parent" | "kid"
+      user_status:
+        | "active"
+        | "inactive"
+        | "pending_payment"
+        | "frozen"
+        | "banned"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -667,6 +751,13 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "parent", "kid"],
+      user_status: [
+        "active",
+        "inactive",
+        "pending_payment",
+        "frozen",
+        "banned",
+      ],
     },
   },
 } as const
