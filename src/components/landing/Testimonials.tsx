@@ -31,7 +31,7 @@ const Testimonials = () => {
       .then(({ data }) => setItems((data as T[]) || []));
   }, []);
 
-  // التشغيل التدريجي
+  // التشغيل التدريجي + إعادة تلقائية
   useEffect(() => {
     if (items.length === 0) return;
     setVisibleCount(0);
@@ -47,6 +47,12 @@ const Testimonials = () => {
       }, MESSAGE_DELAY * (idx + 1));
       timers.push(t);
     });
+
+    // إعادة تلقائية بعد انتهاء كل الرسائل
+    const restart = window.setTimeout(() => {
+      setRunId((r) => r + 1);
+    }, MESSAGE_DELAY * items.length + 3500);
+    timers.push(restart);
 
     return () => timers.forEach((t) => window.clearTimeout(t));
   }, [items, runId]);
