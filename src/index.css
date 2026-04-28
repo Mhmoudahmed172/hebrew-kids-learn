@@ -174,7 +174,7 @@
 }
 @keyframes testimonials-marquee {
   from { transform: translate3d(0, 0, 0); }
-  to { transform: translate3d(-50%, 0, 0); }
+  to { transform: translate3d(var(--marquee-distance, -50%), 0, 0); }
 }
 
 .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
