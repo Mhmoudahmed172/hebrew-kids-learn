@@ -20,10 +20,6 @@ const Testimonials = () => {
   const trackRef = useRef<HTMLDivElement>(null);
   const offsetRef = useRef(0);
   const halfWidthRef = useRef(0);
-  const pausedRef = useRef(false);
-  const draggingRef = useRef(false);
-  const dragStartXRef = useRef(0);
-  const dragStartOffsetRef = useRef(0);
 
   useEffect(() => {
     supabase
