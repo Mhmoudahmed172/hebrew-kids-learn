@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
+  MessageSquare, HelpCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,7 +21,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import mascot from "@/assets/mascot-owl.png";
 
-type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games";
+type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games" | "testimonials" | "faqs";
 
 const nav: { id: Section; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -30,7 +31,24 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "quizzes", label: "الاختبارات", icon: ClipboardCheck },
   { id: "songs", label: "الأغاني", icon: Music },
   { id: "games", label: "الألعاب", icon: Gamepad2 },
+  { id: "testimonials", label: "آراء العملاء", icon: MessageSquare },
+  { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
+
+const STATUS_LABELS: Record<string, string> = {
+  active: "فعّال",
+  inactive: "غير فعّال",
+  pending_payment: "بانتظار الدفع",
+  frozen: "مجمّد",
+  banned: "محظور",
+};
+const STATUS_COLORS: Record<string, string> = {
+  active: "bg-mint text-white",
+  inactive: "bg-muted text-foreground",
+  pending_payment: "bg-accent text-accent-foreground",
+  frozen: "bg-secondary text-secondary-foreground",
+  banned: "bg-destructive text-destructive-foreground",
+};
 
 const Admin = () => {
   const [active, setActive] = useState<Section>("overview");
@@ -110,6 +128,8 @@ const Admin = () => {
         {active === "quizzes" && <QuizzesSection />}
         {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
         {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
+        {active === "testimonials" && <TestimonialsSection />}
+        {active === "faqs" && <FaqsSection />}
       </main>
     </div>
   );
