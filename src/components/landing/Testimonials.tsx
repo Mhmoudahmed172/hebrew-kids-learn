@@ -56,7 +56,7 @@ const Testimonials = () => {
       last = now;
       if (halfWidthRef.current === 0) measure();
 
-      if (!pausedRef.current && !draggingRef.current && halfWidthRef.current > 0) {
+      if (halfWidthRef.current > 0) {
         offsetRef.current -= SPEED_PX_PER_SEC * dt;
         if (offsetRef.current <= -halfWidthRef.current) {
           offsetRef.current += halfWidthRef.current;
