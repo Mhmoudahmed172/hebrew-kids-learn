@@ -66,7 +66,7 @@ const Testimonials = () => {
 
   if (items.length === 0) return null;
 
-  const replay = () => setRunId((r) => r + 1);
+  
 
   return (
     <section className="py-24 relative overflow-hidden">
