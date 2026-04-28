@@ -73,7 +73,14 @@ const Testimonials = () => {
 
   if (items.length === 0) return null;
 
-  const loop = [...items, ...items];
+  // كرر العناصر بحيث يكون الشريط أعرض من الشاشة بمراحل، حتى ما يظهر فراغ
+  // كل بطاقة 360px + gap 24px = 384px. نضمن نسخة واحدة على الأقل = 6 بطاقات (~2300px)
+  const MIN_REPEATS = Math.max(2, Math.ceil(6 / items.length));
+  const single: T[] = [];
+  for (let i = 0; i < MIN_REPEATS; i++) single.push(...items);
+  // نسختان متطابقتان للوب السلس
+  const loop = [...single, ...single];
+
   const DRAG_THRESHOLD = 5;
 
   const onEnter = () => (pausedRef.current = true);
