@@ -39,7 +39,15 @@ const Testimonials = () => {
 
     const measure = () => {
       if (trackRef.current) {
-        halfWidthRef.current = trackRef.current.scrollWidth / 2;
+        // العنصر الذي يمثل بداية النسخة الثانية تم وسمه بـ data-loop-mid
+        const mid = trackRef.current.querySelector<HTMLElement>("[data-loop-mid]");
+        if (mid) {
+          // المسافة من بداية التراك حتى بداية أول بطاقة في النسخة الثانية
+          // = عرض النسخة الأولى + الـ gap الذي يفصل بينها وبين النسخة الثانية
+          halfWidthRef.current = mid.offsetLeft;
+        } else {
+          halfWidthRef.current = trackRef.current.scrollWidth / 2;
+        }
       }
     };
     requestAnimationFrame(measure);
