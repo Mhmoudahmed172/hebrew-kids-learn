@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Star, Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -14,6 +14,12 @@ type T = {
 
 const Testimonials = () => {
   const [items, setItems] = useState<T[]>([]);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const offsetRef = useRef(0);
+  const speedRef = useRef(1); // 1 = السرعة الطبيعية، سالب = للخلف، 0 = توقف
+  const hoveringRef = useRef(false);
+  const halfWidthRef = useRef(0);
 
   useEffect(() => {
     supabase
@@ -24,9 +30,64 @@ const Testimonials = () => {
       .then(({ data }) => setItems((data as T[]) || []));
   }, []);
 
+  // حلقة الحركة بـ requestAnimationFrame
+  useEffect(() => {
+    if (items.length === 0) return;
+    let raf = 0;
+    let last = performance.now();
+    const baseSpeed = 60; // px/sec
+
+    const tick = (now: number) => {
+      const dt = (now - last) / 1000;
+      last = now;
+
+      const track = trackRef.current;
+      if (track) {
+        if (halfWidthRef.current === 0) {
+          halfWidthRef.current = track.scrollWidth / 2;
+        }
+        offsetRef.current += baseSpeed * speedRef.current * dt;
+        const half = halfWidthRef.current;
+        if (half > 0) {
+          // اتجاه RTL: نحرك بالموجب لليمين، ولكن نطبّق translateX سالب
+          if (offsetRef.current >= half) offsetRef.current -= half;
+          if (offsetRef.current < 0) offsetRef.current += half;
+          track.style.transform = `translateX(-${offsetRef.current}px)`;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [items.length]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const ratio = x / rect.width; // 0..1
+    // وسط الشريط (~0.45-0.55) = توقف، يمين = سريع للأمام، يسار = رجوع
+    const centered = (ratio - 0.5) * 2; // -1..1
+    const dead = 0.1;
+    let v = 0;
+    if (centered > dead) v = ((centered - dead) / (1 - dead)) * 3; // حتى 3x
+    else if (centered < -dead) v = ((centered + dead) / (1 - dead)) * 3; // حتى -3x
+    speedRef.current = v;
+  };
+
+  const handleMouseEnter = () => {
+    hoveringRef.current = true;
+    speedRef.current = 0;
+  };
+
+  const handleMouseLeave = () => {
+    hoveringRef.current = false;
+    speedRef.current = 1;
+  };
+
   if (items.length === 0) return null;
 
-  // كرر الكروت لضمان حلقة لا نهائية سلسة
   const loop = [...items, ...items];
 
   return (
@@ -40,16 +101,22 @@ const Testimonials = () => {
             عائلات سعيدة <span className="text-gradient">تتحدث عنا</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            انضم لآلاف العائلات اللي اختارت منصتنا لتعليم أطفالها العبرية.
+            مرّر الماوس على الشريط للتحكم — يمين = أسرع، يسار = للخلف، الوسط = توقف.
           </p>
         </div>
       </div>
 
-      {/* Marquee Strip */}
-      <div className="relative marquee-mask group">
+      <div
+        ref={containerRef}
+        className="relative marquee-mask cursor-ew-resize"
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onMouseMove={handleMouseMove}
+      >
         <div
-          className="flex gap-6 w-max animate-marquee-rtl group-hover:[animation-play-state:paused]"
-          style={{ direction: "ltr" }}
+          ref={trackRef}
+          className="flex gap-6 w-max"
+          style={{ direction: "ltr", willChange: "transform" }}
         >
           {loop.map((t, idx) => (
             <div
