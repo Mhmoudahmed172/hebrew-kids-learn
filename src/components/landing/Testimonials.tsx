@@ -26,8 +26,11 @@ const Testimonials = () => {
 
   if (items.length === 0) return null;
 
+  // duplicate for seamless loop
+  const loop = [...items, ...items];
+
   return (
-    <section className="py-24 relative">
+    <section className="py-24 relative overflow-hidden">
       <div className="container">
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block bg-mint-soft text-mint px-4 py-1.5 rounded-full text-sm font-bold mb-4">
@@ -40,30 +43,48 @@ const Testimonials = () => {
             انضم لآلاف العائلات اللي اختارت منصتنا لتعليم أطفالها العبرية.
           </p>
         </div>
+      </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {items.map((t) => (
+      <div
+        className="group relative w-full overflow-hidden"
+        style={{
+          maskImage:
+            "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+          WebkitMaskImage:
+            "linear-gradient(to right, transparent, black 8%, black 92%, transparent)",
+        }}
+      >
+        <div className="flex gap-6 w-max animate-marquee group-hover:[animation-play-state:paused]">
+          {loop.map((t, i) => (
             <div
-              key={t.id}
-              className="relative bg-card rounded-3xl p-8 border border-border/50 shadow-soft hover:shadow-medium transition-bounce hover:-translate-y-1"
+              key={`${t.id}-${i}`}
+              className="relative bg-card rounded-3xl p-6 border border-border/50 shadow-soft hover:shadow-medium transition-bounce w-[360px] shrink-0"
             >
-              <Quote className="absolute top-6 left-6 w-10 h-10 text-primary/10" />
+              <Quote className="absolute top-4 left-4 w-8 h-8 text-primary/10" />
 
-              <div className="flex items-center gap-1 mb-4">
+              <div className="flex items-center gap-1 mb-3">
                 {Array.from({ length: t.rating || 5 }).map((_, s) => (
                   <Star key={s} className="w-4 h-4 fill-accent text-accent" />
                 ))}
               </div>
 
-              <p className="text-foreground/90 leading-relaxed mb-6 relative z-10">"{t.text}"</p>
+              <p className="text-foreground/90 leading-relaxed mb-4 relative z-10 line-clamp-4">
+                "{t.text}"
+              </p>
 
-              <div className="flex items-center gap-3 pt-4 border-t border-border/50">
-                <div className={`w-12 h-12 rounded-full ${t.avatar_color || "bg-primary-gradient"} flex items-center justify-center text-white font-display text-lg`}>
+              <div className="flex items-center gap-3 pt-3 border-t border-border/50">
+                <div
+                  className={`w-11 h-11 rounded-full ${
+                    t.avatar_color || "bg-primary-gradient"
+                  } flex items-center justify-center text-white font-display text-lg`}
+                >
                   {t.name[0]}
                 </div>
                 <div>
-                  <p className="font-bold">{t.name}</p>
-                  {t.role && <p className="text-xs text-muted-foreground">{t.role}</p>}
+                  <p className="font-bold text-sm">{t.name}</p>
+                  {t.role && (
+                    <p className="text-xs text-muted-foreground">{t.role}</p>
+                  )}
                 </div>
               </div>
             </div>
