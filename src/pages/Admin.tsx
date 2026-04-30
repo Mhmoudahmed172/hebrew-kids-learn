@@ -1200,6 +1200,7 @@ const FaqsSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const empty = { question: "", answer: "", category: "", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("faqs").select("*").order("sort_order");
