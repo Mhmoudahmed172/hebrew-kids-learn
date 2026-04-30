@@ -1384,9 +1384,22 @@ const FaqsSection = () => {
         <h1 className="font-display text-3xl">الأسئلة الشائعة ❓</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الأسئلة..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث في السؤال أو الجواب..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "category", label: "التصنيف", options: categories.map((c) => ({ label: c, value: c })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       {(() => {
-        const filtered = filterByQuery(items, query);
+        const filtered = applyFilters(items, query, ["question", "answer"], {
+          category: { value: filters.category, getter: (f) => f.category },
+          status: { value: filters.status, getter: (f) => String(f.published) },
+        });
         return (
       <div className="space-y-3">
         {filtered.map((f) => (
