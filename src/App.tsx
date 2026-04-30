@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index.tsx";
 import LevelDetail from "./pages/LevelDetail.tsx";
+import GamePlayer from "./pages/GamePlayer.tsx";
 import VideoPlayer from "./pages/VideoPlayer.tsx";
 import Quiz from "./pages/Quiz.tsx";
 import Admin from "./pages/Admin.tsx";
@@ -29,6 +30,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/level/:slug" element={<LevelDetail />} />
             <Route path="/level/:slug/video/:videoId" element={<VideoPlayer />} />
+            <Route path="/level/:slug/game/:gameId" element={<GamePlayer />} />
             <Route path="/quiz/:id" element={<Quiz />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/login" element={<Auth mode="login" />} />
