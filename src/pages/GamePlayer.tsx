@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Play, Gamepad2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Play, Gamepad2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -27,6 +28,7 @@ const GamePlayer = () => {
   const [level, setLevel] = useState<any>(null);
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [iframeLoading, setIframeLoading] = useState(true);
 
   useEffect(() => {
     (async () => {
@@ -41,7 +43,42 @@ const GamePlayer = () => {
     })();
   }, [slug]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  // إعادة تفعيل تحميل الـ iframe عند تغيير اللعبة
+  useEffect(() => {
+    setIframeLoading(true);
+  }, [gameId]);
+
+  if (loading) {
+    return (
+      <main dir="rtl" className="min-h-screen bg-background">
+        <Navbar />
+        <section className="container py-8">
+          <Skeleton className="h-5 w-40 mb-6" />
+          <div className="grid lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2">
+              <Skeleton className="w-full rounded-3xl" style={{ aspectRatio: "4 / 3" }} />
+              <Skeleton className="h-8 w-2/3 mt-4" />
+              <Skeleton className="h-4 w-1/2 mt-2" />
+              <div className="flex justify-between mt-6 gap-3">
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-24" />
+              </div>
+            </div>
+            <aside className="lg:col-span-1">
+              <Skeleton className="h-6 w-32 mb-3" />
+              <div className="space-y-2">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full rounded-2xl" />
+                ))}
+              </div>
+            </aside>
+          </div>
+        </section>
+        <Footer />
+      </main>
+    );
+  }
+
   if (!level) return <div className="min-h-screen flex items-center justify-center">المستوى غير موجود</div>;
 
   const idx = games.findIndex((g) => g.id === gameId);
@@ -70,17 +107,26 @@ const GamePlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="rounded-3xl overflow-hidden bg-black shadow-medium" style={{ aspectRatio: "4 / 3" }}>
+            <div className="relative rounded-3xl overflow-hidden bg-black shadow-medium" style={{ aspectRatio: "4 / 3" }}>
               {embedSrc ? (
-                <iframe
-                  key={current.id}
-                  src={embedSrc}
-                  title={current.title}
-                  className="w-full h-full block"
-                  style={{ border: 0 }}
-                  allow="fullscreen; autoplay; encrypted-media"
-                  allowFullScreen
-                />
+                <>
+                  <iframe
+                    key={current.id}
+                    src={embedSrc}
+                    title={current.title}
+                    onLoad={() => setIframeLoading(false)}
+                    className="w-full h-full block"
+                    style={{ border: 0 }}
+                    allow="fullscreen; autoplay; encrypted-media"
+                    allowFullScreen
+                  />
+                  {iframeLoading && (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 backdrop-blur-sm text-white">
+                      <Loader2 className="w-10 h-10 animate-spin text-primary" />
+                      <p className="text-sm font-bold">جاري تحميل اللعبة...</p>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white/70">لا يوجد كود تضمين للعبة</div>
               )}
