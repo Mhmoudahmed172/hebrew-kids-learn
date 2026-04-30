@@ -1141,8 +1141,12 @@ const TestimonialsSection = () => {
         <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الآراء..." />
+      {(() => {
+        const filtered = filterByQuery(items, query);
+        return (
       <div className="grid md:grid-cols-2 gap-4">
-        {items.map((t) => (
+        {filtered.map((t) => (
           <Card key={t.id} className="p-5">
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -1158,8 +1162,10 @@ const TestimonialsSection = () => {
             <p className="text-sm text-muted-foreground">{t.text}</p>
           </Card>
         ))}
-        {items.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">لا توجد آراء</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد آراء"}</p>}
       </div>
+        );
+      })()}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-w-xl max-h-[90vh] overflow-y-auto">
