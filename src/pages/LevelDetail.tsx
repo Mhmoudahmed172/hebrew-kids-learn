@@ -131,13 +131,13 @@ const LevelDetail = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {games.length === 0 ? <p className="col-span-full text-center text-muted-foreground py-20">لا توجد ألعاب بعد.</p> :
                 games.map((g) => (
-                  <a key={g.id} href={g.url || "#"} target="_blank" rel="noopener noreferrer" className={cardBase}>
+                  <button key={g.id} type="button" onClick={() => setActiveGame(g)} className={`${cardBase} text-right w-full`}>
                     <div className="aspect-video rounded-2xl bg-gradient-to-br from-mint to-secondary flex items-center justify-center mb-4">
                       <Gamepad2 className="w-16 h-16 text-primary-foreground" />
                     </div>
-                    <h3 className="font-display text-lg mb-1 flex items-center gap-2">{g.title} <ExternalLink className="w-4 h-4" /></h3>
+                    <h3 className="font-display text-lg mb-1 flex items-center gap-2">{g.title} <Play className="w-4 h-4" /></h3>
                     {g.description && <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>}
-                  </a>
+                  </button>
                 ))}
             </div>
           </TabsContent>
