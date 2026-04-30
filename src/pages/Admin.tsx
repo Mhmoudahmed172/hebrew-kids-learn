@@ -1029,6 +1029,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         <h1 className="font-display text-3xl">{titleLabel}</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder={`ابحث في ${titleLabel}...`} />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -1038,8 +1039,10 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {items.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">لا توجد عناصر</TableCell></TableRow>
-              : items.map((it: any) => (
+            {(() => {
+              const filtered = filterByQuery(items, query);
+              if (filtered.length === 0) return <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر"}</TableCell></TableRow>;
+              return filtered.map((it: any) => (
                 <TableRow key={it.id}>
                   <TableCell className="font-bold">{it.title}</TableCell>
                   <TableCell><Badge variant="secondary">{it.levels?.title || "—"}</Badge></TableCell>
