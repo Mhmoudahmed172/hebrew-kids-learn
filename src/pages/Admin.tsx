@@ -519,11 +519,18 @@ const UsersSection = () => {
     load();
   };
 
-  const openCred = (u: any) => {
+  const openCred = async (u: any) => {
     setCredUser(u);
     setCredEmail("");
     setCredPassword("");
+    setCredCurrentEmail("");
     setCredOpen(true);
+    setCredLoadingEmail(true);
+    const { data, error } = await supabase.functions.invoke("admin-update-user", {
+      body: { user_id: u.id, action: "get" },
+    });
+    setCredLoadingEmail(false);
+    if (!error && (data as any)?.user?.email) setCredCurrentEmail((data as any).user.email);
   };
 
   const saveCred = async () => {
