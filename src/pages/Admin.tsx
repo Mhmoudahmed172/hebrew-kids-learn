@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
@@ -157,10 +157,20 @@ const STATUS_COLORS: Record<string, string> = {
   banned: "bg-destructive text-destructive-foreground",
 };
 
+const SECTION_IDS: Section[] = ["overview", "videos", "users", "content", "quizzes", "songs", "games", "testimonials", "faqs"];
+
 const Admin = () => {
-  const [active, setActive] = useState<Section>("overview");
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const paramSection = searchParams.get("section") as Section | null;
+  const active: Section = paramSection && SECTION_IDS.includes(paramSection) ? paramSection : "overview";
+  const setActive = (id: Section) => {
+    const next = new URLSearchParams(searchParams);
+    if (id === "overview") next.delete("section");
+    else next.set("section", id);
+    setSearchParams(next, { replace: false });
+  };
 
   useEffect(() => {
     if (loading) return;
