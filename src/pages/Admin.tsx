@@ -39,6 +39,50 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
 
+// ============== شريط البحث المشترك ==============
+const SearchBar = ({ value, onChange, placeholder = "بحث..." }: { value: string; onChange: (v: string) => void; placeholder?: string }) => (
+  <div className="relative w-full sm:w-80 mb-4">
+    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="pr-10"
+    />
+    {value && (
+      <button
+        type="button"
+        onClick={() => onChange("")}
+        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground"
+        aria-label="مسح البحث"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    )}
+  </div>
+);
+
+// فلترة كائنات حسب نص (يبحث في كل القيم النصية، ويغوص في الكائنات المتداخلة مستوى واحد)
+const filterByQuery = <T extends Record<string, any>>(items: T[], query: string): T[] => {
+  const q = query.trim().toLowerCase();
+  if (!q) return items;
+  return items.filter((item) => {
+    for (const v of Object.values(item)) {
+      if (v == null) continue;
+      if (typeof v === "string" || typeof v === "number") {
+        if (String(v).toLowerCase().includes(q)) return true;
+      } else if (Array.isArray(v)) {
+        if (v.some((x) => typeof x === "string" && x.toLowerCase().includes(q))) return true;
+      } else if (typeof v === "object") {
+        for (const inner of Object.values(v as any)) {
+          if ((typeof inner === "string" || typeof inner === "number") && String(inner).toLowerCase().includes(q)) return true;
+        }
+      }
+    }
+    return false;
+  });
+};
+
 const STATUS_LABELS: Record<string, string> = {
   active: "فعّال",
   inactive: "غير فعّال",
