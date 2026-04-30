@@ -80,15 +80,18 @@ const GamePlayer = () => {
         </div>
 
         {embedSrc ? (
-          <div className="relative w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden border-2 border-border shadow-medium" style={{ aspectRatio: "4/3" }}>
-            <iframe
-              key={current.id}
-              src={embedSrc}
-              title={current.title}
-              className="absolute inset-0 w-full h-full"
-              allow="fullscreen; autoplay; encrypted-media"
-              allowFullScreen
-            />
+          <div className="w-full max-w-2xl mx-auto">
+            <div className="relative w-full bg-black rounded-3xl overflow-hidden border-2 border-border shadow-medium" style={{ aspectRatio: "4 / 3" }}>
+              <iframe
+                key={current.id}
+                src={embedSrc}
+                title={current.title}
+                className="absolute inset-0 w-full h-full block"
+                style={{ border: 0 }}
+                allow="fullscreen; autoplay; encrypted-media"
+                allowFullScreen
+              />
+            </div>
           </div>
         ) : (
           <div className="p-10 text-center text-muted-foreground border-2 border-dashed rounded-3xl">لا يوجد كود تضمين للعبة</div>
