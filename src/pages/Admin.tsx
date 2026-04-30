@@ -626,9 +626,12 @@ const UsersSection = () => {
     }
   };
 
+  const filteredUsers = filterByQuery(users, query);
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث بالاسم أو الدور أو الحالة..." />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -641,8 +644,8 @@ const UsersSection = () => {
             <TableHead className="text-right">بيانات الدخول</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {users.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
-              : users.map((u) => (
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+              : filteredUsers.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
                   <TableCell>{u.age || "-"}</TableCell>
