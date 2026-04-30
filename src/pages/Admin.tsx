@@ -1232,8 +1232,12 @@ const FaqsSection = () => {
         <h1 className="font-display text-3xl">الأسئلة الشائعة ❓</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الأسئلة..." />
+      {(() => {
+        const filtered = filterByQuery(items, query);
+        return (
       <div className="space-y-3">
-        {items.map((f) => (
+        {filtered.map((f) => (
           <Card key={f.id} className="p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
@@ -1251,8 +1255,10 @@ const FaqsSection = () => {
             </div>
           </Card>
         ))}
-        {items.length === 0 && <p className="text-center text-muted-foreground py-10">لا توجد أسئلة</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد أسئلة"}</p>}
       </div>
+        );
+      })()}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-w-xl max-h-[90vh] overflow-y-auto">
