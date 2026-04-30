@@ -39,30 +39,91 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
 
-// ============== شريط البحث المشترك ==============
-const SearchBar = ({ value, onChange, placeholder = "بحث..." }: { value: string; onChange: (v: string) => void; placeholder?: string }) => (
-  <div className="relative w-full sm:w-80 mb-4">
-    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-    <Input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="pr-10"
-    />
-    {value && (
-      <button
-        type="button"
-        onClick={() => onChange("")}
-        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground"
-        aria-label="مسح البحث"
-      >
-        <X className="w-3 h-3" />
-      </button>
-    )}
+// ============== شريط البحث + الفلترة ==============
+type FilterOption = { label: string; value: string };
+type FilterDef = {
+  key: string;          // اسم الفلتر (مثلاً "level" / "status" / "role" / "published")
+  label: string;        // النص المعروض
+  options: FilterOption[]; // value === "" يعني "الكل"
+};
+
+const FilterBar = ({
+  query, onQueryChange, searchPlaceholder = "بحث...",
+  filters = [], values = {}, onValueChange,
+}: {
+  query: string;
+  onQueryChange: (v: string) => void;
+  searchPlaceholder?: string;
+  filters?: FilterDef[];
+  values?: Record<string, string>;
+  onValueChange?: (key: string, value: string) => void;
+}) => (
+  <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-wrap">
+    <div className="relative w-full sm:w-72">
+      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <Input value={query} onChange={(e) => onQueryChange(e.target.value)} placeholder={searchPlaceholder} className="pr-10" />
+      {query && (
+        <button type="button" onClick={() => onQueryChange("")}
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground" aria-label="مسح">
+          <X className="w-3 h-3" />
+        </button>
+      )}
+    </div>
+    {filters.map((f) => (
+      <Select key={f.key} value={values[f.key] ?? ""} onValueChange={(v) => onValueChange?.(f.key, v)}>
+        <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder={f.label} /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">{f.label}: الكل</SelectItem>
+          {f.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    ))}
   </div>
 );
 
-// فلترة كائنات حسب نص (يبحث في كل القيم النصية، ويغوص في الكائنات المتداخلة مستوى واحد)
+// مكوّن SearchBar البسيط (للتوافق العكسي)
+const SearchBar = ({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) => (
+  <FilterBar query={value} onQueryChange={onChange} searchPlaceholder={placeholder} />
+);
+
+// فلترة بحقل محدد فقط
+const matchesQuery = (value: any, q: string): boolean => {
+  if (value == null) return false;
+  return String(value).toLowerCase().includes(q);
+};
+
+const applyFilters = <T extends Record<string, any>>(
+  items: T[],
+  query: string,
+  searchFields: string[],          // الحقول التي يبحث فيها النص
+  fieldFilters: Record<string, { value: string; getter: (item: T) => any }> = {},
+): T[] => {
+  const q = query.trim().toLowerCase();
+  return items.filter((item) => {
+    if (q && searchFields.length > 0) {
+      const found = searchFields.some((f) => {
+        // دعم المسارات مثل "levels.title"
+        const parts = f.split(".");
+        let v: any = item;
+        for (const p of parts) v = v?.[p];
+        return matchesQuery(v, q);
+      });
+      if (!found) return false;
+    }
+    for (const [, def] of Object.entries(fieldFilters)) {
+      if (!def.value || def.value === "__all__") continue;
+      const actual = def.getter(item);
+      if (Array.isArray(actual)) {
+        if (!actual.includes(def.value)) return false;
+      } else {
+        if (String(actual ?? "") !== def.value) return false;
+      }
+    }
+    return true;
+  });
+};
+
+// للتوافق العكسي مع استدعاءات سابقة
 const filterByQuery = <T extends Record<string, any>>(items: T[], query: string): T[] => {
   const q = query.trim().toLowerCase();
   if (!q) return items;
@@ -71,9 +132,7 @@ const filterByQuery = <T extends Record<string, any>>(items: T[], query: string)
       if (v == null) continue;
       if (typeof v === "string" || typeof v === "number") {
         if (String(v).toLowerCase().includes(q)) return true;
-      } else if (Array.isArray(v)) {
-        if (v.some((x) => typeof x === "string" && x.toLowerCase().includes(q))) return true;
-      } else if (typeof v === "object") {
+      } else if (typeof v === "object" && !Array.isArray(v)) {
         for (const inner of Object.values(v as any)) {
           if ((typeof inner === "string" || typeof inner === "number") && String(inner).toLowerCase().includes(q)) return true;
         }
