@@ -726,6 +726,7 @@ const LevelsSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ slug: "", title: "", description: "", color: "mint", sort_order: 0, published: true });
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("levels").select("*").order("sort_order");
