@@ -167,6 +167,35 @@ const LevelDetail = () => {
           </TabsContent>
         </Tabs>
       </section>
+
+      <Dialog open={!!activeGame} onOpenChange={(o) => !o && setActiveGame(null)}>
+        <DialogContent className="max-w-5xl w-[95vw] p-0 overflow-hidden" dir="rtl">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="flex items-center gap-2"><Gamepad2 className="w-5 h-5 text-primary" /> {activeGame?.title}</DialogTitle>
+          </DialogHeader>
+          {activeGame?.url ? (
+            <div className="relative w-full bg-black" style={{ aspectRatio: "16/9" }}>
+              <iframe
+                src={toEmbedUrl(activeGame.url)}
+                title={activeGame.title}
+                className="absolute inset-0 w-full h-full"
+                allow="fullscreen; autoplay; encrypted-media"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <div className="p-10 text-center text-muted-foreground">لا يوجد رابط للعبة</div>
+          )}
+          {activeGame?.url && (
+            <div className="p-3 border-t flex justify-end">
+              <a href={activeGame.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                فتح في صفحة جديدة <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </main>
   );
