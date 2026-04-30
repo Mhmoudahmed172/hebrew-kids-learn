@@ -484,6 +484,12 @@ const VideoDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
 // ============== USERS ==============
 const UsersSection = () => {
   const [users, setUsers] = useState<any[]>([]);
+  const [credOpen, setCredOpen] = useState(false);
+  const [credUser, setCredUser] = useState<any>(null);
+  const [credEmail, setCredEmail] = useState("");
+  const [credPassword, setCredPassword] = useState("");
+  const [credSaving, setCredSaving] = useState(false);
+
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     const { data: rolesData } = await supabase.from("user_roles").select("*");
@@ -511,6 +517,33 @@ const UsersSection = () => {
     load();
   };
 
+  const openCred = (u: any) => {
+    setCredUser(u);
+    setCredEmail("");
+    setCredPassword("");
+    setCredOpen(true);
+  };
+
+  const saveCred = async () => {
+    if (!credUser) return;
+    if (!credEmail.trim() && !credPassword) {
+      toast({ title: "أدخل إيميلاً جديداً أو كلمة مرور", variant: "destructive" });
+      return;
+    }
+    setCredSaving(true);
+    const payload: any = { user_id: credUser.id };
+    if (credEmail.trim()) payload.email = credEmail.trim();
+    if (credPassword) payload.password = credPassword;
+    const { data, error } = await supabase.functions.invoke("admin-update-user", { body: payload });
+    setCredSaving(false);
+    if (error || (data as any)?.error) {
+      toast({ title: "خطأ", description: (data as any)?.error || error?.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "تم تحديث بيانات الدخول" });
+    setCredOpen(false);
+  };
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
@@ -523,9 +556,10 @@ const UsersSection = () => {
             <TableHead className="text-right">الحالة</TableHead>
             <TableHead className="text-right">تغيير الدور</TableHead>
             <TableHead className="text-right">تغيير الحالة</TableHead>
+            <TableHead className="text-right">بيانات الدخول</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {users.length === 0 ? <TableRow><TableCell colSpan={6} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
+            {users.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
               : users.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
@@ -556,11 +590,41 @@ const UsersSection = () => {
                       </SelectContent>
                     </Select>
                   </TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="outline" onClick={() => openCred(u)}>
+                      <KeyRound className="w-4 h-4" /> تعديل
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
           </TableBody>
         </Table>
       </Card>
+
+      <Dialog open={credOpen} onOpenChange={setCredOpen}>
+        <DialogContent dir="rtl">
+          <DialogHeader>
+            <DialogTitle>تعديل بيانات دخول: {credUser?.full_name || "—"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <Label className="flex items-center gap-2 mb-2"><Mail className="w-4 h-4" /> إيميل جديد (اختياري)</Label>
+              <Input type="email" value={credEmail} onChange={(e) => setCredEmail(e.target.value)} placeholder="new@example.com" />
+            </div>
+            <div>
+              <Label className="flex items-center gap-2 mb-2"><KeyRound className="w-4 h-4" /> كلمة مرور جديدة (اختياري)</Label>
+              <Input type="text" value={credPassword} onChange={(e) => setCredPassword(e.target.value)} placeholder="6 أحرف على الأقل" />
+            </div>
+            <p className="text-xs text-muted-foreground">اترك الحقل فارغاً إذا لم ترغب بتغييره. يجب ملء حقل واحد على الأقل.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setCredOpen(false)} disabled={credSaving}>إلغاء</Button>
+            <Button variant="hero" onClick={saveCred} disabled={credSaving}>
+              {credSaving ? "جاري الحفظ..." : "حفظ"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
