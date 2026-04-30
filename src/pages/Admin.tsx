@@ -1152,7 +1152,16 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         <h1 className="font-display text-3xl">{titleLabel}</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder={`ابحث في ${titleLabel}...`} />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder={`ابحث بالعنوان...`}
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
+        ]}
+      />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -1163,7 +1172,9 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
           </TableRow></TableHeader>
           <TableBody>
             {(() => {
-              const filtered = filterByQuery(items, query);
+              const filtered = applyFilters(items, query, ["title", "description"], {
+                level: { value: filters.level, getter: (it) => it.level_id },
+              });
               if (filtered.length === 0) return <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر"}</TableCell></TableRow>;
               return filtered.map((it: any) => (
                 <TableRow key={it.id}>
