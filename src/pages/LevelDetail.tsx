@@ -1,11 +1,26 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, ExternalLink } from "lucide-react";
+import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+
+// تحويل أي رابط Wordwall إلى رابط embed صالح للـ iframe
+const toEmbedUrl = (url: string): string => {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("wordwall.net")) {
+      // /resource/123/title  أو  /play/123/...  -> /embed/123
+      const m = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
+      if (m) return `https://wordwall.net/embed/${m[1]}?themeId=1&templateId=3&fontStackId=0`;
+    }
+  } catch {}
+  return url;
+};
 
 const LevelDetail = () => {
   const { slug } = useParams();
