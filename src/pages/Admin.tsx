@@ -451,10 +451,23 @@ const VideosSection = () => {
         </Button>
       </div>
 
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث عن فيديو بالعنوان أو المستوى..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
 
       {(() => {
-        const filtered = filterByQuery(videos, query);
+        const filtered = applyFilters(videos, query, ["title"], {
+          level: { value: filters.level, getter: (v) => v.level_id },
+          status: { value: filters.status, getter: (v) => String(v.published) },
+        });
         return (
       <Card className="overflow-hidden">
         <Table>
