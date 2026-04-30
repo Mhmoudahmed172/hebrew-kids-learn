@@ -820,6 +820,8 @@ const LevelsSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ slug: "", title: "", description: "", color: "mint", sort_order: 0, published: true });
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await supabase.from("levels").select("*").order("sort_order");
