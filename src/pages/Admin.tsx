@@ -954,9 +954,22 @@ const QuizzesSection = () => {
         <h1 className="font-display text-3xl">الاختبارات ✅</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الاختبارات..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       {(() => {
-        const filtered = filterByQuery(quizzes, query);
+        const filtered = applyFilters(quizzes, query, ["title", "description"], {
+          level: { value: filters.level, getter: (q) => q.level_id },
+          status: { value: filters.status, getter: (q) => String(q.published) },
+        });
         return (
       <div className="grid lg:grid-cols-2 gap-4">
         {filtered.map((q) => (
