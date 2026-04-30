@@ -31,6 +31,7 @@ const LevelDetail = () => {
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeGame, setActiveGame] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
