@@ -931,6 +931,8 @@ const QuizzesSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ level: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await supabase.from("quizzes").select("*, quiz_questions(*), levels(title)").order("created_at", { ascending: false });
