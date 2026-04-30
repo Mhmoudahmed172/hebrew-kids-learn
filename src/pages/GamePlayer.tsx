@@ -80,7 +80,7 @@ const GamePlayer = () => {
         </div>
 
         {embedSrc ? (
-          <div className="relative w-full bg-black rounded-3xl overflow-hidden border-2 border-border shadow-medium" style={{ aspectRatio: "16/9" }}>
+          <div className="relative w-full max-w-2xl mx-auto bg-black rounded-3xl overflow-hidden border-2 border-border shadow-medium" style={{ aspectRatio: "4/3" }}>
             <iframe
               key={current.id}
               src={embedSrc}
