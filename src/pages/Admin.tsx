@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
-  MessageSquare, HelpCircle, KeyRound, Mail,
+  MessageSquare, HelpCircle, KeyRound, Mail, Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -38,6 +38,50 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "testimonials", label: "آراء العملاء", icon: MessageSquare },
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
+
+// ============== شريط البحث المشترك ==============
+const SearchBar = ({ value, onChange, placeholder = "بحث..." }: { value: string; onChange: (v: string) => void; placeholder?: string }) => (
+  <div className="relative w-full sm:w-80 mb-4">
+    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+    <Input
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="pr-10"
+    />
+    {value && (
+      <button
+        type="button"
+        onClick={() => onChange("")}
+        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground"
+        aria-label="مسح البحث"
+      >
+        <X className="w-3 h-3" />
+      </button>
+    )}
+  </div>
+);
+
+// فلترة كائنات حسب نص (يبحث في كل القيم النصية، ويغوص في الكائنات المتداخلة مستوى واحد)
+const filterByQuery = <T extends Record<string, any>>(items: T[], query: string): T[] => {
+  const q = query.trim().toLowerCase();
+  if (!q) return items;
+  return items.filter((item) => {
+    for (const v of Object.values(item)) {
+      if (v == null) continue;
+      if (typeof v === "string" || typeof v === "number") {
+        if (String(v).toLowerCase().includes(q)) return true;
+      } else if (Array.isArray(v)) {
+        if (v.some((x) => typeof x === "string" && x.toLowerCase().includes(q))) return true;
+      } else if (typeof v === "object") {
+        for (const inner of Object.values(v as any)) {
+          if ((typeof inner === "string" || typeof inner === "number") && String(inner).toLowerCase().includes(q)) return true;
+        }
+      }
+    }
+    return false;
+  });
+};
 
 const STATUS_LABELS: Record<string, string> = {
   active: "فعّال",
@@ -318,7 +362,7 @@ const VideosSection = () => {
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-
+  const [query, setQuery] = useState("");
   const load = async () => {
     const { data } = await supabase.from("videos").select("*, levels(title, slug)").order("sort_order");
     setVideos(data || []);
@@ -346,6 +390,11 @@ const VideosSection = () => {
         </Button>
       </div>
 
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث عن فيديو بالعنوان أو المستوى..." />
+
+      {(() => {
+        const filtered = filterByQuery(videos, query);
+        return (
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>
@@ -358,9 +407,9 @@ const VideosSection = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {videos.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">لا توجد فيديوهات. ابدأ بالرفع.</TableCell></TableRow>
-            ) : videos.map((v) => (
+            {filtered.length === 0 ? (
+              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد فيديوهات. ابدأ بالرفع."}</TableCell></TableRow>
+            ) : filtered.map((v) => (
               <TableRow key={v.id}>
                 <TableCell className="font-bold">{v.title}</TableCell>
                 <TableCell>{v.levels?.title || "-"}</TableCell>
@@ -377,6 +426,8 @@ const VideosSection = () => {
           </TableBody>
         </Table>
       </Card>
+        );
+      })()}
 
       <VideoDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
@@ -491,6 +542,7 @@ const UsersSection = () => {
   const [credSaving, setCredSaving] = useState(false);
   const [credCurrentEmail, setCredCurrentEmail] = useState<string>("");
   const [credLoadingEmail, setCredLoadingEmail] = useState(false);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
@@ -574,9 +626,12 @@ const UsersSection = () => {
     }
   };
 
+  const filteredUsers = filterByQuery(users, query);
+
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث بالاسم أو الدور أو الحالة..." />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -589,8 +644,8 @@ const UsersSection = () => {
             <TableHead className="text-right">بيانات الدخول</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {users.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">لا يوجد مستخدمون</TableCell></TableRow>
-              : users.map((u) => (
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+              : filteredUsers.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
                   <TableCell>{u.age || "-"}</TableCell>
@@ -671,6 +726,7 @@ const LevelsSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ slug: "", title: "", description: "", color: "mint", sort_order: 0, published: true });
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("levels").select("*").order("sort_order");
@@ -705,6 +761,7 @@ const LevelsSection = () => {
         <h1 className="font-display text-3xl">المستويات 📚</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في المستويات..." />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -715,7 +772,10 @@ const LevelsSection = () => {
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {items.map((l) => (
+            {(() => {
+              const filtered = filterByQuery(items, query);
+              if (filtered.length === 0) return <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد مستويات"}</TableCell></TableRow>;
+              return filtered.map((l) => (
               <TableRow key={l.id}>
                 <TableCell className="font-bold">{l.title}</TableCell>
                 <TableCell className="font-mono text-xs">{l.slug}</TableCell>
@@ -726,7 +786,8 @@ const LevelsSection = () => {
                   <Button size="icon" variant="ghost" onClick={() => remove(l.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
-            ))}
+              ));
+            })()}
           </TableBody>
         </Table>
       </Card>
@@ -763,6 +824,7 @@ const QuizzesSection = () => {
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("quizzes").select("*, quiz_questions(*), levels(title)").order("created_at", { ascending: false });
@@ -784,8 +846,12 @@ const QuizzesSection = () => {
         <h1 className="font-display text-3xl">الاختبارات ✅</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الاختبارات..." />
+      {(() => {
+        const filtered = filterByQuery(quizzes, query);
+        return (
       <div className="grid lg:grid-cols-2 gap-4">
-        {quizzes.map((q) => (
+        {filtered.map((q) => (
           <Card key={q.id} className="p-5">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div>
@@ -800,8 +866,10 @@ const QuizzesSection = () => {
             {q.description && <p className="text-sm text-muted-foreground">{q.description}</p>}
           </Card>
         ))}
-        {quizzes.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">لا توجد اختبارات</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد اختبارات"}</p>}
       </div>
+        );
+      })()}
 
       <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
@@ -920,6 +988,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ title: "", url: "", description: "", level_id: "", published: true });
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await (supabase.from(table) as any).select("*, levels(title)").order("created_at", { ascending: false });
@@ -960,6 +1029,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         <h1 className="font-display text-3xl">{titleLabel}</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder={`ابحث في ${titleLabel}...`} />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -969,8 +1039,10 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {items.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">لا توجد عناصر</TableCell></TableRow>
-              : items.map((it: any) => (
+            {(() => {
+              const filtered = filterByQuery(items, query);
+              if (filtered.length === 0) return <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر"}</TableCell></TableRow>;
+              return filtered.map((it: any) => (
                 <TableRow key={it.id}>
                   <TableCell className="font-bold">{it.title}</TableCell>
                   <TableCell><Badge variant="secondary">{it.levels?.title || "—"}</Badge></TableCell>
@@ -980,7 +1052,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
                     <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              ));
+            })()}
           </TableBody>
         </Table>
       </Card>
@@ -1036,6 +1109,7 @@ const TestimonialsSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const empty = { name: "", role: "", text: "", rating: 5, avatar_color: "bg-primary-gradient", card_color: "bg-primary-soft", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("testimonials").select("*").order("sort_order");
@@ -1067,8 +1141,12 @@ const TestimonialsSection = () => {
         <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الآراء..." />
+      {(() => {
+        const filtered = filterByQuery(items, query);
+        return (
       <div className="grid md:grid-cols-2 gap-4">
-        {items.map((t) => (
+        {filtered.map((t) => (
           <Card key={t.id} className="p-5">
             <div className="flex items-start justify-between mb-2">
               <div>
@@ -1084,8 +1162,10 @@ const TestimonialsSection = () => {
             <p className="text-sm text-muted-foreground">{t.text}</p>
           </Card>
         ))}
-        {items.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">لا توجد آراء</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد آراء"}</p>}
       </div>
+        );
+      })()}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-w-xl max-h-[90vh] overflow-y-auto">
@@ -1120,6 +1200,7 @@ const FaqsSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const empty = { question: "", answer: "", category: "", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("faqs").select("*").order("sort_order");
@@ -1151,8 +1232,12 @@ const FaqsSection = () => {
         <h1 className="font-display text-3xl">الأسئلة الشائعة ❓</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الأسئلة..." />
+      {(() => {
+        const filtered = filterByQuery(items, query);
+        return (
       <div className="space-y-3">
-        {items.map((f) => (
+        {filtered.map((f) => (
           <Card key={f.id} className="p-5">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
@@ -1170,8 +1255,10 @@ const FaqsSection = () => {
             </div>
           </Card>
         ))}
-        {items.length === 0 && <p className="text-center text-muted-foreground py-10">لا توجد أسئلة</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد أسئلة"}</p>}
       </div>
+        );
+      })()}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent dir="rtl" className="max-w-xl max-h-[90vh] overflow-y-auto">
