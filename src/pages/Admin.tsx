@@ -390,6 +390,11 @@ const VideosSection = () => {
         </Button>
       </div>
 
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث عن فيديو بالعنوان أو المستوى..." />
+
+      {(() => {
+        const filtered = filterByQuery(videos, query);
+        return (
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>
@@ -402,9 +407,9 @@ const VideosSection = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {videos.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">لا توجد فيديوهات. ابدأ بالرفع.</TableCell></TableRow>
-            ) : videos.map((v) => (
+            {filtered.length === 0 ? (
+              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد فيديوهات. ابدأ بالرفع."}</TableCell></TableRow>
+            ) : filtered.map((v) => (
               <TableRow key={v.id}>
                 <TableCell className="font-bold">{v.title}</TableCell>
                 <TableCell>{v.levels?.title || "-"}</TableCell>
