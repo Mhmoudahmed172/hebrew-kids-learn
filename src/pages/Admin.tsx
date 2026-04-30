@@ -542,6 +542,7 @@ const UsersSection = () => {
   const [credSaving, setCredSaving] = useState(false);
   const [credCurrentEmail, setCredCurrentEmail] = useState<string>("");
   const [credLoadingEmail, setCredLoadingEmail] = useState(false);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
