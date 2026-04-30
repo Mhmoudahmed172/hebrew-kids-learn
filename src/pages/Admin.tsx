@@ -1244,6 +1244,8 @@ const TestimonialsSection = () => {
   const empty = { name: "", role: "", text: "", rating: 5, avatar_color: "bg-primary-gradient", card_color: "bg-primary-soft", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ rating: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await supabase.from("testimonials").select("*").order("sort_order");
