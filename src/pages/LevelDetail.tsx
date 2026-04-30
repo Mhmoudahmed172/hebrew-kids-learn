@@ -1,11 +1,26 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, ExternalLink } from "lucide-react";
+import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, ExternalLink, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+
+// تحويل أي رابط Wordwall إلى رابط embed صالح للـ iframe
+const toEmbedUrl = (url: string): string => {
+  if (!url) return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname.includes("wordwall.net")) {
+      // /resource/123/title  أو  /play/123/...  -> /embed/123
+      const m = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
+      if (m) return `https://wordwall.net/embed/${m[1]}?themeId=1&templateId=3&fontStackId=0`;
+    }
+  } catch {}
+  return url;
+};
 
 const LevelDetail = () => {
   const { slug } = useParams();
@@ -16,6 +31,7 @@ const LevelDetail = () => {
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeGame, setActiveGame] = useState<any>(null);
 
   useEffect(() => {
     (async () => {
@@ -115,13 +131,13 @@ const LevelDetail = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {games.length === 0 ? <p className="col-span-full text-center text-muted-foreground py-20">لا توجد ألعاب بعد.</p> :
                 games.map((g) => (
-                  <a key={g.id} href={g.url || "#"} target="_blank" rel="noopener noreferrer" className={cardBase}>
+                  <button key={g.id} type="button" onClick={() => setActiveGame(g)} className={`${cardBase} text-right w-full`}>
                     <div className="aspect-video rounded-2xl bg-gradient-to-br from-mint to-secondary flex items-center justify-center mb-4">
                       <Gamepad2 className="w-16 h-16 text-primary-foreground" />
                     </div>
-                    <h3 className="font-display text-lg mb-1 flex items-center gap-2">{g.title} <ExternalLink className="w-4 h-4" /></h3>
+                    <h3 className="font-display text-lg mb-1 flex items-center gap-2">{g.title} <Play className="w-4 h-4" /></h3>
                     {g.description && <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>}
-                  </a>
+                  </button>
                 ))}
             </div>
           </TabsContent>
@@ -151,6 +167,35 @@ const LevelDetail = () => {
           </TabsContent>
         </Tabs>
       </section>
+
+      <Dialog open={!!activeGame} onOpenChange={(o) => !o && setActiveGame(null)}>
+        <DialogContent className="max-w-5xl w-[95vw] p-0 overflow-hidden" dir="rtl">
+          <DialogHeader className="p-4 border-b">
+            <DialogTitle className="flex items-center gap-2"><Gamepad2 className="w-5 h-5 text-primary" /> {activeGame?.title}</DialogTitle>
+          </DialogHeader>
+          {activeGame?.url ? (
+            <div className="relative w-full bg-black" style={{ aspectRatio: "16/9" }}>
+              <iframe
+                src={toEmbedUrl(activeGame.url)}
+                title={activeGame.title}
+                className="absolute inset-0 w-full h-full"
+                allow="fullscreen; autoplay; encrypted-media"
+                allowFullScreen
+              />
+            </div>
+          ) : (
+            <div className="p-10 text-center text-muted-foreground">لا يوجد رابط للعبة</div>
+          )}
+          {activeGame?.url && (
+            <div className="p-3 border-t flex justify-end">
+              <a href={activeGame.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+                فتح في صفحة جديدة <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <Footer />
     </main>
   );
