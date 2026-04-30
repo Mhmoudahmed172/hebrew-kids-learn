@@ -1350,6 +1350,9 @@ const FaqsSection = () => {
   const empty = { question: "", answer: "", category: "", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ category: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
+  const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean)));
 
   const load = async () => {
     const { data } = await supabase.from("faqs").select("*").order("sort_order");
