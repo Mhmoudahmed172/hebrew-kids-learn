@@ -536,7 +536,7 @@ const UsersSection = () => {
   const saveCred = async () => {
     if (!credUser) return;
     if (!credEmail.trim() && !credPassword) {
-      toast({ title: "أدخل إيميلاً جديداً أو كلمة مرور", variant: "destructive" });
+      toast({ title: "⚠️ بيانات ناقصة", description: "أدخل إيميلاً جديداً أو كلمة مرور", variant: "destructive" });
       return;
     }
     setCredSaving(true);
@@ -546,11 +546,32 @@ const UsersSection = () => {
     const { data, error } = await supabase.functions.invoke("admin-update-user", { body: payload });
     setCredSaving(false);
     if (error || (data as any)?.error) {
-      toast({ title: "خطأ", description: (data as any)?.error || error?.message, variant: "destructive" });
+      toast({
+        title: "❌ فشل التحديث",
+        description: (data as any)?.error || error?.message || "حدث خطأ غير متوقع",
+        variant: "destructive",
+      });
       return;
     }
-    toast({ title: "تم تحديث بيانات الدخول" });
-    setCredOpen(false);
+    const changes: string[] = [];
+    if (credEmail.trim()) changes.push("الإيميل");
+    if (credPassword) changes.push("كلمة المرور");
+    toast({
+      title: "✅ تم التحديث بنجاح",
+      description: `تم تحديث ${changes.join(" و ")} للمستخدم ${credUser.full_name || ""}`,
+    });
+
+    // إعادة جلب الإيميل المحدث وتفريغ الحقول
+    setCredEmail("");
+    setCredPassword("");
+    if (credEmail.trim()) {
+      setCredLoadingEmail(true);
+      const { data: refreshed } = await supabase.functions.invoke("admin-update-user", {
+        body: { user_id: credUser.id, action: "get" },
+      });
+      setCredLoadingEmail(false);
+      if ((refreshed as any)?.user?.email) setCredCurrentEmail((refreshed as any).user.email);
+    }
   };
 
   return (
