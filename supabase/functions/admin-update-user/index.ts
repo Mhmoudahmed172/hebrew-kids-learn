@@ -42,8 +42,17 @@ Deno.serve(async (req) => {
     }
 
     const body = await req.json();
-    const { user_id, email, password } = body || {};
+    const { user_id, email, password, action } = body || {};
     if (!user_id) return new Response(JSON.stringify({ error: "user_id required" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+
+    // جلب بيانات المستخدم الحالية
+    if (action === "get") {
+      const { data, error } = await admin.auth.admin.getUserById(user_id);
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ ok: true, user: { id: data.user?.id, email: data.user?.email } }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const updates: Record<string, any> = {};
     if (email && typeof email === "string" && email.trim()) {
