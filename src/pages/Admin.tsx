@@ -824,6 +824,7 @@ const QuizzesSection = () => {
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("quizzes").select("*, quiz_questions(*), levels(title)").order("created_at", { ascending: false });
