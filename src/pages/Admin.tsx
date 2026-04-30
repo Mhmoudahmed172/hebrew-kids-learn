@@ -616,9 +616,15 @@ const UsersSection = () => {
             <DialogTitle>تعديل بيانات دخول: {credUser?.full_name || "—"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            <div className="rounded-xl bg-muted/50 p-3 border border-border">
+              <p className="text-xs text-muted-foreground mb-1">الإيميل الحالي</p>
+              <p className="font-bold text-sm break-all">
+                {credLoadingEmail ? "جاري التحميل..." : (credCurrentEmail || "غير متاح")}
+              </p>
+            </div>
             <div>
               <Label className="flex items-center gap-2 mb-2"><Mail className="w-4 h-4" /> إيميل جديد (اختياري)</Label>
-              <Input type="email" value={credEmail} onChange={(e) => setCredEmail(e.target.value)} placeholder="new@example.com" />
+              <Input type="email" value={credEmail} onChange={(e) => setCredEmail(e.target.value)} placeholder={credCurrentEmail || "new@example.com"} />
             </div>
             <div>
               <Label className="flex items-center gap-2 mb-2"><KeyRound className="w-4 h-4" /> كلمة مرور جديدة (اختياري)</Label>
