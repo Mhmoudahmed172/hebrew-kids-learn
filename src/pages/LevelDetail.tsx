@@ -1,29 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, ExternalLink, X } from "lucide-react";
+import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-// استخراج src من كود iframe الكامل، أو تحويل رابط Wordwall عادي إلى رابط embed
-const toEmbedUrl = (input: string): string => {
-  if (!input) return "";
-  // إذا كان كود iframe، استخرج قيمة src
-  const iframeMatch = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
-  if (iframeMatch) return iframeMatch[1];
-  // وإلا حاول تحويل رابط Wordwall عادي
-  try {
-    const u = new URL(input);
-    if (u.hostname.includes("wordwall.net")) {
-      const m = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
-      if (m) return `https://wordwall.net/embed/${m[1]}?themeId=1&templateId=3&fontStackId=0`;
-    }
-  } catch {}
-  return input;
-};
 
 const LevelDetail = () => {
   const { slug } = useParams();
