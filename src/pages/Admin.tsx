@@ -702,12 +702,29 @@ const UsersSection = () => {
     }
   };
 
-  const filteredUsers = filterByQuery(users, query);
+  const filteredUsers = applyFilters(users, query, ["full_name"], {
+    role: { value: filters.role, getter: (u) => u.roles },
+    status: { value: filters.status, getter: (u) => u.status },
+  });
 
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث بالاسم أو الدور أو الحالة..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالاسم..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "role", label: "الدور", options: [
+            { label: "مدير", value: "admin" },
+            { label: "ولي أمر", value: "parent" },
+            { label: "طفل", value: "kid" },
+          ]},
+          { key: "status", label: "الحالة", options: Object.entries(STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })) },
+        ]}
+      />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
