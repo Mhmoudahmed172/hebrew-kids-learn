@@ -816,24 +816,29 @@ const QuizDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
 // ============== SIMPLE (songs/games) ==============
 const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" | "games"; titleLabel: string; hasDescription?: boolean }) => {
   const [items, setItems] = useState<any[]>([]);
+  const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
-  const [form, setForm] = useState({ title: "", url: "", description: "", published: true });
+  const [form, setForm] = useState({ title: "", url: "", description: "", level_id: "", published: true });
 
   const load = async () => {
-    const { data } = await (supabase.from(table) as any).select("*").order("created_at", { ascending: false });
+    const { data } = await (supabase.from(table) as any).select("*, levels(title)").order("created_at", { ascending: false });
     setItems(data || []);
   };
-  useEffect(() => { load(); }, [table]);
+  useEffect(() => {
+    load();
+    supabase.from("levels").select("id, title").order("sort_order").then(({ data }) => setLevels(data || []));
+  }, [table]);
 
   useEffect(() => {
-    if (editing) setForm({ title: editing.title, url: editing.url || "", description: editing.description || "", published: editing.published });
-    else setForm({ title: "", url: "", description: "", published: true });
+    if (editing) setForm({ title: editing.title, url: editing.url || "", description: editing.description || "", level_id: editing.level_id || "", published: editing.published });
+    else setForm({ title: "", url: "", description: "", level_id: "", published: true });
   }, [editing, open]);
 
   const save = async () => {
     if (!form.title) { toast({ title: "العنوان مطلوب", variant: "destructive" }); return; }
-    const payload: any = { title: form.title, url: form.url, published: form.published };
+    if (!form.level_id) { toast({ title: "يجب اختيار المستوى", variant: "destructive" }); return; }
+    const payload: any = { title: form.title, url: form.url, level_id: form.level_id, published: form.published };
     if (hasDescription) payload.description = form.description;
     const { error } = editing
       ? await (supabase.from(table) as any).update(payload).eq("id", editing.id)
@@ -859,14 +864,16 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         <Table>
           <TableHeader><TableRow>
             <TableHead className="text-right">العنوان</TableHead>
+            <TableHead className="text-right">المستوى</TableHead>
             <TableHead className="text-right">الرابط</TableHead>
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {items.length === 0 ? <TableRow><TableCell colSpan={3} className="text-center py-10 text-muted-foreground">لا توجد عناصر</TableCell></TableRow>
+            {items.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">لا توجد عناصر</TableCell></TableRow>
               : items.map((it: any) => (
                 <TableRow key={it.id}>
                   <TableCell className="font-bold">{it.title}</TableCell>
+                  <TableCell><Badge variant="secondary">{it.levels?.title || "—"}</Badge></TableCell>
                   <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
                   <TableCell>
                     <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
@@ -883,6 +890,15 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
           <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} {titleLabel}</DialogTitle></DialogHeader>
           <div className="space-y-3">
             <div><Label>العنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+            <div>
+              <Label>المستوى *</Label>
+              <Select value={form.level_id} onValueChange={(v) => setForm({ ...form, level_id: v })}>
+                <SelectTrigger><SelectValue placeholder="اختر المستوى" /></SelectTrigger>
+                <SelectContent>
+                  {levels.map((l) => <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
             <div><Label>الرابط</Label><Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" /></div>
             {hasDescription && <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>}
           </div>
