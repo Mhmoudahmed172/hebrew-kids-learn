@@ -846,8 +846,12 @@ const QuizzesSection = () => {
         <h1 className="font-display text-3xl">الاختبارات ✅</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الاختبارات..." />
+      {(() => {
+        const filtered = filterByQuery(quizzes, query);
+        return (
       <div className="grid lg:grid-cols-2 gap-4">
-        {quizzes.map((q) => (
+        {filtered.map((q) => (
           <Card key={q.id} className="p-5">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div>
@@ -862,8 +866,10 @@ const QuizzesSection = () => {
             {q.description && <p className="text-sm text-muted-foreground">{q.description}</p>}
           </Card>
         ))}
-        {quizzes.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">لا توجد اختبارات</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد اختبارات"}</p>}
       </div>
+        );
+      })()}
 
       <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
