@@ -1277,9 +1277,22 @@ const TestimonialsSection = () => {
         <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الآراء..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالاسم..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "rating", label: "التقييم", options: [5,4,3,2,1].map((n) => ({ label: `⭐ ${n}`, value: String(n) })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       {(() => {
-        const filtered = filterByQuery(items, query);
+        const filtered = applyFilters(items, query, ["name", "role", "text"], {
+          rating: { value: filters.rating, getter: (t) => String(t.rating) },
+          status: { value: filters.status, getter: (t) => String(t.published) },
+        });
         return (
       <div className="grid md:grid-cols-2 gap-4">
         {filtered.map((t) => (
