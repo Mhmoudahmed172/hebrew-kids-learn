@@ -39,30 +39,91 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
 
-// ============== شريط البحث المشترك ==============
-const SearchBar = ({ value, onChange, placeholder = "بحث..." }: { value: string; onChange: (v: string) => void; placeholder?: string }) => (
-  <div className="relative w-full sm:w-80 mb-4">
-    <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-    <Input
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className="pr-10"
-    />
-    {value && (
-      <button
-        type="button"
-        onClick={() => onChange("")}
-        className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground"
-        aria-label="مسح البحث"
-      >
-        <X className="w-3 h-3" />
-      </button>
-    )}
+// ============== شريط البحث + الفلترة ==============
+type FilterOption = { label: string; value: string };
+type FilterDef = {
+  key: string;          // اسم الفلتر (مثلاً "level" / "status" / "role" / "published")
+  label: string;        // النص المعروض
+  options: FilterOption[]; // value === "" يعني "الكل"
+};
+
+const FilterBar = ({
+  query, onQueryChange, searchPlaceholder = "بحث...",
+  filters = [], values = {}, onValueChange,
+}: {
+  query: string;
+  onQueryChange: (v: string) => void;
+  searchPlaceholder?: string;
+  filters?: FilterDef[];
+  values?: Record<string, string>;
+  onValueChange?: (key: string, value: string) => void;
+}) => (
+  <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-wrap">
+    <div className="relative w-full sm:w-72">
+      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+      <Input value={query} onChange={(e) => onQueryChange(e.target.value)} placeholder={searchPlaceholder} className="pr-10" />
+      {query && (
+        <button type="button" onClick={() => onQueryChange("")}
+          className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground" aria-label="مسح">
+          <X className="w-3 h-3" />
+        </button>
+      )}
+    </div>
+    {filters.map((f) => (
+      <Select key={f.key} value={values[f.key] ?? ""} onValueChange={(v) => onValueChange?.(f.key, v)}>
+        <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder={f.label} /></SelectTrigger>
+        <SelectContent>
+          <SelectItem value="__all__">{f.label}: الكل</SelectItem>
+          {f.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
+        </SelectContent>
+      </Select>
+    ))}
   </div>
 );
 
-// فلترة كائنات حسب نص (يبحث في كل القيم النصية، ويغوص في الكائنات المتداخلة مستوى واحد)
+// مكوّن SearchBar البسيط (للتوافق العكسي)
+const SearchBar = ({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder?: string }) => (
+  <FilterBar query={value} onQueryChange={onChange} searchPlaceholder={placeholder} />
+);
+
+// فلترة بحقل محدد فقط
+const matchesQuery = (value: any, q: string): boolean => {
+  if (value == null) return false;
+  return String(value).toLowerCase().includes(q);
+};
+
+const applyFilters = <T extends Record<string, any>>(
+  items: T[],
+  query: string,
+  searchFields: string[],          // الحقول التي يبحث فيها النص
+  fieldFilters: Record<string, { value: string; getter: (item: T) => any }> = {},
+): T[] => {
+  const q = query.trim().toLowerCase();
+  return items.filter((item) => {
+    if (q && searchFields.length > 0) {
+      const found = searchFields.some((f) => {
+        // دعم المسارات مثل "levels.title"
+        const parts = f.split(".");
+        let v: any = item;
+        for (const p of parts) v = v?.[p];
+        return matchesQuery(v, q);
+      });
+      if (!found) return false;
+    }
+    for (const [, def] of Object.entries(fieldFilters)) {
+      if (!def.value || def.value === "__all__") continue;
+      const actual = def.getter(item);
+      if (Array.isArray(actual)) {
+        if (!actual.includes(def.value)) return false;
+      } else {
+        if (String(actual ?? "") !== def.value) return false;
+      }
+    }
+    return true;
+  });
+};
+
+// للتوافق العكسي مع استدعاءات سابقة
 const filterByQuery = <T extends Record<string, any>>(items: T[], query: string): T[] => {
   const q = query.trim().toLowerCase();
   if (!q) return items;
@@ -71,9 +132,7 @@ const filterByQuery = <T extends Record<string, any>>(items: T[], query: string)
       if (v == null) continue;
       if (typeof v === "string" || typeof v === "number") {
         if (String(v).toLowerCase().includes(q)) return true;
-      } else if (Array.isArray(v)) {
-        if (v.some((x) => typeof x === "string" && x.toLowerCase().includes(q))) return true;
-      } else if (typeof v === "object") {
+      } else if (typeof v === "object" && !Array.isArray(v)) {
         for (const inner of Object.values(v as any)) {
           if ((typeof inner === "string" || typeof inner === "number") && String(inner).toLowerCase().includes(q)) return true;
         }
@@ -363,6 +422,8 @@ const VideosSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ level: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
   const load = async () => {
     const { data } = await supabase.from("videos").select("*, levels(title, slug)").order("sort_order");
     setVideos(data || []);
@@ -390,10 +451,23 @@ const VideosSection = () => {
         </Button>
       </div>
 
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث عن فيديو بالعنوان أو المستوى..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
 
       {(() => {
-        const filtered = filterByQuery(videos, query);
+        const filtered = applyFilters(videos, query, ["title"], {
+          level: { value: filters.level, getter: (v) => v.level_id },
+          status: { value: filters.status, getter: (v) => String(v.published) },
+        });
         return (
       <Card className="overflow-hidden">
         <Table>
@@ -543,6 +617,8 @@ const UsersSection = () => {
   const [credCurrentEmail, setCredCurrentEmail] = useState<string>("");
   const [credLoadingEmail, setCredLoadingEmail] = useState(false);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ role: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
@@ -626,12 +702,29 @@ const UsersSection = () => {
     }
   };
 
-  const filteredUsers = filterByQuery(users, query);
+  const filteredUsers = applyFilters(users, query, ["full_name"], {
+    role: { value: filters.role, getter: (u) => u.roles },
+    status: { value: filters.status, getter: (u) => u.status },
+  });
 
   return (
     <div>
       <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث بالاسم أو الدور أو الحالة..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالاسم..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "role", label: "الدور", options: [
+            { label: "مدير", value: "admin" },
+            { label: "ولي أمر", value: "parent" },
+            { label: "طفل", value: "kid" },
+          ]},
+          { key: "status", label: "الحالة", options: Object.entries(STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })) },
+        ]}
+      />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -727,6 +820,8 @@ const LevelsSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ slug: "", title: "", description: "", color: "mint", sort_order: 0, published: true });
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await supabase.from("levels").select("*").order("sort_order");
@@ -761,7 +856,16 @@ const LevelsSection = () => {
         <h1 className="font-display text-3xl">المستويات 📚</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في المستويات..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -773,7 +877,9 @@ const LevelsSection = () => {
           </TableRow></TableHeader>
           <TableBody>
             {(() => {
-              const filtered = filterByQuery(items, query);
+              const filtered = applyFilters(items, query, ["title", "slug"], {
+                status: { value: filters.status, getter: (l) => String(l.published) },
+              });
               if (filtered.length === 0) return <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد مستويات"}</TableCell></TableRow>;
               return filtered.map((l) => (
               <TableRow key={l.id}>
@@ -825,6 +931,8 @@ const QuizzesSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ level: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await supabase.from("quizzes").select("*, quiz_questions(*), levels(title)").order("created_at", { ascending: false });
@@ -846,9 +954,22 @@ const QuizzesSection = () => {
         <h1 className="font-display text-3xl">الاختبارات ✅</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الاختبارات..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       {(() => {
-        const filtered = filterByQuery(quizzes, query);
+        const filtered = applyFilters(quizzes, query, ["title", "description"], {
+          level: { value: filters.level, getter: (q) => q.level_id },
+          status: { value: filters.status, getter: (q) => String(q.published) },
+        });
         return (
       <div className="grid lg:grid-cols-2 gap-4">
         {filtered.map((q) => (
@@ -989,6 +1110,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ title: "", url: "", description: "", level_id: "", published: true });
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ level: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await (supabase.from(table) as any).select("*, levels(title)").order("created_at", { ascending: false });
@@ -1029,7 +1152,16 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         <h1 className="font-display text-3xl">{titleLabel}</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder={`ابحث في ${titleLabel}...`} />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder={`ابحث بالعنوان...`}
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
+        ]}
+      />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -1040,7 +1172,9 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
           </TableRow></TableHeader>
           <TableBody>
             {(() => {
-              const filtered = filterByQuery(items, query);
+              const filtered = applyFilters(items, query, ["title", "description"], {
+                level: { value: filters.level, getter: (it) => it.level_id },
+              });
               if (filtered.length === 0) return <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر"}</TableCell></TableRow>;
               return filtered.map((it: any) => (
                 <TableRow key={it.id}>
@@ -1110,6 +1244,8 @@ const TestimonialsSection = () => {
   const empty = { name: "", role: "", text: "", rating: 5, avatar_color: "bg-primary-gradient", card_color: "bg-primary-soft", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ rating: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
     const { data } = await supabase.from("testimonials").select("*").order("sort_order");
@@ -1141,9 +1277,22 @@ const TestimonialsSection = () => {
         <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الآراء..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالاسم..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "rating", label: "التقييم", options: [5,4,3,2,1].map((n) => ({ label: `⭐ ${n}`, value: String(n) })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       {(() => {
-        const filtered = filterByQuery(items, query);
+        const filtered = applyFilters(items, query, ["name", "role", "text"], {
+          rating: { value: filters.rating, getter: (t) => String(t.rating) },
+          status: { value: filters.status, getter: (t) => String(t.published) },
+        });
         return (
       <div className="grid md:grid-cols-2 gap-4">
         {filtered.map((t) => (
@@ -1201,6 +1350,9 @@ const FaqsSection = () => {
   const empty = { question: "", answer: "", category: "", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
   const [query, setQuery] = useState("");
+  const [filters, setFilters] = useState<Record<string, string>>({ category: "", status: "" });
+  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
+  const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean)));
 
   const load = async () => {
     const { data } = await supabase.from("faqs").select("*").order("sort_order");
@@ -1232,9 +1384,22 @@ const FaqsSection = () => {
         <h1 className="font-display text-3xl">الأسئلة الشائعة ❓</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في الأسئلة..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث في السؤال أو الجواب..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "category", label: "التصنيف", options: categories.map((c) => ({ label: c, value: c })) },
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       {(() => {
-        const filtered = filterByQuery(items, query);
+        const filtered = applyFilters(items, query, ["question", "answer"], {
+          category: { value: filters.category, getter: (f) => f.category },
+          status: { value: filters.status, getter: (f) => String(f.published) },
+        });
         return (
       <div className="space-y-3">
         {filtered.map((f) => (
