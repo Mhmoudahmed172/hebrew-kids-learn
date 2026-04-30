@@ -191,7 +191,7 @@ const LevelDetail = () => {
           )}
           {activeGame?.url && (
             <div className="p-3 border-t flex justify-end">
-              <a href={activeGame.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+              <a href={toEmbedUrl(activeGame.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
                 فتح في صفحة جديدة <ExternalLink className="w-3 h-3" />
               </a>
             </div>
