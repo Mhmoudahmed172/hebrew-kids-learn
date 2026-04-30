@@ -988,6 +988,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ title: "", url: "", description: "", level_id: "", published: true });
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await (supabase.from(table) as any).select("*, levels(title)").order("created_at", { ascending: false });
