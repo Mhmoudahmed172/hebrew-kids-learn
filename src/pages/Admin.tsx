@@ -1109,6 +1109,7 @@ const TestimonialsSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const empty = { name: "", role: "", text: "", rating: 5, avatar_color: "bg-primary-gradient", card_color: "bg-primary-soft", sort_order: 0, published: true };
   const [form, setForm] = useState<any>(empty);
+  const [query, setQuery] = useState("");
 
   const load = async () => {
     const { data } = await supabase.from("testimonials").select("*").order("sort_order");
