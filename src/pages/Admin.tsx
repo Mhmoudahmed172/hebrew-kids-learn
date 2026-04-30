@@ -1052,7 +1052,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
                     <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                   </TableCell>
                 </TableRow>
-              ))}
+              ));
+            })()}
           </TableBody>
         </Table>
       </Card>
