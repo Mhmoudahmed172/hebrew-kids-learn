@@ -761,6 +761,7 @@ const LevelsSection = () => {
         <h1 className="font-display text-3xl">المستويات 📚</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>
       </div>
+      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في المستويات..." />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -771,7 +772,10 @@ const LevelsSection = () => {
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {items.map((l) => (
+            {(() => {
+              const filtered = filterByQuery(items, query);
+              if (filtered.length === 0) return <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد مستويات"}</TableCell></TableRow>;
+              return filtered.map((l) => (
               <TableRow key={l.id}>
                 <TableCell className="font-bold">{l.title}</TableCell>
                 <TableCell className="font-mono text-xs">{l.slug}</TableCell>
@@ -782,7 +786,8 @@ const LevelsSection = () => {
                   <Button size="icon" variant="ghost" onClick={() => remove(l.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                 </TableCell>
               </TableRow>
-            ))}
+              ));
+            })()}
           </TableBody>
         </Table>
       </Card>
