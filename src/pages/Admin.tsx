@@ -900,24 +900,20 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
               </Select>
             </div>
             <div>
-              <Label>{table === "games" ? "كود التضمين (iframe) أو الرابط" : "الرابط"}</Label>
+              <Label>{table === "games" ? "كود التضمين (iframe)" : "الرابط"}</Label>
               {table === "games" ? (
-                <Textarea
-                  value={form.url}
-                  onChange={(e) => {
-                    const v = e.target.value;
-                    const m = v.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
-                    setForm({ ...form, url: m ? m[1] : v });
-                  }}
-                  dir="ltr"
-                  rows={3}
-                  placeholder='<iframe src="https://wordwall.net/ar/embed/..." ...></iframe>'
-                />
+                <>
+                  <Textarea
+                    value={form.url}
+                    onChange={(e) => setForm({ ...form, url: e.target.value })}
+                    dir="ltr"
+                    rows={4}
+                    placeholder='<iframe src="https://wordwall.net/ar/embed/..." width="500" height="380" frameborder="0" allowfullscreen></iframe>'
+                  />
+                  <p className="text-xs text-muted-foreground mt-1">الصق كود iframe كاملاً كما هو من Wordwall.</p>
+                </>
               ) : (
                 <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" />
-              )}
-              {table === "games" && form.url && (
-                <p className="text-xs text-muted-foreground mt-1 break-all">الرابط المُستخرج: {form.url}</p>
               )}
             </div>
             {hasDescription && <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>}

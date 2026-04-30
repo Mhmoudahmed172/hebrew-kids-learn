@@ -8,18 +8,21 @@ import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-// تحويل أي رابط Wordwall إلى رابط embed صالح للـ iframe
-const toEmbedUrl = (url: string): string => {
-  if (!url) return url;
+// استخراج src من كود iframe الكامل، أو تحويل رابط Wordwall عادي إلى رابط embed
+const toEmbedUrl = (input: string): string => {
+  if (!input) return "";
+  // إذا كان كود iframe، استخرج قيمة src
+  const iframeMatch = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+  if (iframeMatch) return iframeMatch[1];
+  // وإلا حاول تحويل رابط Wordwall عادي
   try {
-    const u = new URL(url);
+    const u = new URL(input);
     if (u.hostname.includes("wordwall.net")) {
-      // /resource/123/title  أو  /play/123/...  -> /embed/123
       const m = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
       if (m) return `https://wordwall.net/embed/${m[1]}?themeId=1&templateId=3&fontStackId=0`;
     }
   } catch {}
-  return url;
+  return input;
 };
 
 const LevelDetail = () => {
@@ -188,7 +191,7 @@ const LevelDetail = () => {
           )}
           {activeGame?.url && (
             <div className="p-3 border-t flex justify-end">
-              <a href={activeGame.url} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
+              <a href={toEmbedUrl(activeGame.url)} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1">
                 فتح في صفحة جديدة <ExternalLink className="w-3 h-3" />
               </a>
             </div>
