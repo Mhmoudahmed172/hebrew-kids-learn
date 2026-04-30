@@ -856,7 +856,16 @@ const LevelsSection = () => {
         <h1 className="font-display text-3xl">المستويات 📚</h1>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>
       </div>
-      <SearchBar value={query} onChange={setQuery} placeholder="ابحث في المستويات..." />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={filters}
+        onValueChange={setF}
+        filters={[
+          { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
+        ]}
+      />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
@@ -868,7 +877,9 @@ const LevelsSection = () => {
           </TableRow></TableHeader>
           <TableBody>
             {(() => {
-              const filtered = filterByQuery(items, query);
+              const filtered = applyFilters(items, query, ["title", "slug"], {
+                status: { value: filters.status, getter: (l) => String(l.published) },
+              });
               if (filtered.length === 0) return <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد مستويات"}</TableCell></TableRow>;
               return filtered.map((l) => (
               <TableRow key={l.id}>
