@@ -489,6 +489,8 @@ const UsersSection = () => {
   const [credEmail, setCredEmail] = useState("");
   const [credPassword, setCredPassword] = useState("");
   const [credSaving, setCredSaving] = useState(false);
+  const [credCurrentEmail, setCredCurrentEmail] = useState<string>("");
+  const [credLoadingEmail, setCredLoadingEmail] = useState(false);
 
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
@@ -517,11 +519,18 @@ const UsersSection = () => {
     load();
   };
 
-  const openCred = (u: any) => {
+  const openCred = async (u: any) => {
     setCredUser(u);
     setCredEmail("");
     setCredPassword("");
+    setCredCurrentEmail("");
     setCredOpen(true);
+    setCredLoadingEmail(true);
+    const { data, error } = await supabase.functions.invoke("admin-update-user", {
+      body: { user_id: u.id, action: "get" },
+    });
+    setCredLoadingEmail(false);
+    if (!error && (data as any)?.user?.email) setCredCurrentEmail((data as any).user.email);
   };
 
   const saveCred = async () => {
@@ -607,9 +616,15 @@ const UsersSection = () => {
             <DialogTitle>تعديل بيانات دخول: {credUser?.full_name || "—"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
+            <div className="rounded-xl bg-muted/50 p-3 border border-border">
+              <p className="text-xs text-muted-foreground mb-1">الإيميل الحالي</p>
+              <p className="font-bold text-sm break-all">
+                {credLoadingEmail ? "جاري التحميل..." : (credCurrentEmail || "غير متاح")}
+              </p>
+            </div>
             <div>
               <Label className="flex items-center gap-2 mb-2"><Mail className="w-4 h-4" /> إيميل جديد (اختياري)</Label>
-              <Input type="email" value={credEmail} onChange={(e) => setCredEmail(e.target.value)} placeholder="new@example.com" />
+              <Input type="email" value={credEmail} onChange={(e) => setCredEmail(e.target.value)} placeholder={credCurrentEmail || "new@example.com"} />
             </div>
             <div>
               <Label className="flex items-center gap-2 mb-2"><KeyRound className="w-4 h-4" /> كلمة مرور جديدة (اختياري)</Label>
