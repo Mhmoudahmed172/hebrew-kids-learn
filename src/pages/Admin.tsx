@@ -426,6 +426,8 @@ const VideosSection = () => {
           </TableBody>
         </Table>
       </Card>
+        );
+      })()}
 
       <VideoDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
