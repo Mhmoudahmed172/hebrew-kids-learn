@@ -899,7 +899,27 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
                 </SelectContent>
               </Select>
             </div>
-            <div><Label>الرابط</Label><Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" /></div>
+            <div>
+              <Label>{table === "games" ? "كود التضمين (iframe) أو الرابط" : "الرابط"}</Label>
+              {table === "games" ? (
+                <Textarea
+                  value={form.url}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    const m = v.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+                    setForm({ ...form, url: m ? m[1] : v });
+                  }}
+                  dir="ltr"
+                  rows={3}
+                  placeholder='<iframe src="https://wordwall.net/ar/embed/..." ...></iframe>'
+                />
+              ) : (
+                <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" />
+              )}
+              {table === "games" && form.url && (
+                <p className="text-xs text-muted-foreground mt-1 break-all">الرابط المُستخرج: {form.url}</p>
+              )}
+            </div>
             {hasDescription && <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>}
           </div>
           <DialogFooter>
