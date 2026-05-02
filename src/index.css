@@ -148,6 +148,7 @@
   .bg-sky-gradient { background: var(--gradient-sky); }
   .bg-sun-gradient { background: var(--gradient-sun); }
   .bg-card-gradient { background: var(--gradient-card); }
+  .bg-gold-gradient { background: var(--gradient-gold); }
 
   .shadow-soft { box-shadow: var(--shadow-soft); }
   .shadow-medium { box-shadow: var(--shadow-medium); }
