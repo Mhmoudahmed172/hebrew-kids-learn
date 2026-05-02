@@ -19,7 +19,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import mascot from "@/assets/mascot-owl.png";
+import logo from "@/assets/logo.png";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip as RTooltip, Cell, PieChart, Pie, Legend, AreaChart, Area,
@@ -190,7 +190,7 @@ const Admin = () => {
       <aside className="sticky top-0 right-0 h-screen w-72 bg-card border-l border-border/60 hidden lg:block">
         <div className="p-6 border-b border-border/60">
           <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-lg">
-            <img src={mascot} alt="" className="w-10 h-10" />
+            <img src={logo} alt="عبري ببساطة" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
             <div>
               <div className="text-gradient">لوحة الإدارة</div>
               <div className="text-xs font-normal text-muted-foreground">منصة عبرية</div>
