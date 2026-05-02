@@ -1,58 +1,65 @@
-import { Mic, Hand, Trophy, Sparkles, Music, Puzzle } from "lucide-react";
+import { MousePointerClick, Mic, Layers, BarChart3, ShieldCheck, Headphones } from "lucide-react";
 
-const games = [
-  { icon: Hand, title: "اسحب وأفلت", emoji: "🎯", desc: "طابق الكلمة مع صورتها", bg: "bg-pink", shadow: "shadow-pink", rotate: "-rotate-2" },
-  { icon: Mic, title: "تكلّم وردّد", emoji: "🎤", desc: "سجّل صوتك واسمع نفسك", bg: "bg-mint", shadow: "shadow-soft", rotate: "rotate-2" },
-  { icon: Puzzle, title: "ركّب الأحجية", emoji: "🧩", desc: "اجمع الحروف لتكوّن كلمة", bg: "bg-accent", shadow: "shadow-glow", rotate: "-rotate-1" },
-  { icon: Music, title: "غنّي معنا", emoji: "🎵", desc: "أغاني عبرية بإيقاع ممتع", bg: "bg-primary", shadow: "shadow-medium", rotate: "rotate-1" },
-  { icon: Trophy, title: "تحديات يومية", emoji: "🏆", desc: "اربح كؤوس كل يوم", bg: "bg-orange", shadow: "shadow-yellow", rotate: "-rotate-2" },
-  { icon: Sparkles, title: "مكافآت مفاجئة", emoji: "🎁", desc: "صناديق هدايا في كل مستوى", bg: "bg-pink", shadow: "shadow-pink", rotate: "rotate-2" },
+const features = [
+  {
+    icon: MousePointerClick,
+    title: "تمارين تفاعلية",
+    desc: "السحب والإفلات، المطابقة، والاختيار المتعدد — تثبّت المعلومة بدون ملل.",
+  },
+  {
+    icon: Mic,
+    title: "نطق وتسجيل",
+    desc: "استمع للنطق الأصلي وسجّل صوتك لمقارنة دقيقة وتحسين سريع.",
+  },
+  {
+    icon: Layers,
+    title: "مسارات حسب المستوى",
+    desc: "محتوى متدرّج للأطفال واليافعين والكبار، تختار البداية المناسبة لك.",
+  },
+  {
+    icon: BarChart3,
+    title: "متابعة تقدّم واضحة",
+    desc: "لوحة بسيطة تعرض الدروس المكتملة، الوقت، ونقاط القوة والضعف.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "بيئة آمنة وبدون إعلانات",
+    desc: "محتوى مراجَع، خصوصية محفوظة، وأدوات تحكّم للأهل.",
+  },
+  {
+    icon: Headphones,
+    title: "محتوى صوتي عالي الجودة",
+    desc: "مقاطع مسجّلة من ناطقين أصليين بصوت طبيعي وواضح.",
+  },
 ];
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 relative overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="blob bg-primary w-[400px] h-[400px] -top-20 -left-20" />
-      <div className="blob bg-accent w-[400px] h-[400px] bottom-0 -right-20" />
-
-      <div className="container relative">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="inline-block bg-pink text-white px-5 py-2 rounded-full text-sm font-extrabold mb-4 shadow-pink animate-wiggle">
-            🎮 ألعاب صغيرة
+    <section id="features" className="py-24 bg-background">
+      <div className="container">
+        <div className="max-w-2xl mx-auto text-center mb-14">
+          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-primary bg-primary-soft px-3 py-1 rounded-full mb-4">
+            المزايا
           </span>
-          <h2 className="font-display text-4xl lg:text-6xl mb-4">
-            كل درس <span className="text-gradient-fun">لعبة جديدة!</span>
+          <h2 className="font-display text-3xl lg:text-5xl tracking-tight mb-4">
+            كل ما تحتاجه لتتعلّم العبرية بثقة
           </h2>
-          <p className="text-lg text-foreground/70 font-medium">
-            بدل الكتاب المملّ، عندنا 6 أنواع ألعاب تخلي طفلك يطلب يكمّل!
+          <p className="text-muted-foreground text-lg">
+            أدوات مدروسة، واجهة هادئة، وتجربة تعليمية تركّز على الفهم لا التشتيت.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {games.map((g, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features.map((f) => (
             <div
-              key={i}
-              className={`group relative bg-white rounded-3xl p-7 border-4 border-foreground/5 shadow-medium hover:-translate-y-2 hover:rotate-0 transition-bounce cursor-pointer ${g.rotate}`}
+              key={f.title}
+              className="group bg-white border border-border rounded-2xl p-6 hover:border-primary/40 hover:shadow-medium transition-smooth"
             >
-              {/* Big emoji */}
-              <div className="text-6xl mb-3 group-hover:scale-125 group-hover:animate-wiggle transition-bounce origin-bottom-left inline-block">
-                {g.emoji}
+              <div className="w-11 h-11 rounded-xl bg-primary-soft text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-smooth">
+                <f.icon className="w-5 h-5" />
               </div>
-
-              {/* Tag */}
-              <div className={`inline-flex items-center gap-2 ${g.bg} text-white px-3 py-1 rounded-full text-xs font-extrabold mb-3 ${g.shadow}`}>
-                <g.icon className="w-3.5 h-3.5" />
-                لعبة
-              </div>
-
-              <h3 className="font-display text-2xl mb-1">{g.title}</h3>
-              <p className="text-foreground/60 font-medium">{g.desc}</p>
-
-              {/* Play button on hover */}
-              <div className="absolute top-5 left-5 w-10 h-10 rounded-full bg-foreground/5 group-hover:bg-accent group-hover:text-white flex items-center justify-center font-extrabold transition-bounce opacity-0 group-hover:opacity-100">
-                ▶
-              </div>
+              <h3 className="font-display text-xl mb-2">{f.title}</h3>
+              <p className="text-muted-foreground leading-relaxed text-sm">{f.desc}</p>
             </div>
           ))}
         </div>
