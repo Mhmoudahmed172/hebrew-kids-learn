@@ -6,90 +6,109 @@
 
 @layer base {
   :root {
-    --background: 250 100% 99%;
-    --foreground: 260 35% 18%;
+    /* Warm cream background derived from logo gold */
+    --background: 40 45% 98%;
+    --foreground: 265 30% 18%;
 
     --card: 0 0% 100%;
-    --card-foreground: 260 35% 18%;
+    --card-foreground: 265 30% 18%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 260 35% 18%;
+    --popover-foreground: 265 30% 18%;
 
-    /* Brand: Purple */
-    --primary: 265 85% 60%;
+    /* Brand: Royal Purple (from logo ا/ج/ל) */
+    --primary: 265 45% 44%;
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 265 100% 96%;
-    --primary-glow: 270 95% 75%;
+    --primary-soft: 265 55% 95%;
+    --primary-glow: 270 55% 62%;
 
-    /* Brand: Sky Blue */
-    --secondary: 200 95% 60%;
+    /* Brand: Friendly Teal (from logo ע) */
+    --secondary: 192 56% 51%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-soft: 200 100% 95%;
+    --secondary-soft: 192 65% 94%;
 
-    /* Brand: Sunny Yellow */
-    --accent: 45 100% 60%;
-    --accent-foreground: 30 80% 15%;
-    --accent-soft: 48 100% 94%;
+    /* Brand: Warm Gold (from logo border) */
+    --accent: 42 65% 55%;
+    --accent-foreground: 30 60% 15%;
+    --accent-soft: 42 70% 94%;
 
-    /* Brand: Pink (gamification) */
-    --pink: 340 90% 68%;
+    /* Brand: Magenta Pink (from logo ב) */
+    --pink: 327 55% 50%;
     --pink-foreground: 0 0% 100%;
-    --pink-soft: 340 100% 96%;
+    --pink-soft: 327 60% 95%;
 
-    /* Brand: Mint (success) */
-    --mint: 160 70% 55%;
+    /* Brand: Fresh Mint (from logo ג) */
+    --mint: 145 45% 48%;
     --mint-foreground: 0 0% 100%;
-    --mint-soft: 160 70% 95%;
+    --mint-soft: 145 50% 94%;
 
-    --muted: 260 25% 96%;
-    --muted-foreground: 260 15% 50%;
+    /* Brand: Vibrant Orange (from logo ד/ל) */
+    --orange: 17 78% 54%;
+    --orange-foreground: 0 0% 100%;
+    --orange-soft: 17 85% 95%;
 
-    --destructive: 0 85% 60%;
+    --muted: 40 30% 95%;
+    --muted-foreground: 265 12% 42%;
+
+    --destructive: 0 70% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 260 25% 92%;
-    --input: 260 25% 92%;
-    --ring: 265 85% 60%;
+    --border: 40 25% 88%;
+    --input: 40 25% 90%;
+    --ring: 265 45% 44%;
 
     --radius: 1.25rem;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(265 100% 97%) 0%, hsl(200 100% 96%) 50%, hsl(48 100% 95%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(265 85% 60%), hsl(280 90% 70%));
-    --gradient-fun: linear-gradient(135deg, hsl(265 85% 60%) 0%, hsl(340 90% 68%) 50%, hsl(45 100% 60%) 100%);
-    --gradient-sky: linear-gradient(135deg, hsl(200 95% 60%), hsl(220 90% 70%));
-    --gradient-sun: linear-gradient(135deg, hsl(45 100% 60%), hsl(30 100% 65%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(260 50% 99%));
+    /* Gradients — soft, kid-friendly, derived from logo */
+    --gradient-hero: linear-gradient(135deg, hsl(265 60% 96%) 0%, hsl(192 60% 95%) 50%, hsl(42 70% 95%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(265 45% 44%), hsl(270 55% 62%));
+    --gradient-fun: linear-gradient(135deg, hsl(265 45% 44%) 0%, hsl(327 55% 50%) 50%, hsl(17 78% 54%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(192 56% 51%), hsl(210 55% 60%));
+    --gradient-sun: linear-gradient(135deg, hsl(42 65% 55%), hsl(17 78% 54%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(40 40% 98%));
 
-    /* Shadows: soft & playful */
-    --shadow-soft: 0 4px 20px -4px hsl(265 60% 70% / 0.15);
-    --shadow-medium: 0 10px 40px -10px hsl(265 60% 60% / 0.25);
-    --shadow-glow: 0 20px 60px -20px hsl(265 85% 60% / 0.4);
-    --shadow-yellow: 0 10px 30px -8px hsl(45 100% 55% / 0.4);
-    --shadow-pink: 0 10px 30px -8px hsl(340 90% 65% / 0.4);
+    /* Shadows: warm & soft */
+    --shadow-soft: 0 4px 20px -4px hsl(265 40% 50% / 0.12);
+    --shadow-medium: 0 10px 40px -10px hsl(265 45% 44% / 0.22);
+    --shadow-glow: 0 20px 60px -20px hsl(265 45% 44% / 0.35);
+    --shadow-yellow: 0 10px 30px -8px hsl(42 65% 50% / 0.35);
+    --shadow-pink: 0 10px 30px -8px hsl(327 55% 50% / 0.32);
 
     --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 260 30% 10%;
-    --foreground: 250 30% 96%;
-    --card: 260 30% 13%;
-    --card-foreground: 250 30% 96%;
-    --popover: 260 30% 13%;
-    --popover-foreground: 250 30% 96%;
-    --primary: 270 90% 70%;
-    --primary-foreground: 260 30% 10%;
-    --secondary: 200 90% 65%;
-    --secondary-foreground: 260 30% 10%;
-    --accent: 45 100% 65%;
-    --accent-foreground: 30 80% 15%;
-    --muted: 260 25% 18%;
-    --muted-foreground: 260 15% 65%;
-    --border: 260 25% 20%;
-    --input: 260 25% 20%;
-    --ring: 270 90% 70%;
+    --background: 265 25% 10%;
+    --foreground: 40 30% 95%;
+    --card: 265 25% 14%;
+    --card-foreground: 40 30% 95%;
+    --popover: 265 25% 14%;
+    --popover-foreground: 40 30% 95%;
+    --primary: 270 60% 68%;
+    --primary-foreground: 265 25% 10%;
+    --primary-soft: 265 30% 22%;
+    --primary-glow: 270 70% 75%;
+    --secondary: 192 60% 58%;
+    --secondary-foreground: 265 25% 10%;
+    --secondary-soft: 192 30% 22%;
+    --accent: 42 70% 60%;
+    --accent-foreground: 30 60% 12%;
+    --accent-soft: 42 30% 22%;
+    --pink: 327 60% 62%;
+    --pink-foreground: 0 0% 100%;
+    --pink-soft: 327 30% 22%;
+    --mint: 145 50% 58%;
+    --mint-foreground: 265 25% 10%;
+    --mint-soft: 145 30% 20%;
+    --orange: 17 80% 60%;
+    --orange-foreground: 0 0% 100%;
+    --orange-soft: 17 30% 22%;
+    --muted: 265 20% 18%;
+    --muted-foreground: 40 15% 70%;
+    --border: 265 20% 22%;
+    --input: 265 20% 22%;
+    --ring: 270 60% 68%;
   }
 }
 
