@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import mascot from "@/assets/mascot-owl.png";
+import logo from "@/assets/logo.png";
 
 type Mode = "login" | "signup";
 
@@ -89,7 +89,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
       <div className="relative w-full max-w-5xl grid lg:grid-cols-2 gap-8 items-center">
         <div className="hidden lg:block text-right">
           <Link to="/" className="inline-flex items-center gap-2 font-display font-extrabold text-2xl mb-8">
-            <img src={mascot} alt="" className="w-12 h-12" />
+            <img src={logo} alt="عبري ببساطة" className="w-12 h-12 rounded-full ring-2 ring-accent/40 object-cover" />
             <span className="text-gradient">منصة عبرية</span>
           </Link>
           <h1 className="font-display text-4xl xl:text-5xl mb-4 leading-tight">
