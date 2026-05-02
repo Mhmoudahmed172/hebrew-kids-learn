@@ -47,6 +47,11 @@ export default {
           foreground: "hsl(var(--mint-foreground))",
           soft: "hsl(var(--mint-soft))",
         },
+        orange: {
+          DEFAULT: "hsl(var(--orange))",
+          foreground: "hsl(var(--orange-foreground))",
+          soft: "hsl(var(--orange-soft))",
+        },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
           foreground: "hsl(var(--destructive-foreground))",
