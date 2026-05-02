@@ -1,130 +1,102 @@
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, PlayCircle, Check, BookOpen, Award, Users } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
+import heroKid from "@/assets/hero-kid.png";
 
 const Hero = () => {
   return (
-    <section className="relative overflow-hidden bg-hero-gradient">
-      {/* Subtle grid backdrop */}
-      <div
-        className="absolute inset-0 opacity-[0.04] pointer-events-none"
-        style={{
-          backgroundImage:
-            "linear-gradient(hsl(var(--foreground)) 1px, transparent 1px), linear-gradient(90deg, hsl(var(--foreground)) 1px, transparent 1px)",
-          backgroundSize: "44px 44px",
-        }}
-        aria-hidden
-      />
+    <section className="relative overflow-hidden bg-hero-gradient pt-12 pb-24 lg:pt-20 lg:pb-32">
+      {/* Decorative blobs */}
+      <div className="blob bg-primary w-[500px] h-[500px] -top-40 -right-40" />
+      <div className="blob bg-accent w-[400px] h-[400px] top-40 -left-40" />
+      <div className="blob bg-secondary w-[300px] h-[300px] bottom-0 right-1/3" />
 
-      <div className="container relative pt-16 pb-20 lg:pt-24 lg:pb-28">
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
-          {/* Copy */}
-          <div className="lg:col-span-7 text-center lg:text-right space-y-7">
-            <div className="inline-flex items-center gap-2 bg-white border border-border px-3 py-1.5 rounded-full text-xs font-semibold text-muted-foreground shadow-soft">
-              <span className="w-1.5 h-1.5 rounded-full bg-mint" />
-              منصة تعليمية حديثة لكل الأعمار
+      {/* Floating Hebrew letters */}
+      <div className="absolute top-32 right-[15%] text-5xl font-display text-primary/30 animate-float-slow hidden md:block">א</div>
+      <div className="absolute top-1/2 left-[10%] text-6xl font-display text-pink/40 animate-float-fast hidden md:block">ב</div>
+      <div className="absolute bottom-32 right-1/4 text-4xl font-display text-accent/50 animate-wiggle hidden md:block">ג</div>
+
+      <div className="container relative">
+        <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          {/* Text */}
+          <div className="text-center lg:text-right space-y-8 animate-pop-in">
+            <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full border border-primary/10 shadow-soft">
+              <Sparkles className="w-4 h-4 text-accent" />
+              <span className="text-sm font-bold text-foreground/80">منصة #1 لتعليم العبرية للأطفال</span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.08] tracking-tight">
-              تعلّم العبرية
-              <br />
-              <span className="text-gradient">بطريقة بسيطة وواضحة</span>
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15]">
+              حوّل تعلم العبرية إلى{" "}
+              <span className="text-gradient-fun">تجربة ممتعة</span>{" "}
+              لطفلك
             </h1>
 
-            <p className="text-lg text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              دروس قصيرة، تمارين تفاعلية، ومتابعة تقدّم منظّمة — مصمّمة بعناية للأطفال واليافعين والكبار.
+            <p className="text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
+              دروس تفاعلية، فيديوهات ممتعة، ونظام تحفيزي يساعد طفلك يتعلم بسهولة — مصمم خصيصاً للأطفال من 5 إلى 10 سنوات.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start">
-              <Button variant="default" size="lg" asChild>
-                <Link to="/signup">
-                  ابدأ التعلّم مجاناً <ArrowLeft className="w-4 h-4" />
-                </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+              <Button variant="hero" size="xl">
+                <Sparkles /> ابدأ التجربة المجانية
               </Button>
-              <Button variant="outline" size="lg">
-                <PlayCircle className="w-4 h-4" /> شاهد كيف تعمل
+              <Button variant="outline" size="xl">
+                <PlayCircle /> شاهد كيف تعمل
               </Button>
             </div>
 
-            <ul className="flex flex-wrap items-center justify-center lg:justify-start gap-x-6 gap-y-2 pt-2 text-sm text-muted-foreground">
-              {["بدون إعلانات", "محتوى آمن", "إلغاء في أي وقت"].map((t) => (
-                <li key={t} className="inline-flex items-center gap-1.5">
-                  <Check className="w-4 h-4 text-accent" /> {t}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Visual: clean dashboard preview card */}
-          <div className="lg:col-span-5">
-            <div className="relative max-w-md mx-auto">
-              <div className="absolute -inset-6 bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl blur-2xl" aria-hidden />
-
-              <div className="relative bg-white border border-border rounded-2xl shadow-medium overflow-hidden">
-                {/* Header */}
-                <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-primary-soft text-primary flex items-center justify-center">
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold leading-none">الدرس 4</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">الحروف الأساسية</p>
-                    </div>
-                  </div>
-                  <span className="text-xs font-semibold text-accent bg-accent-soft px-2 py-1 rounded-md">
-                    قيد التقدّم
-                  </span>
-                </div>
-
-                {/* Letter card */}
-                <div className="px-5 py-6 text-center bg-muted/40 border-b border-border">
-                  <div className="font-display text-7xl text-foreground mb-2">שׁ</div>
-                  <p className="text-sm text-muted-foreground">شين — تُلفظ "Sh"</p>
-                </div>
-
-                {/* Options */}
-                <div className="p-5 space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground mb-2">اختر النطق الصحيح</p>
-                  {[
-                    { t: "Sh", correct: true },
-                    { t: "S" },
-                    { t: "Z" },
-                  ].map((o) => (
-                    <button
-                      key={o.t}
-                      className={`w-full text-right px-4 py-2.5 rounded-lg border text-sm font-semibold transition-smooth ${
-                        o.correct
-                          ? "border-accent bg-accent-soft text-accent"
-                          : "border-border bg-white hover:border-primary/40 hover:bg-primary-soft/40"
-                      }`}
-                    >
-                      {o.correct && <Check className="inline w-4 h-4 ml-2" />}
-                      {o.t}
-                    </button>
+            {/* Trust indicators */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
+              <div className="flex items-center gap-2">
+                <div className="flex -space-x-2 space-x-reverse">
+                  {[1,2,3,4].map(i => (
+                    <div key={i} className={`w-9 h-9 rounded-full border-2 border-background ${
+                      ['bg-primary','bg-accent','bg-secondary','bg-pink'][i-1]
+                    }`} />
                   ))}
                 </div>
+                <div className="text-right">
+                  <div className="flex items-center gap-1">
+                    {[1,2,3,4,5].map(i => <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" />)}
+                  </div>
+                  <p className="text-xs text-muted-foreground font-medium">+10,000 طفل سعيد</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Progress footer */}
-                <div className="px-5 py-4 border-t border-border bg-white">
-                  <div className="flex items-center justify-between text-xs mb-1.5">
-                    <span className="font-semibold text-muted-foreground">التقدّم</span>
-                    <span className="font-bold text-foreground">68%</span>
-                  </div>
-                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full w-[68%] bg-primary rounded-full" />
-                  </div>
+          {/* Hero image */}
+          <div className="relative animate-pop-in">
+            <div className="relative">
+              {/* Glow background */}
+              <div className="absolute inset-0 bg-primary-gradient rounded-[3rem] blur-3xl opacity-30 scale-90" />
+
+              {/* Image card */}
+              <div className="relative bg-white/60 backdrop-blur-sm rounded-[3rem] p-6 shadow-glow border border-white">
+                <img src={heroKid} alt="طفل سعيد يتعلم العبرية" width={1024} height={1024} className="w-full h-auto" />
+              </div>
+
+              {/* Floating badges */}
+              <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-slow">
+                <div className="w-12 h-12 rounded-xl bg-sun-gradient flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-display font-extrabold text-lg leading-none">+50</p>
+                  <p className="text-xs text-muted-foreground">نجمة اليوم</p>
                 </div>
               </div>
 
-              {/* Floating stat chips */}
-              <div className="absolute -top-4 -right-4 bg-white border border-border rounded-xl px-3 py-2 shadow-soft flex items-center gap-2">
-                <Award className="w-4 h-4 text-accent" />
-                <span className="text-xs font-bold">+12 نقطة</span>
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-fast">
+                <div className="w-12 h-12 rounded-xl bg-sky-gradient flex items-center justify-center">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <p className="font-display font-extrabold text-lg leading-none">7 أيام</p>
+                  <p className="text-xs text-muted-foreground">سلسلة متواصلة</p>
+                </div>
               </div>
-              <div className="absolute -bottom-4 -left-4 bg-white border border-border rounded-xl px-3 py-2 shadow-soft flex items-center gap-2">
-                <Users className="w-4 h-4 text-primary" />
-                <span className="text-xs font-bold">+10K متعلّم</span>
+
+              <div className="absolute top-1/3 -left-6 bg-pink rounded-2xl shadow-pink p-3 animate-wiggle">
+                <span className="font-display font-extrabold text-2xl text-white">שלום</span>
               </div>
             </div>
           </div>

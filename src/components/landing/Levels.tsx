@@ -1,136 +1,70 @@
 import { useEffect, useState } from "react";
-import { Check, Lock, ArrowLeft, BookOpen } from "lucide-react";
+import { Star, Trophy, Crown } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+
+const colorMap: Record<string, string> = {
+  mint: "from-mint to-mint/70",
+  peach: "from-accent to-accent/70",
+  sky: "from-secondary to-secondary/70",
+  pink: "from-pink to-pink/70",
+  sun: "from-sun to-sun/70",
+};
 
 const Levels = () => {
   const [levels, setLevels] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase
-      .from("levels")
-      .select("*")
-      .eq("published", true)
-      .order("sort_order")
+    supabase.from("levels").select("*").eq("published", true).order("sort_order")
       .then(({ data }) => setLevels(data || []));
   }, []);
 
   return (
-    <section id="levels" className="py-24 bg-background">
+    <section id="levels" className="py-24 relative">
       <div className="container">
-        <div className="max-w-2xl mx-auto text-center mb-14">
-          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-primary bg-primary-soft px-3 py-1 rounded-full mb-4">
-            المستويات
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="inline-block bg-pink-soft text-pink px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+            🎮 رحلة المغامرة
           </span>
-          <h2 className="font-display text-3xl lg:text-5xl tracking-tight mb-4">
-            مسار واضح من الحرف الأول حتى الطلاقة
+          <h2 className="font-display text-4xl lg:text-5xl mb-4">
+            مستويات <span className="text-gradient-fun">شيقة</span> ينتظر فتحها طفلك
           </h2>
-          <p className="text-muted-foreground text-lg">
-            مستويات متدرّجة تناسب الأطفال واليافعين والكبار — ابدأ من حيث تشاء.
+          <p className="text-lg text-muted-foreground">
+            كل مستوى مغامرة جديدة، ومع كل إنجاز يفتح طفلك عالماً أوسع من المعرفة.
           </p>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-5xl mx-auto">
-          {levels.length === 0 &&
-            [1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-40 rounded-2xl bg-muted animate-pulse" />
-            ))}
-
-          {levels.map((lvl, i) => {
-            const locked = i > 2;
-            const completed = i === 0;
-            const inProgress = i === 1;
-
-            return (
-              <Link
-                key={lvl.id}
-                to={locked ? "#" : `/level/${lvl.slug}`}
-                className={`group relative bg-white border rounded-2xl p-5 transition-smooth ${
-                  locked
-                    ? "border-border opacity-60 cursor-not-allowed"
-                    : "border-border hover:border-primary/40 hover:shadow-medium"
-                }`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div
-                    className={`w-11 h-11 rounded-xl flex items-center justify-center text-sm font-bold ${
-                      completed
-                        ? "bg-accent-soft text-accent"
-                        : inProgress
-                          ? "bg-primary-soft text-primary"
-                          : locked
-                            ? "bg-muted text-muted-foreground"
-                            : "bg-muted text-foreground"
-                    }`}
-                  >
-                    {locked ? (
-                      <Lock className="w-4 h-4" />
-                    ) : completed ? (
-                      <Check className="w-5 h-5" />
-                    ) : (
-                      <BookOpen className="w-4 h-4" />
-                    )}
-                  </div>
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    المستوى {String(i + 1).padStart(2, "0")}
-                  </span>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
+          {levels.map((lvl, i) => (
+            <Link key={lvl.id} to={`/level/${lvl.slug}`} className="block h-full group">
+              <div className="relative bg-card rounded-3xl p-6 border-2 border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2 cursor-pointer transition-bounce text-center h-full">
+                <div className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${colorMap[lvl.color] || colorMap.mint} flex items-center justify-center shadow-medium`}>
+                  <span className="font-display text-4xl text-white">{i + 1}</span>
                 </div>
-
-                <h3 className="font-display text-lg mb-1.5 leading-tight">{lvl.title}</h3>
-                {lvl.description && (
-                  <p className="text-sm text-muted-foreground line-clamp-2 mb-4 leading-relaxed">
-                    {lvl.description}
-                  </p>
-                )}
-
-                {/* Status row */}
-                <div className="flex items-center justify-between pt-3 border-t border-border">
-                  {completed && (
-                    <span className="text-xs font-semibold text-accent inline-flex items-center gap-1">
-                      <Check className="w-3.5 h-3.5" /> مكتمل
-                    </span>
-                  )}
-                  {inProgress && (
-                    <div className="flex-1 ml-3">
-                      <div className="flex items-center justify-between text-[11px] mb-1">
-                        <span className="text-muted-foreground font-medium">التقدّم</span>
-                        <span className="font-bold">45%</span>
-                      </div>
-                      <div className="h-1 bg-muted rounded-full overflow-hidden">
-                        <div className="h-full w-[45%] bg-primary rounded-full" />
-                      </div>
-                    </div>
-                  )}
-                  {!completed && !inProgress && (
-                    <span className="text-xs font-semibold text-muted-foreground">
-                      {locked ? "مغلق" : "ابدأ"}
-                    </span>
-                  )}
-                  {!locked && (
-                    <ArrowLeft className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-smooth" />
-                  )}
-                </div>
-              </Link>
-            );
-          })}
+                <p className="text-xs font-bold text-muted-foreground mb-1">المستوى {i + 1}</p>
+                <h3 className="font-display text-lg mb-2">{lvl.title}</h3>
+                {lvl.description && <p className="text-xs text-muted-foreground line-clamp-2">{lvl.description}</p>}
+              </div>
+            </Link>
+          ))}
         </div>
 
-        {/* Stats — minimal */}
-        <div className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
+        <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 bg-card-gradient rounded-3xl p-8 border border-border/50 shadow-soft">
           {[
-            { v: "+200", l: "درس مدروس" },
-            { v: "+50", l: "تمرين تفاعلي" },
-            { v: "+10K", l: "متعلّم نشط" },
-            { v: "4.8★", l: "تقييم المستخدمين" },
-          ].map((s) => (
-            <div
-              key={s.l}
-              className="bg-white border border-border rounded-xl p-5 text-center hover:border-primary/40 transition-smooth"
-            >
-              <div className="font-display text-2xl lg:text-3xl text-foreground">{s.v}</div>
-              <div className="text-xs text-muted-foreground font-medium mt-1">{s.l}</div>
-            </div>
-          ))}
+            { v: "+200", l: "درس تفاعلي", icon: Star, color: "text-accent" },
+            { v: "+50", l: "لعبة تعليمية", icon: Trophy, color: "text-pink" },
+            { v: "+1000", l: "طفل سعيد", icon: Crown, color: "text-primary" },
+            { v: "5⭐", l: "تقييم العائلات", icon: Star, color: "text-sun" },
+          ].map((s) => {
+            const Icon = s.icon;
+            return (
+              <div key={s.l} className="text-center">
+                <Icon className={`w-8 h-8 mx-auto mb-2 ${s.color}`} />
+                <div className="font-display text-2xl">{s.v}</div>
+                <div className="text-xs text-muted-foreground">{s.l}</div>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>

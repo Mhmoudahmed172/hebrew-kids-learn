@@ -24,9 +24,9 @@ const Navbar = () => {
   return (
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/70 border-b border-border/40">
       <div className="container flex items-center justify-between h-20">
-        <Link to="/" className="flex items-center gap-2.5 font-display font-bold text-lg">
-          <img src={logo} alt="عبري ببساطة" width={36} height={36} className="w-9 h-9 rounded-lg object-cover" />
-          <span className="text-foreground">عبري ببساطة</span>
+        <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-xl">
+          <img src={logo} alt="عبري ببساطة" width={44} height={44} className="w-11 h-11 rounded-full ring-2 ring-accent/40 object-cover" />
+          <span className="text-gradient">عبري ببساطة</span>
         </Link>
         <nav className="hidden lg:flex items-center gap-8">
           {links.map(l => (

@@ -1,65 +1,41 @@
-import { MousePointerClick, Mic, Layers, BarChart3, ShieldCheck, Headphones } from "lucide-react";
+import { BookOpen, Video, Trophy, Users, Brain, Gamepad2 } from "lucide-react";
 
 const features = [
-  {
-    icon: MousePointerClick,
-    title: "تمارين تفاعلية",
-    desc: "السحب والإفلات، المطابقة، والاختيار المتعدد — تثبّت المعلومة بدون ملل.",
-  },
-  {
-    icon: Mic,
-    title: "نطق وتسجيل",
-    desc: "استمع للنطق الأصلي وسجّل صوتك لمقارنة دقيقة وتحسين سريع.",
-  },
-  {
-    icon: Layers,
-    title: "مسارات حسب المستوى",
-    desc: "محتوى متدرّج للأطفال واليافعين والكبار، تختار البداية المناسبة لك.",
-  },
-  {
-    icon: BarChart3,
-    title: "متابعة تقدّم واضحة",
-    desc: "لوحة بسيطة تعرض الدروس المكتملة، الوقت، ونقاط القوة والضعف.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "بيئة آمنة وبدون إعلانات",
-    desc: "محتوى مراجَع، خصوصية محفوظة، وأدوات تحكّم للأهل.",
-  },
-  {
-    icon: Headphones,
-    title: "محتوى صوتي عالي الجودة",
-    desc: "مقاطع مسجّلة من ناطقين أصليين بصوت طبيعي وواضح.",
-  },
+  { icon: Video, title: "فيديوهات تعليمية ممتعة", desc: "محتوى مرئي عالي الجودة بأسلوب يحبه الأطفال", color: "primary", bg: "bg-primary-soft" },
+  { icon: Gamepad2, title: "ألعاب وأنشطة تفاعلية", desc: "تعلم باللعب مع تمارين وألغاز شيقة", color: "pink", bg: "bg-pink-soft" },
+  { icon: Trophy, title: "نظام نجوم وشارات", desc: "تحفيز مستمر يجعل طفلك متحمساً للاستمرار", color: "accent", bg: "bg-accent-soft" },
+  { icon: Brain, title: "بطاقات حفظ ذكية", desc: "تذكر سهل وسريع للكلمات والحروف العبرية", color: "secondary", bg: "bg-secondary-soft" },
+  { icon: BookOpen, title: "مناهج متدرجة", desc: "من الحروف الأولى إلى المحادثة الكاملة", color: "mint", bg: "bg-mint-soft" },
+  { icon: Users, title: "متابعة الأهل", desc: "تقارير دقيقة عن تقدم طفلك في كل وقت", color: "primary", bg: "bg-primary-soft" },
 ];
 
 const Features = () => {
   return (
-    <section id="features" className="py-24 bg-background">
+    <section id="features" className="py-24 relative">
       <div className="container">
-        <div className="max-w-2xl mx-auto text-center mb-14">
-          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-primary bg-primary-soft px-3 py-1 rounded-full mb-4">
-            المزايا
+        <div className="text-center max-w-3xl mx-auto mb-16">
+          <span className="inline-block bg-accent-soft text-accent-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+            ✨ مميزاتنا
           </span>
-          <h2 className="font-display text-3xl lg:text-5xl tracking-tight mb-4">
-            كل ما تحتاجه لتتعلّم العبرية بثقة
+          <h2 className="font-display text-4xl lg:text-5xl mb-4">
+            كل ما يحتاجه طفلك في <span className="text-gradient">مكان واحد</span>
           </h2>
-          <p className="text-muted-foreground text-lg">
-            أدوات مدروسة، واجهة هادئة، وتجربة تعليمية تركّز على الفهم لا التشتيت.
+          <p className="text-lg text-muted-foreground">
+            مصمم بعناية ليجعل رحلة تعلم العبرية تجربة ممتعة وفعّالة من البداية للنهاية.
           </p>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {features.map((f) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((f, i) => (
             <div
-              key={f.title}
-              className="group bg-white border border-border rounded-2xl p-6 hover:border-primary/40 hover:shadow-medium transition-smooth"
+              key={i}
+              className="group bg-card-gradient rounded-3xl p-8 border border-border/50 shadow-soft hover:shadow-medium transition-bounce hover:-translate-y-1"
             >
-              <div className="w-11 h-11 rounded-xl bg-primary-soft text-primary flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-primary-foreground transition-smooth">
-                <f.icon className="w-5 h-5" />
+              <div className={`w-16 h-16 rounded-2xl ${f.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-bounce`}>
+                <f.icon className={`w-8 h-8 text-${f.color}`} />
               </div>
               <h3 className="font-display text-xl mb-2">{f.title}</h3>
-              <p className="text-muted-foreground leading-relaxed text-sm">{f.desc}</p>
+              <p className="text-muted-foreground leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>

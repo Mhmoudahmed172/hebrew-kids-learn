@@ -1,75 +1,55 @@
-import { UserPlus, Target, TrendingUp, Shield, ArrowLeft } from "lucide-react";
+import { UserPlus, Sparkles, TrendingUp } from "lucide-react";
+import parentChild from "@/assets/parent-child.png";
 
 const steps = [
-  {
-    n: "01",
-    icon: UserPlus,
-    title: "أنشئ حسابك",
-    desc: "تسجيل سريع واختيار مستواك الحالي — مبتدئ، متوسط، أو متقدّم.",
-  },
-  {
-    n: "02",
-    icon: Target,
-    title: "تابع المسار",
-    desc: "دروس قصيرة (5–10 دقائق) مع تمارين تفاعلية بعد كل وحدة.",
-  },
-  {
-    n: "03",
-    icon: TrendingUp,
-    title: "راقب تقدّمك",
-    desc: "لوحة واضحة تعرض إنجازاتك، نقاطك، والمهارات التي تحتاج مراجعة.",
-  },
+  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل سريع في أقل من دقيقة، ثم اختر مستوى طفلك المناسب." },
+  { n: "2", icon: Sparkles, title: "ابدأ الرحلة الممتعة", desc: "دروس قصيرة يومياً، فيديوهات تفاعلية، وألعاب تعليمية شيقة." },
+  { n: "3", icon: TrendingUp, title: "تابع التقدم", desc: "تقارير أسبوعية مفصّلة، شارات إنجاز، وتحفيز مستمر لطفلك." },
 ];
 
 const HowItWorks = () => {
   return (
-    <section id="how" className="py-24 bg-muted/40 border-y border-border">
+    <section id="how" className="py-24 bg-muted/40 relative overflow-hidden">
       <div className="container">
-        <div className="max-w-2xl mx-auto text-center mb-14">
-          <span className="inline-block text-xs font-semibold tracking-wider uppercase text-accent bg-accent-soft px-3 py-1 rounded-full mb-4">
-            كيف تعمل
-          </span>
-          <h2 className="font-display text-3xl lg:text-5xl tracking-tight mb-4">
-            ثلاث خطوات بسيطة للبدء
-          </h2>
-        </div>
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          <div className="relative order-2 lg:order-1">
+            <div className="absolute inset-0 bg-sky-gradient rounded-[3rem] blur-3xl opacity-20" />
+            <div className="relative bg-white rounded-[3rem] p-8 shadow-medium border border-white">
+              <img src={parentChild} alt="أم وطفل يتعلمان معاً" width={768} height={768} loading="lazy" className="w-full h-auto" />
+            </div>
+          </div>
 
-        <div className="grid md:grid-cols-3 gap-5 mb-16">
-          {steps.map((s) => (
-            <div
-              key={s.n}
-              className="relative bg-white border border-border rounded-2xl p-6 hover:shadow-medium transition-smooth"
-            >
-              <div className="flex items-start justify-between mb-5">
-                <div className="w-11 h-11 rounded-xl bg-primary-soft text-primary flex items-center justify-center">
-                  <s.icon className="w-5 h-5" />
+          <div className="order-1 lg:order-2 space-y-8">
+            <div>
+              <span className="inline-block bg-secondary-soft text-secondary px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+                👨‍👩‍👧 للأهل
+              </span>
+              <h2 className="font-display text-4xl lg:text-5xl mb-4">
+                كيف تعمل <span className="text-gradient">المنصة؟</span>
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                ثلاث خطوات بسيطة فقط ليبدأ طفلك رحلته في تعلم العبرية بطريقة ممتعة.
+              </p>
+            </div>
+
+            <div className="space-y-5">
+              {steps.map((s) => (
+                <div key={s.n} className="flex gap-5 bg-card rounded-2xl p-5 shadow-soft border border-border/50 hover:border-primary/30 transition-smooth">
+                  <div className="flex-shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center font-display text-2xl text-primary-foreground shadow-soft">
+                      {s.n}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <s.icon className="w-5 h-5 text-primary" />
+                      <h3 className="font-display text-xl">{s.title}</h3>
+                    </div>
+                    <p className="text-muted-foreground">{s.desc}</p>
+                  </div>
                 </div>
-                <span className="font-display text-2xl text-muted-foreground/40">{s.n}</span>
-              </div>
-              <h3 className="font-display text-xl mb-2">{s.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed">{s.desc}</p>
+              ))}
             </div>
-          ))}
-        </div>
-
-        {/* Parents section — calm, professional */}
-        <div className="max-w-4xl mx-auto bg-primary-dark text-primary-dark-foreground rounded-2xl p-8 lg:p-10">
-          <div className="grid md:grid-cols-[auto_1fr_auto] gap-6 items-center">
-            <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 mx-auto md:mx-0">
-              <Shield className="w-5 h-5" />
-            </div>
-            <div className="text-center md:text-right">
-              <p className="text-xs font-semibold uppercase tracking-wider text-white/60 mb-1">
-                للأهل
-              </p>
-              <h3 className="font-display text-2xl mb-1.5">تابع تقدّم أبنائك بكل وضوح</h3>
-              <p className="text-white/70 text-sm leading-relaxed">
-                تقارير دورية، أدوات للحدّ من وقت الاستخدام، ومحتوى مفلتر ومراجَع.
-              </p>
-            </div>
-            <button className="inline-flex items-center gap-2 bg-white text-primary-dark hover:bg-white/90 font-semibold px-5 py-2.5 rounded-lg text-sm transition-smooth">
-              لوحة الأهل <ArrowLeft className="w-4 h-4" />
-            </button>
           </div>
         </div>
       </div>
