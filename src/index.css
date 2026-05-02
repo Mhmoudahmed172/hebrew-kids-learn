@@ -17,35 +17,35 @@
     --popover-foreground: 265 30% 18%;
 
     /* Brand: Royal Purple (from logo ا/ج/ל) */
-    --primary: 265 45% 44%;
+    --primary: 270 75% 52%;
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 265 55% 95%;
-    --primary-glow: 270 55% 62%;
+    --primary-soft: 270 80% 95%;
+    --primary-glow: 280 90% 68%;
 
     /* Brand: Friendly Teal (from logo ע) */
-    --secondary: 192 56% 51%;
+    --secondary: 190 85% 50%;
     --secondary-foreground: 0 0% 100%;
-    --secondary-soft: 192 65% 94%;
+    --secondary-soft: 190 90% 93%;
 
     /* Brand: Warm Gold (from logo border) */
-    --accent: 42 65% 55%;
-    --accent-foreground: 30 60% 15%;
-    --accent-soft: 42 70% 94%;
+    --accent: 42 95% 55%;
+    --accent-foreground: 30 70% 12%;
+    --accent-soft: 42 95% 92%;
 
     /* Brand: Magenta Pink (from logo ב) */
-    --pink: 327 55% 50%;
+    --pink: 327 80% 55%;
     --pink-foreground: 0 0% 100%;
-    --pink-soft: 327 60% 95%;
+    --pink-soft: 327 85% 94%;
 
     /* Brand: Fresh Mint (from logo ג) */
-    --mint: 145 45% 48%;
+    --mint: 142 65% 48%;
     --mint-foreground: 0 0% 100%;
-    --mint-soft: 145 50% 94%;
+    --mint-soft: 142 65% 93%;
 
     /* Brand: Vibrant Orange (from logo ד/ל) */
-    --orange: 17 78% 54%;
+    --orange: 17 95% 56%;
     --orange-foreground: 0 0% 100%;
-    --orange-soft: 17 85% 95%;
+    --orange-soft: 17 95% 94%;
 
     --muted: 40 30% 95%;
     --muted-foreground: 265 12% 42%;
@@ -59,20 +59,20 @@
 
     --radius: 1.25rem;
 
-    /* Gradients — soft, kid-friendly, derived from logo */
-    --gradient-hero: linear-gradient(135deg, hsl(265 60% 96%) 0%, hsl(192 60% 95%) 50%, hsl(42 70% 95%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(265 45% 44%), hsl(270 55% 62%));
-    --gradient-fun: linear-gradient(135deg, hsl(265 45% 44%) 0%, hsl(327 55% 50%) 50%, hsl(17 78% 54%) 100%);
-    --gradient-sky: linear-gradient(135deg, hsl(192 56% 51%), hsl(210 55% 60%));
-    --gradient-sun: linear-gradient(135deg, hsl(42 65% 55%), hsl(17 78% 54%));
+    /* Gradients — vibrant, kid-friendly, derived from logo */
+    --gradient-hero: linear-gradient(135deg, hsl(270 85% 94%) 0%, hsl(190 90% 92%) 50%, hsl(42 95% 92%) 100%);
+    --gradient-primary: linear-gradient(135deg, hsl(270 75% 52%), hsl(280 90% 68%));
+    --gradient-fun: linear-gradient(135deg, hsl(270 75% 52%) 0%, hsl(327 80% 55%) 50%, hsl(17 95% 56%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(190 85% 50%), hsl(210 80% 58%));
+    --gradient-sun: linear-gradient(135deg, hsl(42 95% 55%), hsl(17 95% 56%));
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(40 40% 98%));
 
-    /* Shadows: warm & soft */
-    --shadow-soft: 0 4px 20px -4px hsl(265 40% 50% / 0.12);
-    --shadow-medium: 0 10px 40px -10px hsl(265 45% 44% / 0.22);
-    --shadow-glow: 0 20px 60px -20px hsl(265 45% 44% / 0.35);
-    --shadow-yellow: 0 10px 30px -8px hsl(42 65% 50% / 0.35);
-    --shadow-pink: 0 10px 30px -8px hsl(327 55% 50% / 0.32);
+    /* Shadows: vivid & soft */
+    --shadow-soft: 0 4px 20px -4px hsl(270 60% 55% / 0.18);
+    --shadow-medium: 0 10px 40px -10px hsl(270 75% 52% / 0.3);
+    --shadow-glow: 0 20px 60px -20px hsl(270 75% 52% / 0.45);
+    --shadow-yellow: 0 10px 30px -8px hsl(42 95% 55% / 0.45);
+    --shadow-pink: 0 10px 30px -8px hsl(327 80% 55% / 0.4);
 
     --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
