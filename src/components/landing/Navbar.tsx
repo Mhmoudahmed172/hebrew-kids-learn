@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPoints } from "@/hooks/useUserPoints";
-import mascot from "@/assets/mascot-owl.png";
+import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
@@ -25,8 +25,8 @@ const Navbar = () => {
     <header className="sticky top-0 z-50 w-full backdrop-blur-xl bg-background/70 border-b border-border/40">
       <div className="container flex items-center justify-between h-20">
         <Link to="/" className="flex items-center gap-2 font-display font-extrabold text-xl">
-          <img src={mascot} alt="" width={40} height={40} className="w-10 h-10" />
-          <span className="text-gradient">منصة عبرية</span>
+          <img src={logo} alt="عبري ببساطة" width={44} height={44} className="w-11 h-11 rounded-full ring-2 ring-accent/40 object-cover" />
+          <span className="text-gradient">عبري ببساطة</span>
         </Link>
         <nav className="hidden lg:flex items-center gap-8">
           {links.map(l => (
