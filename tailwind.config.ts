@@ -26,6 +26,13 @@ export default {
           foreground: "hsl(var(--primary-foreground))",
           soft: "hsl(var(--primary-soft))",
           glow: "hsl(var(--primary-glow))",
+          dark: "hsl(var(--primary-dark))",
+          "dark-foreground": "hsl(var(--primary-dark-foreground))",
+        },
+        teal: {
+          DEFAULT: "hsl(var(--teal))",
+          foreground: "hsl(var(--teal-foreground))",
+          soft: "hsl(var(--teal-soft))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
