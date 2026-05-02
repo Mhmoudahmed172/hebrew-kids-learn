@@ -6,86 +6,83 @@
 
 @layer base {
   :root {
-    /* Soft warm-cream background that complements purple+gold brand */
-    --background: 40 50% 98%;
-    --foreground: 270 60% 12%;
+    /* Clean, modern EdTech palette — soft neutrals + indigo/teal accents */
+    --background: 0 0% 100%;
+    --foreground: 230 25% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 270 60% 12%;
+    --card-foreground: 230 25% 14%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 270 60% 12%;
+    --popover-foreground: 230 25% 14%;
 
-    /* Brand PRIMARY: Royal Purple #7B2D9E */
-    --primary: 282 56% 40%;
+    /* PRIMARY: refined Indigo — calm, trustworthy */
+    --primary: 245 58% 51%;
     --primary-foreground: 0 0% 100%;
-    --primary-soft: 282 70% 95%;
-    --primary-glow: 282 65% 60%;
+    --primary-soft: 245 100% 97%;
+    --primary-glow: 245 70% 65%;
 
-    /* Brand DARK PURPLE #2D0A5E — backgrounds & depth */
-    --primary-dark: 263 80% 20%;
+    /* Deep navy for premium surfaces */
+    --primary-dark: 240 35% 18%;
     --primary-dark-foreground: 0 0% 100%;
 
-    /* SECONDARY: Elegant Gold #C9A84C — borders & highlights */
-    --secondary: 44 55% 55%;
-    --secondary-foreground: 30 70% 12%;
-    --secondary-soft: 44 75% 94%;
+    /* SECONDARY: warm subtle gold — used sparingly for awards */
+    --secondary: 42 60% 60%;
+    --secondary-foreground: 230 25% 14%;
+    --secondary-soft: 42 80% 96%;
 
-    /* ACCENT: Vibrant Orange #E8610A — CTA & emphasis */
-    --accent: 22 92% 48%;
+    /* ACCENT: clean Teal — progress + interactive highlights */
+    --accent: 174 65% 42%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 22 95% 94%;
+    --accent-soft: 174 70% 95%;
 
-    /* Helper: Crimson Pink #E8194B */
-    --pink: 343 80% 51%;
+    /* Helpers — used minimally */
+    --pink: 340 70% 58%;
     --pink-foreground: 0 0% 100%;
-    --pink-soft: 343 85% 95%;
+    --pink-soft: 340 80% 96%;
 
-    /* Helper: Active Green #5CB85C */
-    --mint: 120 40% 54%;
+    --mint: 158 55% 48%;
     --mint-foreground: 0 0% 100%;
-    --mint-soft: 120 50% 94%;
+    --mint-soft: 158 60% 95%;
 
-    /* Helper: Warm Yellow #F5A623 */
-    --orange: 38 91% 55%;
-    --orange-foreground: 30 70% 12%;
-    --orange-soft: 38 95% 94%;
+    --orange: 28 85% 58%;
+    --orange-foreground: 0 0% 100%;
+    --orange-soft: 28 90% 96%;
 
-    /* Helper: Turquoise #00B4C8 */
-    --teal: 187 100% 39%;
+    --teal: 188 75% 42%;
     --teal-foreground: 0 0% 100%;
-    --teal-soft: 187 90% 93%;
+    --teal-soft: 188 70% 95%;
 
-    --muted: 40 30% 95%;
-    --muted-foreground: 270 15% 40%;
+    --muted: 230 25% 96%;
+    --muted-foreground: 230 12% 45%;
 
-    --destructive: 343 80% 51%;
+    --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 44 40% 88%;
-    --input: 44 35% 92%;
-    --ring: 282 56% 40%;
+    --border: 230 20% 91%;
+    --input: 230 20% 93%;
+    --ring: 245 58% 51%;
 
-    --radius: 1.25rem;
+    --radius: 0.875rem;
 
-    /* Gradients — warm purple↔gold↔orange brand feel */
-    --gradient-hero: linear-gradient(135deg, hsl(282 70% 96%) 0%, hsl(44 75% 95%) 50%, hsl(22 90% 95%) 100%);
-    --gradient-primary: linear-gradient(135deg, hsl(263 80% 28%), hsl(282 56% 45%));
-    --gradient-fun: linear-gradient(135deg, hsl(263 80% 25%) 0%, hsl(282 60% 45%) 45%, hsl(22 92% 52%) 100%);
-    --gradient-sky: linear-gradient(135deg, hsl(187 100% 42%), hsl(282 60% 55%));
-    --gradient-sun: linear-gradient(135deg, hsl(38 91% 58%), hsl(22 92% 52%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(44 60% 98%));
-    --gradient-gold: linear-gradient(135deg, hsl(44 65% 60%), hsl(38 91% 58%));
+    /* Gradients — subtle, modern */
+    --gradient-hero: linear-gradient(180deg, hsl(245 100% 99%) 0%, hsl(0 0% 100%) 70%);
+    --gradient-primary: linear-gradient(135deg, hsl(245 58% 51%), hsl(245 70% 60%));
+    --gradient-fun: linear-gradient(135deg, hsl(245 58% 51%) 0%, hsl(174 65% 42%) 100%);
+    --gradient-sky: linear-gradient(135deg, hsl(188 75% 50%), hsl(245 58% 60%));
+    --gradient-sun: linear-gradient(135deg, hsl(42 80% 65%), hsl(28 85% 60%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(230 30% 99%));
+    --gradient-gold: linear-gradient(135deg, hsl(42 70% 65%), hsl(28 80% 62%));
 
-    /* Shadows: warm purple/gold tints */
-    --shadow-soft: 0 4px 20px -4px hsl(263 60% 30% / 0.15);
-    --shadow-medium: 0 10px 40px -10px hsl(282 56% 40% / 0.25);
-    --shadow-glow: 0 20px 60px -20px hsl(22 92% 48% / 0.35);
-    --shadow-yellow: 0 10px 30px -8px hsl(44 70% 55% / 0.40);
-    --shadow-pink: 0 10px 30px -8px hsl(343 80% 55% / 0.35);
+    /* Shadows: subtle, neutral */
+    --shadow-soft: 0 1px 3px 0 hsl(230 25% 14% / 0.06), 0 1px 2px -1px hsl(230 25% 14% / 0.04);
+    --shadow-medium: 0 8px 24px -8px hsl(230 25% 14% / 0.10);
+    --shadow-glow: 0 12px 40px -12px hsl(245 58% 51% / 0.25);
+    --shadow-yellow: 0 8px 24px -8px hsl(42 70% 55% / 0.25);
+    --shadow-pink: 0 8px 24px -8px hsl(340 70% 58% / 0.20);
 
-    --transition-bounce: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-smooth: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
