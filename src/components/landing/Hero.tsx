@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
-import heroKid from "@/assets/hero-kid.png";
+import heroKid from "@/assets/hero-characters.png";
 
 const Hero = () => {
   return (
