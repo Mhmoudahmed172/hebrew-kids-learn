@@ -29,9 +29,11 @@ const Features = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className="group bg-card-gradient rounded-3xl p-8 border border-border/50 shadow-soft hover:shadow-medium transition-bounce hover:-translate-y-1"
+              className="group relative bg-card-gradient rounded-3xl p-8 border border-border/50 shadow-soft hover:shadow-glow transition-bounce hover:-translate-y-2 shine-on-hover overflow-hidden"
             >
-              <div className={`w-16 h-16 rounded-2xl ${f.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-bounce`}>
+              {/* corner sparkle */}
+              <div className="absolute top-3 left-3 w-1.5 h-1.5 rounded-full bg-accent/50 group-hover:animate-ping-soft" />
+              <div className={`w-16 h-16 rounded-2xl ${f.bg} flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-6 transition-bounce`}>
                 <f.icon className={`w-8 h-8 text-${f.color}`} />
               </div>
               <h3 className="font-display text-xl mb-2">{f.title}</h3>
