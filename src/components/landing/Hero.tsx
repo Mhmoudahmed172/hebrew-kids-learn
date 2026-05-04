@@ -83,10 +83,9 @@ const Hero = () => {
 
               {/* Soft ground shadow ellipse */}
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-6 bg-primary/30 blur-2xl rounded-full" />
-            </div>
 
               {/* Floating badges */}
-              <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-slow">
+              <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-slow z-20">
                 <div className="w-12 h-12 rounded-xl bg-sun-gradient flex items-center justify-center">
                   <Trophy className="w-6 h-6 text-white" />
                 </div>
@@ -96,7 +95,7 @@ const Hero = () => {
                 </div>
               </div>
 
-              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-fast">
+              <div className="absolute -bottom-4 -left-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-fast z-20">
                 <div className="w-12 h-12 rounded-xl bg-sky-gradient flex items-center justify-center">
                   <Zap className="w-6 h-6 text-white" />
                 </div>
@@ -106,7 +105,7 @@ const Hero = () => {
                 </div>
               </div>
 
-              <div className="absolute top-1/3 -left-6 bg-pink rounded-2xl shadow-pink p-3 animate-wiggle">
+              <div className="absolute top-1/4 -left-6 bg-pink rounded-2xl shadow-pink p-3 animate-wiggle z-20">
                 <span className="font-display font-extrabold text-2xl text-white">שלום</span>
               </div>
             </div>
