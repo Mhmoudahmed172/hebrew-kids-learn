@@ -70,8 +70,8 @@ const Hero = () => {
               <div className="absolute inset-0 bg-sun-gradient rounded-full blur-3xl opacity-30 scale-75 translate-y-10" />
               <div className="absolute inset-0 bg-primary-gradient rounded-full blur-3xl opacity-20 scale-90" />
 
-              {/* Floating characters with depth shadow */}
-              <div className="relative animate-float-slow" style={{ filter: 'drop-shadow(0 25px 35px hsl(var(--primary) / 0.35)) drop-shadow(0 10px 15px hsl(var(--accent) / 0.25))' }}>
+              {/* Characters with depth shadow */}
+              <div className="relative" style={{ filter: 'drop-shadow(0 25px 35px hsl(var(--primary) / 0.35)) drop-shadow(0 10px 15px hsl(var(--accent) / 0.25))' }}>
                 <img
                   src={heroCharacters}
                   alt="معلمة وأطفال يتعلمون العبرية بمتعة"
