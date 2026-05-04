@@ -3,8 +3,6 @@ import Hero from "@/components/landing/Hero";
 import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Levels from "@/components/landing/Levels";
-import Gamification from "@/components/landing/Gamification";
-import ParentDashboard from "@/components/landing/ParentDashboard";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
 import FinalCTA from "@/components/landing/FinalCTA";
@@ -19,8 +17,6 @@ const Index = () => {
       <Features />
       <HowItWorks />
       <Levels />
-      <Gamification />
-      <ParentDashboard />
       <Pricing />
       <Testimonials />
       <FAQ />

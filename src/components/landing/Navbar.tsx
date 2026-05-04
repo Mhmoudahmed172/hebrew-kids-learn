@@ -15,8 +15,6 @@ const Navbar = () => {
     { label: "المنصة", href: "/#features" },
     { label: "كيف تعمل", href: "/#how" },
     { label: "المستويات", href: "/#levels" },
-    { label: "نظام التحفيز", href: "/#game" },
-    { label: "للأهل", href: "/#parents" },
     { label: "الأسعار", href: "/#pricing" },
     { label: "الأسئلة", href: "/#faq" },
   ];

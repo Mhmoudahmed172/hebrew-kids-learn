@@ -1,12 +1,12 @@
 import { BookOpen, Video, Trophy, Users, Brain, Gamepad2 } from "lucide-react";
 
 const features = [
-  { icon: Video, title: "فيديوهات يحبّها الأطفال", desc: "دروس مرئية قصيرة بشخصيات مرحة تجعل الحرف العبري سهلاً ومحبَّباً.", color: "primary", bg: "bg-primary-soft" },
-  { icon: Gamepad2, title: "ألعاب تعلّم بدون ملل", desc: "تمارين تفاعلية وألغاز ممتعة — طفلك يلعب، وفي نفس الوقت يحفظ ويفهم.", color: "pink", bg: "bg-pink-soft" },
-  { icon: Trophy, title: "نقاط وشارات تحفّز يومياً", desc: "نظام مكافآت ذكي يجعل طفلك متشوّقاً للعودة وإكمال السلسلة كل يوم.", color: "accent", bg: "bg-accent-soft" },
-  { icon: Brain, title: "بطاقات حفظ تثبّت المعلومة", desc: "مراجعة ذكية بنظام التكرار المتباعد لتذكُّر سريع وعميق للكلمات.", color: "secondary", bg: "bg-secondary-soft" },
-  { icon: BookOpen, title: "منهج متدرّج من الصفر", desc: "من أول حرف عبري حتى محادثة كاملة — خطوة بخطوة بدون قفزات صعبة.", color: "mint", bg: "bg-mint-soft" },
-  { icon: Users, title: "تقارير واضحة للأهل", desc: "اعرف بالضبط أين وصل طفلك، وأين يحتاج دعماً — بدون تعقيد.", color: "primary", bg: "bg-primary-soft" },
+  { icon: Video, title: "فيديوهات تعليمية ممتعة", desc: "محتوى مرئي عالي الجودة بأسلوب يحبه الأطفال", color: "primary", bg: "bg-primary-soft" },
+  { icon: Gamepad2, title: "ألعاب وأنشطة تفاعلية", desc: "تعلم باللعب مع تمارين وألغاز شيقة", color: "pink", bg: "bg-pink-soft" },
+  { icon: Trophy, title: "نظام نجوم وشارات", desc: "تحفيز مستمر يجعل طفلك متحمساً للاستمرار", color: "accent", bg: "bg-accent-soft" },
+  { icon: Brain, title: "بطاقات حفظ ذكية", desc: "تذكر سهل وسريع للكلمات والحروف العبرية", color: "secondary", bg: "bg-secondary-soft" },
+  { icon: BookOpen, title: "مناهج متدرجة", desc: "من الحروف الأولى إلى المحادثة الكاملة", color: "mint", bg: "bg-mint-soft" },
+  { icon: Users, title: "متابعة الأهل", desc: "تقارير دقيقة عن تقدم طفلك في كل وقت", color: "primary", bg: "bg-primary-soft" },
 ];
 
 const Features = () => {
@@ -29,11 +29,9 @@ const Features = () => {
           {features.map((f, i) => (
             <div
               key={i}
-              className="group relative bg-card-gradient rounded-3xl p-8 border border-border/50 shadow-soft hover:shadow-glow transition-bounce hover:-translate-y-2 shine-on-hover overflow-hidden"
+              className="group bg-card-gradient rounded-3xl p-8 border border-border/50 shadow-soft hover:shadow-medium transition-bounce hover:-translate-y-1"
             >
-              {/* corner sparkle */}
-              <div className="absolute top-3 left-3 w-1.5 h-1.5 rounded-full bg-accent/50 group-hover:animate-ping-soft" />
-              <div className={`w-16 h-16 rounded-2xl ${f.bg} flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-6 transition-bounce`}>
+              <div className={`w-16 h-16 rounded-2xl ${f.bg} flex items-center justify-center mb-5 group-hover:scale-110 transition-bounce`}>
                 <f.icon className={`w-8 h-8 text-${f.color}`} />
               </div>
               <h3 className="font-display text-xl mb-2">{f.title}</h3>

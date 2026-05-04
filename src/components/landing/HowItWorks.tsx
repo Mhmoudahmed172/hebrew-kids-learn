@@ -2,9 +2,9 @@ import { UserPlus, Sparkles, TrendingUp } from "lucide-react";
 import parentChild from "@/assets/parent-child.png";
 
 const steps = [
-  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل سريع في أقل من دقيقة. اختر العمر والمستوى المناسب." },
-  { n: "2", icon: Sparkles, title: "ابدأ الرحلة الممتعة", desc: "دروس قصيرة يومية، فيديوهات وألعاب — كأنه يلعب لعبته المفضلة." },
-  { n: "3", icon: TrendingUp, title: "تابع التقدّم بفخر", desc: "تقارير أسبوعية واضحة، شارات إنجاز، ونتائج تشعر بها بنفسك." },
+  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل سريع في أقل من دقيقة، ثم اختر مستوى طفلك المناسب." },
+  { n: "2", icon: Sparkles, title: "ابدأ الرحلة الممتعة", desc: "دروس قصيرة يومياً، فيديوهات تفاعلية، وألعاب تعليمية شيقة." },
+  { n: "3", icon: TrendingUp, title: "تابع التقدم", desc: "تقارير أسبوعية مفصّلة، شارات إنجاز، وتحفيز مستمر لطفلك." },
 ];
 
 const HowItWorks = () => {
@@ -32,19 +32,13 @@ const HowItWorks = () => {
               </p>
             </div>
 
-            <div className="space-y-5 relative">
-              {/* Vertical journey path */}
-              <div className="absolute right-7 top-14 bottom-14 w-0.5 bg-gradient-to-b from-primary via-accent to-pink opacity-30" />
-
-              {steps.map((s, idx) => (
-                <div key={s.n} className="flex gap-5 bg-card rounded-2xl p-5 shadow-soft border border-border/50 hover:border-primary/30 hover:shadow-medium hover-lift transition-bounce relative">
-                  <div className="flex-shrink-0 relative z-10">
-                    <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center font-display text-2xl text-primary-foreground shadow-medium ring-4 ring-background">
+            <div className="space-y-5">
+              {steps.map((s) => (
+                <div key={s.n} className="flex gap-5 bg-card rounded-2xl p-5 shadow-soft border border-border/50 hover:border-primary/30 transition-smooth">
+                  <div className="flex-shrink-0">
+                    <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center font-display text-2xl text-primary-foreground shadow-soft">
                       {s.n}
                     </div>
-                    {idx < steps.length - 1 && (
-                      <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-primary/40 text-2xl">↓</span>
-                    )}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-1">
