@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
-import heroCharacters from "@/assets/hero-characters.png";
+import heroKid from "@/assets/hero-kid.png";
 
 const Hero = () => {
   return (
@@ -67,25 +67,11 @@ const Hero = () => {
           <div className="relative animate-pop-in">
             <div className="relative">
               {/* Glow background */}
-              <div className="absolute inset-0 bg-fun-gradient rounded-[3rem] blur-3xl opacity-40 scale-95" />
+              <div className="absolute inset-0 bg-primary-gradient rounded-[3rem] blur-3xl opacity-30 scale-90" />
 
-              {/* Image card with colorful gradient background */}
-              <div className="relative bg-fun-gradient rounded-[3rem] p-6 shadow-glow border-4 border-white overflow-hidden">
-                {/* Decorative circles inside card */}
-                <div className="absolute top-6 right-6 w-24 h-24 rounded-full bg-accent/40 blur-2xl" />
-                <div className="absolute bottom-10 left-10 w-32 h-32 rounded-full bg-secondary/50 blur-2xl" />
-                <div className="absolute top-1/3 left-1/4 w-20 h-20 rounded-full bg-pink/40 blur-xl" />
-
-                {/* Sun-like gradient backdrop behind characters */}
-                <div className="absolute inset-x-8 bottom-0 top-12 bg-gradient-to-b from-secondary/30 via-accent/20 to-transparent rounded-[2.5rem]" />
-
-                <img
-                  src={heroCharacters}
-                  alt="معلمة وأطفال يتعلمون العبرية"
-                  width={1366}
-                  height={768}
-                  className="relative w-full h-auto drop-shadow-2xl"
-                />
+              {/* Image card */}
+              <div className="relative bg-white/60 backdrop-blur-sm rounded-[3rem] p-6 shadow-glow border border-white">
+                <img src={heroKid} alt="طفل سعيد يتعلم العبرية" width={1024} height={1024} className="w-full h-auto" />
               </div>
 
               {/* Floating badges */}
