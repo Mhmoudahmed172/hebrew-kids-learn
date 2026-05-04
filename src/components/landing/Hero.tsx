@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
-import heroKid from "@/assets/hero-kid.png";
+import heroCharacters from "@/assets/hero-characters.png";
 
 const Hero = () => {
   return (
@@ -70,8 +70,8 @@ const Hero = () => {
               <div className="absolute inset-0 bg-primary-gradient rounded-[3rem] blur-3xl opacity-30 scale-90" />
 
               {/* Image card */}
-              <div className="relative bg-white/60 backdrop-blur-sm rounded-[3rem] p-6 shadow-glow border border-white">
-                <img src={heroKid} alt="طفل سعيد يتعلم العبرية" width={1024} height={1024} className="w-full h-auto" />
+              <div className="relative bg-white/80 backdrop-blur-sm rounded-[3rem] p-6 shadow-glow border border-white">
+                <img src={heroCharacters} alt="معلمة وأطفال يتعلمون العبرية" width={1366} height={768} className="w-full h-auto drop-shadow-2xl" />
               </div>
 
               {/* Floating badges */}
