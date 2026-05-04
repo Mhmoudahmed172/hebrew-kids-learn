@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
-import heroKid from "@/assets/hero-kid.png";
+import heroCharacters from "@/assets/hero-characters.png";
 
 const Hero = () => {
   return (
@@ -63,16 +63,27 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Hero image */}
+          {/* Hero image - 3D characters */}
           <div className="relative animate-pop-in">
             <div className="relative">
-              {/* Glow background */}
-              <div className="absolute inset-0 bg-primary-gradient rounded-[3rem] blur-3xl opacity-30 scale-90" />
+              {/* Soft radial glow behind characters */}
+              <div className="absolute inset-0 bg-sun-gradient rounded-full blur-3xl opacity-30 scale-75 translate-y-10" />
+              <div className="absolute inset-0 bg-primary-gradient rounded-full blur-3xl opacity-20 scale-90" />
 
-              {/* Image card */}
-              <div className="relative bg-white/60 backdrop-blur-sm rounded-[3rem] p-6 shadow-glow border border-white">
-                <img src={heroKid} alt="طفل سعيد يتعلم العبرية" width={1024} height={1024} className="w-full h-auto" />
+              {/* Floating characters with depth shadow */}
+              <div className="relative animate-float-slow" style={{ filter: 'drop-shadow(0 25px 35px hsl(var(--primary) / 0.35)) drop-shadow(0 10px 15px hsl(var(--accent) / 0.25))' }}>
+                <img
+                  src={heroCharacters}
+                  alt="معلمة وأطفال يتعلمون العبرية بمتعة"
+                  width={1400}
+                  height={800}
+                  className="w-full h-auto relative z-10"
+                />
               </div>
+
+              {/* Soft ground shadow ellipse */}
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-6 bg-primary/30 blur-2xl rounded-full" />
+            </div>
 
               {/* Floating badges */}
               <div className="absolute -top-4 -right-4 bg-white rounded-2xl shadow-medium p-4 flex items-center gap-3 animate-float-slow">
