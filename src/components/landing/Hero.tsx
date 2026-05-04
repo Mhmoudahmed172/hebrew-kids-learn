@@ -4,16 +4,9 @@ import heroCharacters from "@/assets/hero-characters.png";
 
 const Hero = () => {
   return (
-    <section className="relative overflow-hidden bg-hero-gradient pt-12 pb-24 lg:pt-20 lg:pb-32">
-      {/* Decorative blobs */}
-      <div className="blob bg-primary w-[500px] h-[500px] -top-40 -right-40" />
-      <div className="blob bg-accent w-[400px] h-[400px] top-40 -left-40" />
-      <div className="blob bg-secondary w-[300px] h-[300px] bottom-0 right-1/3" />
-
-      {/* Floating Hebrew letters */}
-      <div className="absolute top-32 right-[15%] text-5xl font-display text-primary/30 animate-float-slow hidden md:block">א</div>
-      <div className="absolute top-1/2 left-[10%] text-6xl font-display text-pink/40 animate-float-fast hidden md:block">ב</div>
-      <div className="absolute bottom-32 right-1/4 text-4xl font-display text-accent/50 animate-wiggle hidden md:block">ג</div>
+    <section className="relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-32" style={{ background: 'linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--background)) 100%)' }}>
+      {/* Single soft purple blob behind the image for subtle depth */}
+      <div className="blob bg-primary w-[520px] h-[520px] top-20 -left-32 opacity-30" />
 
       <div className="container relative">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
