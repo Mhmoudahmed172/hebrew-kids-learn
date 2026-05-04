@@ -15,22 +15,22 @@ const FinalCTA = () => {
 
           <div className="relative grid lg:grid-cols-2 gap-12 items-center">
             <div className="text-white text-center lg:text-right space-y-6">
-              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full">
+              <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full animate-bounce-in">
                 <Gift className="w-4 h-4" />
-                <span className="text-sm font-bold">عرض خاص: 7 أيام مجانية</span>
+                <span className="text-sm font-bold">🎁 عرض اليوم: 7 أيام مجانية + شارة بداية حصرية</span>
               </div>
               <h2 className="font-display text-4xl lg:text-6xl text-white leading-tight">
-                ابدأ رحلة طفلك مع العبرية اليوم!
+                كل يوم تأخير… يوم متعة وتعلّم يفوّته طفلك
               </h2>
               <p className="text-lg text-white/90 max-w-lg mx-auto lg:mx-0">
-                انضم لأكثر من 10,000 عائلة اختارت منصتنا. لا حاجة لبطاقة ائتمان، إلغاء في أي وقت.
+                انضم لأكثر من 10,000 عائلة بدأت رحلتها معنا. بدون بطاقة ائتمان، وبدون أي التزام — جرّب اليوم وقرّر بنفسك.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
-                <Button variant="sun" size="xl">
-                  <Sparkles /> ابدأ التجربة المجانية
+                <Button variant="sun" size="xl" className="shine-on-hover">
+                  <Sparkles /> ابدأ مجاناً الآن
                 </Button>
                 <Button size="xl" className="bg-white text-primary hover:bg-white/90">
-                  تواصل معنا
+                  تحدّث مع فريقنا
                 </Button>
               </div>
             </div>

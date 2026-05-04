@@ -42,10 +42,10 @@ const Pricing = () => {
             💎 الباقات
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
-            باقات بأسعار <span className="text-gradient">مناسبة لكل عائلة</span>
+            استثمر في مستقبل طفلك <span className="text-gradient">بأقل من قهوة يومية</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            اختر الباقة المناسبة لاحتياجات طفلك. يمكنك التغيير أو الإلغاء في أي وقت.
+            ابدأ مجاناً 7 أيام كاملة — بدون بطاقة ائتمان. ألغِ في أي وقت بنقرة واحدة.
           </p>
         </div>
 
@@ -53,16 +53,19 @@ const Pricing = () => {
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`relative bg-card rounded-3xl p-8 transition-bounce hover:-translate-y-2 ${
+              className={`relative bg-card rounded-3xl p-8 transition-bounce hover-lift overflow-hidden ${
                 p.popular
-                  ? "border-2 border-primary shadow-glow scale-105 lg:scale-110"
+                  ? "border-2 border-primary shadow-glow scale-105 lg:scale-110 shine-on-hover"
                   : "border border-border/50 shadow-soft hover:shadow-medium"
               }`}
             >
               {p.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fun-gradient text-white px-5 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-pink">
-                  <Crown className="w-4 h-4" /> الأكثر شعبية
-                </div>
+                <>
+                  <div className="absolute inset-x-0 -top-px h-1 bg-fun-gradient" />
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fun-gradient text-white px-5 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-pink animate-bounce-in">
+                    <Crown className="w-4 h-4" /> الأكثر اختياراً
+                  </div>
+                </>
               )}
 
               <div className="text-center mb-6">
