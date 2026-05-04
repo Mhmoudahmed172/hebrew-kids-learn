@@ -54,6 +54,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    if (action === "delete") {
+      if (user_id === userData.user.id) {
+        return new Response(JSON.stringify({ error: "لا يمكنك حذف حسابك الخاص" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { error } = await admin.auth.admin.deleteUser(user_id);
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      // Cleanup related rows (in case no FK cascade)
+      await admin.from("user_roles").delete().eq("user_id", user_id);
+      await admin.from("profiles").delete().eq("id", user_id);
+      return new Response(JSON.stringify({ ok: true }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     const updates: Record<string, any> = {};
     if (email && typeof email === "string" && email.trim()) {
       const emailTrim = email.trim();
