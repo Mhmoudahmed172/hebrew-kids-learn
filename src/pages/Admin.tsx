@@ -640,10 +640,23 @@ const UsersSection = () => {
   };
   useEffect(() => { load(); }, []);
 
-  const setRole = async (userId: string, newRole: "admin" | "parent" | "kid") => {
+  const setRole = async (userId: string, newRole: "admin" | "kid") => {
     await supabase.from("user_roles").delete().eq("user_id", userId);
     await supabase.from("user_roles").insert({ user_id: userId, role: newRole });
     toast({ title: "تم تحديث الدور" });
+    load();
+  };
+
+  const deleteUser = async (u: any) => {
+    if (!confirm(`هل أنت متأكد من حذف المستخدم "${u.full_name || u.id}"؟ لا يمكن التراجع.`)) return;
+    const { data, error } = await supabase.functions.invoke("admin-update-user", {
+      body: { user_id: u.id, action: "delete" },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: "فشل الحذف", description: (data as any)?.error || error?.message || "خطأ", variant: "destructive" });
+      return;
+    }
+    toast({ title: "تم حذف المستخدم" });
     load();
   };
 
@@ -729,7 +742,6 @@ const UsersSection = () => {
         filters={[
           { key: "role", label: "الدور", options: [
             { label: "مدير", value: "admin" },
-            { label: "ولي أمر", value: "parent" },
             { label: "طفل", value: "kid" },
           ]},
           { key: "status", label: "الحالة", options: Object.entries(STATUS_LABELS).map(([v, l]) => ({ value: v, label: l })) },
@@ -745,9 +757,10 @@ const UsersSection = () => {
             <TableHead className="text-right">تغيير الدور</TableHead>
             <TableHead className="text-right">تغيير الحالة</TableHead>
             <TableHead className="text-right">بيانات الدخول</TableHead>
+            <TableHead className="text-right">حذف</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={7} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
               : filteredUsers.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
@@ -763,7 +776,6 @@ const UsersSection = () => {
                       <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="admin">مدير</SelectItem>
-                        <SelectItem value="parent">ولي أمر</SelectItem>
                         <SelectItem value="kid">طفل</SelectItem>
                       </SelectContent>
                     </Select>
@@ -781,6 +793,11 @@ const UsersSection = () => {
                   <TableCell>
                     <Button size="sm" variant="outline" onClick={() => openCred(u)}>
                       <KeyRound className="w-4 h-4" /> تعديل
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="destructive" onClick={() => deleteUser(u)}>
+                      <Trash2 className="w-4 h-4" /> حذف
                     </Button>
                   </TableCell>
                 </TableRow>
