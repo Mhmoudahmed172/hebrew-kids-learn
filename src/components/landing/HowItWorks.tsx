@@ -2,9 +2,9 @@ import { UserPlus, Sparkles, TrendingUp } from "lucide-react";
 import parentChild from "@/assets/parent-child.png";
 
 const steps = [
-  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل سريع في أقل من دقيقة، ثم اختر مستوى طفلك المناسب." },
-  { n: "2", icon: Sparkles, title: "ابدأ الرحلة الممتعة", desc: "دروس قصيرة يومياً، فيديوهات تفاعلية، وألعاب تعليمية شيقة." },
-  { n: "3", icon: TrendingUp, title: "تابع التقدم", desc: "تقارير أسبوعية مفصّلة، شارات إنجاز، وتحفيز مستمر لطفلك." },
+  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل سريع في أقل من دقيقة. اختر العمر والمستوى المناسب." },
+  { n: "2", icon: Sparkles, title: "ابدأ الرحلة الممتعة", desc: "دروس قصيرة يومية، فيديوهات وألعاب — كأنه يلعب لعبته المفضلة." },
+  { n: "3", icon: TrendingUp, title: "تابع التقدّم بفخر", desc: "تقارير أسبوعية واضحة، شارات إنجاز، ونتائج تشعر بها بنفسك." },
 ];
 
 const HowItWorks = () => {
