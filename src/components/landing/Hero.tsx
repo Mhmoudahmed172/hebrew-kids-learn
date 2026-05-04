@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Sparkles, PlayCircle, Star, Trophy, Zap } from "lucide-react";
+import { Sparkles, PlayCircle, Star, Trophy, Zap, ShieldCheck, Heart } from "lucide-react";
 import heroCharacters from "@/assets/hero-characters.png";
 
 const Hero = () => {
@@ -18,33 +18,46 @@ const Hero = () => {
       <div className="container relative">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           {/* Text */}
-          <div className="text-center lg:text-right space-y-8 animate-pop-in">
+          <div className="text-center lg:text-right space-y-7 animate-pop-in">
             <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full border border-primary/10 shadow-soft">
               <Sparkles className="w-4 h-4 text-accent" />
               <span className="text-sm font-bold text-foreground/80">منصة #1 لتعليم العبرية للأطفال</span>
             </div>
 
             <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15]">
-              حوّل تعلم العبرية إلى{" "}
-              <span className="text-gradient-fun">تجربة ممتعة</span>{" "}
-              لطفلك
+              طفلك يتقن العبرية{" "}
+              <span className="text-gradient-fun">بطريقة يحبّها</span>{" "}
+              — وأنت ترى النتيجة
             </h1>
 
             <p className="text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              دروس تفاعلية، فيديوهات ممتعة، ونظام تحفيزي يساعد طفلك يتعلم بسهولة — مصمم خصيصاً للأطفال من 5 إلى 10 سنوات.
+              منهج تفاعلي على شكل لعبة: دروس قصيرة، فيديوهات ممتعة، ونظام نقاط وشارات يجعل طفلك يعود كل يوم بحماس — مصمَّم خصيصاً لأعمار 5 إلى 10 سنوات.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button variant="hero" size="xl">
-                <Sparkles /> ابدأ التجربة المجانية
+              <Button variant="hero" size="xl" className="animate-glow-pulse shine-on-hover">
+                <Sparkles /> ابدأ مجاناً 7 أيام
               </Button>
               <Button variant="outline" size="xl">
                 <PlayCircle /> شاهد كيف تعمل
               </Button>
             </div>
 
-            {/* Trust indicators */}
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-4">
+            {/* Trust badges */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
+              <div className="inline-flex items-center gap-1.5 bg-mint-soft text-mint px-3 py-1.5 rounded-full text-xs font-bold">
+                <ShieldCheck className="w-3.5 h-3.5" /> آمن للأطفال
+              </div>
+              <div className="inline-flex items-center gap-1.5 bg-primary-soft text-primary px-3 py-1.5 rounded-full text-xs font-bold">
+                <Heart className="w-3.5 h-3.5" /> بإشراف تربوي
+              </div>
+              <div className="inline-flex items-center gap-1.5 bg-accent-soft text-accent px-3 py-1.5 rounded-full text-xs font-bold">
+                <Sparkles className="w-3.5 h-3.5" /> بدون إعلانات
+              </div>
+            </div>
+
+            {/* Social proof */}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2">
               <div className="flex items-center gap-2">
                 <div className="flex -space-x-2 space-x-reverse">
                   {[1,2,3,4].map(i => (
