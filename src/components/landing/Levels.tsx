@@ -22,23 +22,23 @@ const Levels = () => {
   return (
     <section id="levels" className="py-24 relative">
       <div className="container">
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-16 reveal is-visible">
           <span className="inline-block bg-pink-soft text-pink px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             🎮 رحلة المغامرة
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
-            مستويات <span className="text-gradient-fun">شيقة</span> ينتظر فتحها طفلك
+            مستويات <span className="text-gradient-fun">شيّقة</span> ينتظر طفلك فتحها
           </h2>
           <p className="text-lg text-muted-foreground">
-            كل مستوى مغامرة جديدة، ومع كل إنجاز يفتح طفلك عالماً أوسع من المعرفة.
+            كل مستوى مغامرة جديدة، ومع كل إنجاز يكتشف طفلك عالماً أوسع من الكلمات والمعرفة.
           </p>
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-5">
           {levels.map((lvl, i) => (
             <Link key={lvl.id} to={`/level/${lvl.slug}`} className="block h-full group">
-              <div className="relative bg-card rounded-3xl p-6 border-2 border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2 cursor-pointer transition-bounce text-center h-full">
-                <div className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${colorMap[lvl.color] || colorMap.mint} flex items-center justify-center shadow-medium`}>
+              <div className="relative bg-card rounded-3xl p-6 border-2 border-primary/20 shadow-soft hover:shadow-glow hover:-translate-y-2 hover:border-primary/50 cursor-pointer transition-bounce text-center h-full">
+                <div className={`w-20 h-20 mx-auto mb-4 rounded-2xl bg-gradient-to-br ${colorMap[lvl.color] || colorMap.mint} flex items-center justify-center shadow-medium group-hover:scale-110 group-hover:rotate-6 transition-bounce`}>
                   <span className="font-display text-4xl text-white">{i + 1}</span>
                 </div>
                 <p className="text-xs font-bold text-muted-foreground mb-1">المستوى {i + 1}</p>

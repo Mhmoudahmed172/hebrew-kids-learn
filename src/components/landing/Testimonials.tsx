@@ -37,10 +37,10 @@ const Testimonials = () => {
             ⭐ آراء العائلات
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
-            عائلات سعيدة <span className="text-gradient">تتحدث عنا</span>
+            عائلات تثق بنا — <span className="text-gradient">وأطفال يحبّون الدرس</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            انضم لآلاف العائلات اللي اختارت منصتنا لتعليم أطفالها العبرية.
+            انضم لآلاف العائلات التي اختارت منصّتنا لتعليم أطفالها العبرية بأمان ومتعة.
           </p>
         </div>
       </div>

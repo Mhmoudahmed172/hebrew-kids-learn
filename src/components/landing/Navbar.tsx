@@ -60,7 +60,7 @@ const Navbar = () => {
             <>
               <Button variant="ghost" size="lg" asChild><Link to="/login">تسجيل الدخول</Link></Button>
               <Button variant="hero" size="lg" asChild>
-                <Link to="/signup"><Sparkles className="ml-1" /> ابدأ مجاناً</Link>
+                <Link to="/signup"><Sparkles className="ml-1" /> ابدأ الآن مجانًا</Link>
               </Button>
             </>
           )}
@@ -87,7 +87,7 @@ const Navbar = () => {
             ) : (
               <>
                 <Button variant="outline" size="lg" asChild><Link to="/login" onClick={() => setOpen(false)}>تسجيل الدخول</Link></Button>
-                <Button variant="hero" size="lg" asChild><Link to="/signup" onClick={() => setOpen(false)}>ابدأ مجاناً</Link></Button>
+                <Button variant="hero" size="lg" asChild><Link to="/signup" onClick={() => setOpen(false)}>ابدأ الآن مجانًا</Link></Button>
               </>
             )}
           </div>

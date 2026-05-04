@@ -1,42 +1,53 @@
 import { UserPlus, Sparkles, TrendingUp } from "lucide-react";
 import parentChild from "@/assets/parent-child.png";
+import { useReveal } from "@/hooks/useReveal";
 
 const steps = [
-  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل سريع في أقل من دقيقة، ثم اختر مستوى طفلك المناسب." },
-  { n: "2", icon: Sparkles, title: "ابدأ الرحلة الممتعة", desc: "دروس قصيرة يومياً، فيديوهات تفاعلية، وألعاب تعليمية شيقة." },
-  { n: "3", icon: TrendingUp, title: "تابع التقدم", desc: "تقارير أسبوعية مفصّلة، شارات إنجاز، وتحفيز مستمر لطفلك." },
+  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل آمن في أقل من دقيقة، واختر المستوى المناسب لعمر طفلك." },
+  { n: "2", icon: Sparkles, title: "ابدأوا الرحلة معًا", desc: "دروس قصيرة يومية، فيديوهات تفاعلية، وألعاب تجعل التعلّم متعة لا تنتهي." },
+  { n: "3", icon: TrendingUp, title: "تابع تقدّمه بثقة", desc: "تقارير أسبوعية واضحة، شارات إنجاز، وتحفيز مستمر يلمسه طفلك." },
 ];
 
 const HowItWorks = () => {
+  const head = useReveal<HTMLDivElement>();
+  const list = useReveal<HTMLDivElement>();
+  const img = useReveal<HTMLDivElement>();
+
   return (
     <section id="how" className="py-24 bg-muted/40 relative overflow-hidden">
       <div className="container">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
-          <div className="relative order-2 lg:order-1">
+          <div
+            ref={img.ref}
+            className={`relative order-2 lg:order-1 reveal-zoom ${img.visible ? "is-visible" : ""}`}
+          >
             <div className="absolute inset-0 bg-sky-gradient rounded-[3rem] blur-3xl opacity-20" />
-            <div className="relative bg-white rounded-[3rem] p-8 shadow-medium border border-white">
+            <div className="relative bg-white rounded-[3rem] p-8 shadow-medium border border-white animate-float-slow">
               <img src={parentChild} alt="أم وطفل يتعلمان معاً" width={768} height={768} loading="lazy" className="w-full h-auto" />
             </div>
           </div>
 
           <div className="order-1 lg:order-2 space-y-8">
-            <div>
+            <div ref={head.ref} className={`reveal ${head.visible ? "is-visible" : ""}`}>
               <span className="inline-block bg-secondary-soft text-secondary px-4 py-1.5 rounded-full text-sm font-bold mb-4">
                 👨‍👩‍👧 للأهل
               </span>
               <h2 className="font-display text-4xl lg:text-5xl mb-4">
-                كيف تعمل <span className="text-gradient">المنصة؟</span>
+                ابدأ خلال دقيقة — <span className="text-gradient">3 خطوات فقط</span>
               </h2>
               <p className="text-lg text-muted-foreground">
-                ثلاث خطوات بسيطة فقط ليبدأ طفلك رحلته في تعلم العبرية بطريقة ممتعة.
+                صمّمنا الرحلة لتكون بسيطة وواضحة، حتى لو لم تستخدم منصّات تعليمية من قبل.
               </p>
             </div>
 
-            <div className="space-y-5">
+            <div
+              ref={list.ref}
+              className={`space-y-5 reveal-stagger ${list.visible ? "is-visible" : ""}`}
+            >
               {steps.map((s) => (
-                <div key={s.n} className="flex gap-5 bg-card rounded-2xl p-5 shadow-soft border border-border/50 hover:border-primary/30 transition-smooth">
+                <div key={s.n} className="group flex gap-5 bg-card rounded-2xl p-5 shadow-soft border border-border/50 hover:border-primary/40 hover:shadow-medium hover:-translate-y-0.5 transition-smooth">
                   <div className="flex-shrink-0">
-                    <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center font-display text-2xl text-primary-foreground shadow-soft">
+                    <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center font-display text-2xl text-primary-foreground shadow-soft animate-step-pulse group-hover:scale-110 transition-bounce">
                       {s.n}
                     </div>
                   </div>
