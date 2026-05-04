@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Sparkles, Mail, Lock, User, ArrowRight, Eye, EyeOff, Baby, Users } from "lucide-react";
+import { Sparkles, Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,6 @@ type Mode = "login" | "signup";
 const Auth = ({ mode: initialMode }: { mode: Mode }) => {
   const [mode, setMode] = useState<Mode>(initialMode);
   const [showPwd, setShowPwd] = useState(false);
-  const [role, setRole] = useState<"kid" | "parent">("kid");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", age: "" });
   const navigate = useNavigate();
@@ -49,7 +48,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
           password: form.password,
           options: {
             emailRedirectTo: `${window.location.origin}/`,
-            data: { full_name: form.name, age: form.age || null, role },
+            data: { full_name: form.name, age: form.age || null, role: "kid" },
           },
         });
         if (error) throw error;
@@ -122,22 +121,6 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
             {mode === "signup" && (
               <>
                 <div>
-                  <Label className="mb-2 block text-sm font-bold">من سيستخدم الحساب؟</Label>
-                  <div className="grid grid-cols-2 gap-3">
-                    <button type="button" onClick={() => setRole("kid")}
-                      className={`p-4 rounded-2xl border-2 transition-bounce flex flex-col items-center gap-2 ${role === "kid" ? "border-pink bg-pink-soft" : "border-border"}`}>
-                      <Baby className={`w-6 h-6 ${role === "kid" ? "text-pink" : "text-muted-foreground"}`} />
-                      <span className="text-sm font-bold">طفل</span>
-                    </button>
-                    <button type="button" onClick={() => setRole("parent")}
-                      className={`p-4 rounded-2xl border-2 transition-bounce flex flex-col items-center gap-2 ${role === "parent" ? "border-secondary bg-secondary-soft" : "border-border"}`}>
-                      <Users className={`w-6 h-6 ${role === "parent" ? "text-secondary" : "text-muted-foreground"}`} />
-                      <span className="text-sm font-bold">ولي أمر</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
                   <Label htmlFor="name" className="text-sm font-bold mb-1.5 block">الاسم الكامل</Label>
                   <div className="relative">
                     <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -146,13 +129,11 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
                   </div>
                 </div>
 
-                {role === "kid" && (
-                  <div>
-                    <Label htmlFor="age" className="text-sm font-bold mb-1.5 block">العمر</Label>
-                    <Input id="age" type="number" min={3} max={15} placeholder="مثال: 8" value={form.age}
-                      onChange={(e) => setForm({ ...form, age: e.target.value })} className="h-12 rounded-xl" />
-                  </div>
-                )}
+                <div>
+                  <Label htmlFor="age" className="text-sm font-bold mb-1.5 block">العمر</Label>
+                  <Input id="age" type="number" min={3} max={15} placeholder="مثال: 8" value={form.age}
+                    onChange={(e) => setForm({ ...form, age: e.target.value })} className="h-12 rounded-xl" />
+                </div>
               </>
             )}
 
