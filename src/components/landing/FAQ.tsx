@@ -26,8 +26,9 @@ const FAQ = () => {
             ❓ الأسئلة الشائعة
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
-            كل ما تريد <span className="text-gradient">معرفته</span>
+            أسئلة <span className="text-gradient">يطرحها الأهل عادةً</span>
           </h2>
+          <p className="text-muted-foreground">إجابات واضحة وصريحة لتطمئن قبل أن تبدأ.</p>
         </div>
 
         <Accordion type="single" collapsible className="space-y-4">
