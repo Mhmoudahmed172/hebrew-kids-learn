@@ -53,16 +53,19 @@ const Pricing = () => {
           {plans.map((p) => (
             <div
               key={p.name}
-              className={`relative bg-card rounded-3xl p-8 transition-bounce hover:-translate-y-2 ${
+              className={`relative bg-card rounded-3xl p-8 transition-bounce hover-lift overflow-hidden ${
                 p.popular
-                  ? "border-2 border-primary shadow-glow scale-105 lg:scale-110"
+                  ? "border-2 border-primary shadow-glow scale-105 lg:scale-110 shine-on-hover"
                   : "border border-border/50 shadow-soft hover:shadow-medium"
               }`}
             >
               {p.popular && (
-                <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fun-gradient text-white px-5 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-pink">
-                  <Crown className="w-4 h-4" /> الأكثر شعبية
-                </div>
+                <>
+                  <div className="absolute inset-x-0 -top-px h-1 bg-fun-gradient" />
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-fun-gradient text-white px-5 py-1.5 rounded-full text-sm font-bold flex items-center gap-1 shadow-pink animate-bounce-in">
+                    <Crown className="w-4 h-4" /> الأكثر اختياراً
+                  </div>
+                </>
               )}
 
               <div className="text-center mb-6">
