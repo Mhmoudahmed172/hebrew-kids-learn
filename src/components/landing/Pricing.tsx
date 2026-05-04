@@ -42,10 +42,10 @@ const Pricing = () => {
             💎 الباقات
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
-            باقات بأسعار <span className="text-gradient">مناسبة لكل عائلة</span>
+            استثمر في مستقبل طفلك <span className="text-gradient">بأقل من قهوة يومية</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            اختر الباقة المناسبة لاحتياجات طفلك. يمكنك التغيير أو الإلغاء في أي وقت.
+            ابدأ مجاناً 7 أيام كاملة — بدون بطاقة ائتمان. ألغِ في أي وقت بنقرة واحدة.
           </p>
         </div>
 
