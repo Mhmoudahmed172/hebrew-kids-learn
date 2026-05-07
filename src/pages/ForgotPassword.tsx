@@ -39,7 +39,7 @@ const ForgotPassword = () => {
       <div className="bg-card rounded-3xl p-8 lg:p-10 shadow-glow border border-border/50 w-full max-w-md">
         <Link to="/" className="flex items-center justify-center gap-2 font-display font-extrabold text-xl mb-6">
           <img src={logo} alt="عبري ببساطة" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
-          <span className="text-gradient">منصة عبرية</span>
+          <span className="text-gradient">عبري ببساطة</span>
         </Link>
 
         <div className="text-center mb-6">
