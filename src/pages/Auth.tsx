@@ -52,7 +52,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
           },
         });
         if (error) throw error;
-        toast({ title: "تم إنشاء الحساب! 🌟", description: "أهلاً بك في منصة عبرية." });
+        toast({ title: "تم إنشاء الحساب! 🌟", description: "أهلاً بك في عبري ببساطة." });
         navigate("/");
       } else {
         const { error } = await supabase.auth.signInWithPassword({
@@ -89,7 +89,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
         <div className="hidden lg:block text-right">
           <Link to="/" className="inline-flex items-center gap-2 font-display font-extrabold text-2xl mb-8">
             <img src={logo} alt="عبري ببساطة" className="w-12 h-12 rounded-full ring-2 ring-accent/40 object-cover" />
-            <span className="text-gradient">منصة عبرية</span>
+            <span className="text-gradient">عبري ببساطة</span>
           </Link>
           <h1 className="font-display text-4xl xl:text-5xl mb-4 leading-tight">
             ابدأ رحلة طفلك في تعلّم <span className="text-gradient-fun">العبرية</span> بمرح!

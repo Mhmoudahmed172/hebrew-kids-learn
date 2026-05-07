@@ -193,7 +193,7 @@ const Admin = () => {
             <img src={logo} alt="عبري ببساطة" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
             <div>
               <div className="text-gradient">لوحة الإدارة</div>
-              <div className="text-xs font-normal text-muted-foreground">منصة عبرية</div>
+              <div className="text-xs font-normal text-muted-foreground">عبري ببساطة</div>
             </div>
           </Link>
         </div>
