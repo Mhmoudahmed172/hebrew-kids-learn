@@ -1563,48 +1563,102 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
     toast({ title: "تم الحذف" }); load();
   };
 
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const unitLabel = table === "songs" ? "أغنية" : "لعبة";
+
+  if (!selectedLevel) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h1 className="font-display text-3xl">{titleLabel}</h1>
+            <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة محتواه</p>
+          </div>
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
+        </div>
+        <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={setSelectedLevel} />
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent dir="rtl">
+            <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} {titleLabel}</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label>العنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+              <div>
+                <Label>المستوى *</Label>
+                <Select value={form.level_id} onValueChange={(v) => setForm({ ...form, level_id: v })}>
+                  <SelectTrigger><SelectValue placeholder="اختر المستوى" /></SelectTrigger>
+                  <SelectContent>
+                    {levels.map((l) => <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{table === "games" ? "كود التضمين (iframe)" : "الرابط"}</Label>
+                {table === "games" ? (
+                  <>
+                    <Textarea value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" rows={4}
+                      placeholder='<iframe src="https://wordwall.net/ar/embed/..." width="500" height="380" frameborder="0" allowfullscreen></iframe>' />
+                    <p className="text-xs text-muted-foreground mt-1">الصق كود iframe كاملاً كما هو من Wordwall.</p>
+                  </>
+                ) : (
+                  <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" />
+                )}
+              </div>
+              {hasDescription && <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
+              <Button variant="hero" onClick={save}>حفظ</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  const levelItems = items.filter((it) => (selectedLevel.id === "_unassigned" ? !it.level_id : it.level_id === selectedLevel.id));
+  const filtered = applyFilters(levelItems, query, ["title", "description"], {});
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl">{titleLabel}</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
-      </div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} • ${titleLabel}`}
+        sectionLabel={titleLabel}
+        onBack={() => { setSelectedLevel(null); setQuery(""); }}
+        action={<Button variant="hero" onClick={() => { setEditing(null); setForm((f) => ({ ...f, level_id: selectedLevel.id === "_unassigned" ? "" : selectedLevel.id })); setOpen(true); }}><Plus /> إضافة</Button>}
+      />
       <FilterBar
         query={query}
         onQueryChange={setQuery}
-        searchPlaceholder={`ابحث بالعنوان...`}
-        values={filters}
-        onValueChange={setF}
-        filters={[
-          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
-        ]}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={{}}
+        onValueChange={() => {}}
+        filters={[]}
       />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
             <TableHead className="text-right">العنوان</TableHead>
-            <TableHead className="text-right">المستوى</TableHead>
             <TableHead className="text-right">الرابط</TableHead>
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {(() => {
-              const filtered = applyFilters(items, query, ["title", "description"], {
-                level: { value: filters.level, getter: (it) => it.level_id },
-              });
-              if (filtered.length === 0) return <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر"}</TableCell></TableRow>;
-              return filtered.map((it: any) => (
-                <TableRow key={it.id}>
-                  <TableCell className="font-bold">{it.title}</TableCell>
-                  <TableCell><Badge variant="secondary">{it.levels?.title || "—"}</Badge></TableCell>
-                  <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
-                  <TableCell>
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                  </TableCell>
-                </TableRow>
-              ));
-            })()}
+            {filtered.length === 0 ? (
+              <TableRow><TableCell colSpan={3} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر في هذا المستوى"}</TableCell></TableRow>
+            ) : filtered.map((it: any) => (
+              <TableRow key={it.id}>
+                <TableCell className="font-bold flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-primary-soft flex items-center justify-center text-primary">
+                    <PlayCircle className="w-5 h-5" />
+                  </div>
+                  {it.title}
+                </TableCell>
+                <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
+                <TableCell>
+                  <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </Card>
