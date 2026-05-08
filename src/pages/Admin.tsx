@@ -778,7 +778,68 @@ const UsersSection = () => {
 
   return (
     <div>
-      <h1 className="font-display text-3xl mb-6">المستخدمون 👥</h1>
+      <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
+        <h1 className="font-display text-3xl">المستخدمون 👥</h1>
+        <Button variant="hero" onClick={() => { resetCreate(); setCreateOpen(true); }}>
+          <UserPlus className="w-4 h-4" /> إضافة مستخدم
+        </Button>
+      </div>
+
+      <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetCreate(); }}>
+        <DialogContent dir="rtl" className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><UserPlus className="w-5 h-5 text-primary" /> إضافة مستخدم جديد</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>الاسم الكامل</Label>
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="مثال: محمد أحمد" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>البريد الإلكتروني *</Label>
+                <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="user@example.com" />
+              </div>
+              <div className="space-y-1.5">
+                <Label>العمر</Label>
+                <Input type="number" min={1} value={newAge} onChange={(e) => setNewAge(e.target.value)} placeholder="مثال: 8" />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label>كلمة المرور * <span className="text-xs text-muted-foreground">(6 أحرف على الأقل)</span></Label>
+              <Input type="text" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label>الدور</Label>
+                <Select value={newRole} onValueChange={(v: any) => setNewRole(v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="kid"><span className="inline-flex items-center gap-2">👶 طفل</span></SelectItem>
+                    <SelectItem value="admin"><span className="inline-flex items-center gap-2">👑 مدير</span></SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1.5">
+                <Label>الحالة</Label>
+                <Select value={newStatus} onValueChange={(v: any) => setNewStatus(v)}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="active">✅ فعّال</SelectItem>
+                    <SelectItem value="inactive">⛔ غير فعّال</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </div>
+          <DialogFooter className="gap-2">
+            <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={createSaving}>إلغاء</Button>
+            <Button variant="hero" onClick={submitCreate} disabled={createSaving}>
+              {createSaving ? "جاري الإنشاء..." : <><UserPlus className="w-4 h-4" /> إنشاء</>}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <FilterBar
         query={query}
         onQueryChange={setQuery}
