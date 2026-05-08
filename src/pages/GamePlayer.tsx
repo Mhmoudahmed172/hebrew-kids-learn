@@ -26,6 +26,7 @@ const toEmbedUrl = (input: string): string => {
 const GamePlayer = () => {
   const { slug, gameId } = useParams();
   const navigate = useNavigate();
+  const { canPlay, loading: permsLoading } = usePermissions();
   const [level, setLevel] = useState<any>(null);
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
