@@ -14,6 +14,7 @@ const VideoPlayer = () => {
   const { slug, videoId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canPlay, loading: permsLoading } = usePermissions();
   const [level, setLevel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
