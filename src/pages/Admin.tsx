@@ -797,6 +797,13 @@ const UsersSection = () => {
                     </Button>
                   </TableCell>
                   <TableCell>
+                    <Button size="sm" variant="soft" asChild>
+                      <Link to={`/admin/users/${u.id}/permissions`}>
+                        <Shield className="w-4 h-4" /> صلاحيات
+                      </Link>
+                    </Button>
+                  </TableCell>
+                  <TableCell>
                     <Button size="sm" variant="destructive" onClick={() => deleteUser(u)}>
                       <Trash2 className="w-4 h-4" /> حذف
                     </Button>
