@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
   MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield, UserPlus,
-  MoreHorizontal, AlertTriangle, UserCog,
+  MoreHorizontal, AlertTriangle, UserCog, ChevronLeft, PlayCircle, FolderOpen,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
@@ -459,8 +459,10 @@ const VideosSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<Record<string, string>>({ level: "", status: "" });
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
+
   const load = async () => {
     const { data } = await supabase.from("videos").select("*, levels(title, slug)").order("sort_order");
     setVideos(data || []);
@@ -471,7 +473,6 @@ const VideosSection = () => {
 
   const remove = async (id: string, url: string) => {
     if (!confirm("حذف الفيديو؟")) return;
-    // delete file from storage
     const path = url.split("/videos/")[1];
     if (path) await supabase.storage.from("videos").remove([path]);
     await supabase.from("videos").delete().eq("id", id);
@@ -479,10 +480,103 @@ const VideosSection = () => {
     load();
   };
 
+  // Group videos by level for counts
+  const videosByLevel = videos.reduce<Record<string, any[]>>((acc, v) => {
+    const key = v.level_id || "_unassigned";
+    (acc[key] = acc[key] || []).push(v);
+    return acc;
+  }, {});
+
+  // ===== Level not selected: show levels grid =====
+  if (!selectedLevel) {
+    const colors = [
+      "from-primary to-secondary",
+      "from-secondary to-mint",
+      "from-pink to-accent",
+      "from-accent to-primary",
+      "from-mint to-primary",
+    ];
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h1 className="font-display text-3xl">الفيديوهات 🎬</h1>
+            <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة فيديوهاته</p>
+          </div>
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+            <Plus /> رفع فيديو جديد
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {levels.map((lv, i) => {
+            const count = videosByLevel[lv.id]?.length || 0;
+            return (
+              <button
+                key={lv.id}
+                onClick={() => setSelectedLevel(lv)}
+                className="group relative overflow-hidden rounded-3xl border-2 border-border bg-card shadow-soft hover:shadow-medium hover:-translate-y-1 hover:border-primary transition-bounce text-right p-6"
+              >
+                <div className={`absolute -left-8 -top-8 w-32 h-32 rounded-full bg-gradient-to-br ${colors[i % colors.length]} opacity-20 group-hover:opacity-40 transition-opacity`} />
+                <div className="relative flex items-start justify-between">
+                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-primary-foreground shadow-soft`}>
+                    <FolderOpen className="w-7 h-7" />
+                  </div>
+                  <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
+                </div>
+                <h3 className="font-display text-xl mt-4">{lv.title}</h3>
+                <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                  <PlayCircle className="w-4 h-4" />
+                  <span>{count} فيديو</span>
+                </div>
+              </button>
+            );
+          })}
+
+          {/* Unassigned videos card */}
+          {videosByLevel["_unassigned"]?.length > 0 && (
+            <button
+              onClick={() => setSelectedLevel({ id: "_unassigned", title: "بدون مستوى" })}
+              className="group relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:border-primary hover:bg-card transition-bounce text-right p-6"
+            >
+              <div className="flex items-start justify-between">
+                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+                  <FolderOpen className="w-7 h-7 text-muted-foreground" />
+                </div>
+                <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
+              </div>
+              <h3 className="font-display text-xl mt-4">بدون مستوى</h3>
+              <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+                <PlayCircle className="w-4 h-4" />
+                <span>{videosByLevel["_unassigned"].length} فيديو</span>
+              </div>
+            </button>
+          )}
+        </div>
+
+        <VideoDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
+      </div>
+    );
+  }
+
+  // ===== Level selected: show videos list =====
+  const levelVideos = videosByLevel[selectedLevel.id] || [];
+  const filtered = applyFilters(levelVideos, query, ["title"], {
+    status: { value: filters.status, getter: (v) => String(v.published) },
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl">الفيديوهات 🎬</h1>
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }} className="rounded-full">
+            <ChevronLeft className="w-5 h-5 rotate-180" />
+          </Button>
+          <div>
+            <div className="text-xs text-muted-foreground">الفيديوهات / </div>
+            <h1 className="font-display text-2xl">{selectedLevel.title} 🎬</h1>
+          </div>
+        </div>
         <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
           <Plus /> رفع فيديو جديد
         </Button>
@@ -495,23 +589,15 @@ const VideosSection = () => {
         values={filters}
         onValueChange={setF}
         filters={[
-          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
           { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
         ]}
       />
 
-      {(() => {
-        const filtered = applyFilters(videos, query, ["title"], {
-          level: { value: filters.level, getter: (v) => v.level_id },
-          status: { value: filters.status, getter: (v) => String(v.published) },
-        });
-        return (
       <Card className="overflow-hidden">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="text-right">العنوان</TableHead>
-              <TableHead className="text-right">المستوى</TableHead>
               <TableHead className="text-right">الترتيب</TableHead>
               <TableHead className="text-right">الحالة</TableHead>
               <TableHead className="text-right">إجراءات</TableHead>
@@ -519,11 +605,15 @@ const VideosSection = () => {
           </TableHeader>
           <TableBody>
             {filtered.length === 0 ? (
-              <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد فيديوهات. ابدأ بالرفع."}</TableCell></TableRow>
+              <TableRow><TableCell colSpan={4} className="text-center text-muted-foreground py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد فيديوهات في هذا المستوى."}</TableCell></TableRow>
             ) : filtered.map((v) => (
               <TableRow key={v.id}>
-                <TableCell className="font-bold">{v.title}</TableCell>
-                <TableCell>{v.levels?.title || "-"}</TableCell>
+                <TableCell className="font-bold flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-primary-soft flex items-center justify-center text-primary">
+                    <PlayCircle className="w-5 h-5" />
+                  </div>
+                  {v.title}
+                </TableCell>
                 <TableCell>{v.sort_order}</TableCell>
                 <TableCell><Badge variant={v.published ? "default" : "secondary"}>{v.published ? "منشور" : "مخفي"}</Badge></TableCell>
                 <TableCell>
@@ -537,8 +627,6 @@ const VideosSection = () => {
           </TableBody>
         </Table>
       </Card>
-        );
-      })()}
 
       <VideoDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
