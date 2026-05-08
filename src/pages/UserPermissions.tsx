@@ -428,3 +428,191 @@ const ContentGroup = ({
     </div>
   );
 };
+
+// =================== USER ACTIVITY LOG ===================
+type ActivityItem = {
+  id: string;
+  kind: "session_start" | "session_end" | "video" | "song" | "quiz" | "game";
+  at: string;
+  title: string;
+  detail?: string;
+};
+
+const KIND_META: Record<ActivityItem["kind"], { label: string; icon: any; color: string }> = {
+  session_start: { label: "بدأ جلسة", icon: LogIn, color: "bg-secondary-soft text-secondary" },
+  session_end:   { label: "انتهت الجلسة", icon: Clock, color: "bg-muted text-foreground" },
+  video:         { label: "شاهد فيديو", icon: Video, color: "bg-primary-soft text-primary" },
+  song:          { label: "استمع لأغنية", icon: Music, color: "bg-pink-soft text-pink" },
+  quiz:          { label: "أكمل اختباراً", icon: Trophy, color: "bg-accent text-accent-foreground" },
+  game:          { label: "لعب لعبة", icon: PlayCircle, color: "bg-mint text-white" },
+};
+
+const fmtDate = (s: string) => {
+  try {
+    return new Date(s).toLocaleString("ar", {
+      dateStyle: "medium", timeStyle: "short",
+    });
+  } catch { return s; }
+};
+const fmtDuration = (sec?: number) => {
+  if (!sec || sec <= 0) return "—";
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  if (m === 0) return `${s} ث`;
+  return `${m} د${s ? ` ${s} ث` : ""}`;
+};
+
+function UserActivity({ userId }: { userId: string }) {
+  const [items, setItems] = useState<ActivityItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | ActivityItem["kind"]>("all");
+  const [limit, setLimit] = useState(50);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const [{ data: sessions }, { data: progress }, { data: videos }, { data: songs }, { data: quizzes }, { data: games }] = await Promise.all([
+        supabase.from("kid_sessions").select("id,started_at,ended_at,duration_seconds").eq("kid_id", userId).order("started_at", { ascending: false }).limit(200),
+        supabase.from("user_progress").select("id,content_type,content_id,score,max_score,completed_at,level_id").eq("user_id", userId).order("completed_at", { ascending: false }).limit(200),
+        supabase.from("videos").select("id,title"),
+        supabase.from("songs").select("id,title"),
+        supabase.from("quizzes").select("id,title"),
+        supabase.from("games").select("id,title"),
+      ]);
+
+      const titleMap = new Map<string, string>();
+      [videos, songs, quizzes, games].forEach((arr) =>
+        (arr || []).forEach((r: any) => titleMap.set(r.id, r.title))
+      );
+
+      const list: ActivityItem[] = [];
+
+      (sessions || []).forEach((s: any) => {
+        list.push({
+          id: `ss-${s.id}`,
+          kind: "session_start",
+          at: s.started_at,
+          title: "بدأ جلسة جديدة",
+          detail: s.duration_seconds ? `المدة: ${fmtDuration(s.duration_seconds)}` : undefined,
+        });
+        if (s.ended_at) {
+          list.push({
+            id: `se-${s.id}`,
+            kind: "session_end",
+            at: s.ended_at,
+            title: "انتهت الجلسة",
+            detail: `المدة: ${fmtDuration(s.duration_seconds)}`,
+          });
+        }
+      });
+
+      (progress || []).forEach((p: any) => {
+        const k = p.content_type as ActivityItem["kind"];
+        if (!["video", "song", "quiz", "game"].includes(k)) return;
+        const t = titleMap.get(p.content_id) || "—";
+        let detail: string | undefined;
+        if (k === "quiz" && p.max_score) detail = `النتيجة: ${p.score ?? 0} / ${p.max_score}`;
+        list.push({
+          id: `p-${p.id}`,
+          kind: k,
+          at: p.completed_at,
+          title: t,
+          detail,
+        });
+      });
+
+      list.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+      setItems(list);
+      setLoading(false);
+    })();
+  }, [userId]);
+
+  const filtered = filter === "all" ? items : items.filter((i) => i.kind === filter);
+  const visible = filtered.slice(0, limit);
+
+  const counts = {
+    sessions: items.filter((i) => i.kind === "session_start").length,
+    videos: items.filter((i) => i.kind === "video").length,
+    songs: items.filter((i) => i.kind === "song").length,
+    quizzes: items.filter((i) => i.kind === "quiz").length,
+    games: items.filter((i) => i.kind === "game").length,
+  };
+
+  return (
+    <Card className="p-6 mt-6">
+      <div className="flex items-center gap-2 mb-1">
+        <Activity className="w-5 h-5 text-primary" />
+        <h2 className="font-display text-xl">سجل النشاط</h2>
+      </div>
+      <p className="text-sm text-muted-foreground mb-4">
+        جلسات الدخول والتقدم وتشغيل المحتوى لهذا المستخدم.
+      </p>
+
+      {/* Stats */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 mb-4">
+        <StatPill icon={LogIn} label="جلسات" value={counts.sessions} />
+        <StatPill icon={Video} label="فيديوهات" value={counts.videos} />
+        <StatPill icon={Music} label="أغاني" value={counts.songs} />
+        <StatPill icon={Trophy} label="اختبارات" value={counts.quizzes} />
+        <StatPill icon={PlayCircle} label="ألعاب" value={counts.games} />
+      </div>
+
+      {/* Filter */}
+      <div className="flex flex-wrap gap-2 mb-4">
+        {(["all", "session_start", "video", "song", "quiz", "game"] as const).map((k) => (
+          <Button key={k} size="sm" variant={filter === k ? "hero" : "outline"} onClick={() => { setFilter(k); setLimit(50); }}>
+            {k === "all" ? "الكل" : KIND_META[k].label}
+          </Button>
+        ))}
+      </div>
+
+      {loading ? (
+        <p className="text-center text-muted-foreground py-8">جاري تحميل النشاط...</p>
+      ) : visible.length === 0 ? (
+        <p className="text-center text-muted-foreground py-8">لا يوجد نشاط مسجّل بعد.</p>
+      ) : (
+        <ol className="relative border-r-2 border-border pr-5 space-y-3">
+          {visible.map((it) => {
+            const meta = KIND_META[it.kind];
+            const Icon = meta.icon;
+            return (
+              <li key={it.id} className="relative">
+                <span className={`absolute -right-[34px] top-1 w-7 h-7 rounded-full flex items-center justify-center ${meta.color} ring-4 ring-background`}>
+                  <Icon className="w-4 h-4" />
+                </span>
+                <div className="bg-muted/40 hover:bg-muted/60 transition-colors rounded-xl p-3 border border-border">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="min-w-0">
+                      <p className="text-xs text-muted-foreground">{meta.label}</p>
+                      <p className="font-bold truncate">{it.title}</p>
+                      {it.detail && <p className="text-xs text-muted-foreground mt-0.5">{it.detail}</p>}
+                    </div>
+                    <span className="text-xs text-muted-foreground shrink-0">{fmtDate(it.at)}</span>
+                  </div>
+                </div>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
+      {filtered.length > visible.length && (
+        <div className="flex justify-center mt-4">
+          <Button variant="outline" size="sm" onClick={() => setLimit((l) => l + 50)}>
+            عرض المزيد ({filtered.length - visible.length})
+          </Button>
+        </div>
+      )}
+    </Card>
+  );
+}
+
+const StatPill = ({ icon: Icon, label, value }: { icon: any; label: string; value: number }) => (
+  <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/40 border border-border">
+    <Icon className="w-4 h-4 text-primary shrink-0" />
+    <div className="min-w-0">
+      <p className="text-[10px] text-muted-foreground leading-none">{label}</p>
+      <p className="font-bold text-sm">{value}</p>
+    </div>
+  </div>
+);
