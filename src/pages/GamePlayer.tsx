@@ -98,6 +98,7 @@ const GamePlayer = () => {
   const prev = idx > 0 ? games[idx - 1] : null;
   const next = idx < games.length - 1 ? games[idx + 1] : null;
   const embedSrc = toEmbedUrl(current.url || "");
+  const allowed = !permsLoading && canPlay("game", current.id, level.id);
 
   return (
     <main dir="rtl" className="min-h-screen bg-background">
