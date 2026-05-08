@@ -704,16 +704,23 @@ const UsersSection = () => {
     load();
   };
 
-  const deleteUser = async (u: any) => {
-    if (!confirm(`هل أنت متأكد من حذف المستخدم "${u.full_name || u.id}"؟ لا يمكن التراجع.`)) return;
+  // Delete confirmation dialog
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteSaving, setDeleteSaving] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteSaving(true);
     const { data, error } = await supabase.functions.invoke("admin-update-user", {
-      body: { user_id: u.id, action: "delete" },
+      body: { user_id: deleteTarget.id, action: "delete" },
     });
+    setDeleteSaving(false);
     if (error || (data as any)?.error) {
       toast({ title: "فشل الحذف", description: (data as any)?.error || error?.message || "خطأ", variant: "destructive" });
       return;
     }
-    toast({ title: "تم حذف المستخدم" });
+    toast({ title: "✅ تم حذف المستخدم" });
+    setDeleteTarget(null);
     load();
   };
 
