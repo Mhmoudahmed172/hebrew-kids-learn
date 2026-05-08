@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { ArrowRight, CheckCircle2, XCircle, Trophy, Lock } from "lucide-react";
+import { ArrowRight, CheckCircle2, XCircle, Trophy } from "lucide-react";
+import LockedContent from "@/components/LockedContent";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
