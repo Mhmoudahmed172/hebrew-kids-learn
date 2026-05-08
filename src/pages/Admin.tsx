@@ -563,6 +563,7 @@ const VideosSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
