@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Play } from "lucide-react";
+import { ArrowRight, ArrowLeft, Play, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { recordProgress } from "@/hooks/useUserPoints";
 import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
@@ -13,6 +14,7 @@ const VideoPlayer = () => {
   const { slug, videoId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canPlay, loading: permsLoading } = usePermissions();
   const [level, setLevel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -20,13 +22,15 @@ const VideoPlayer = () => {
   // تسجيل المشاهدة عند فتح الفيديو
   useEffect(() => {
     if (!user || !videoId || !level) return;
+    if (permsLoading) return;
+    if (!canPlay("video", videoId, level.id)) return;
     recordProgress({
       userId: user.id,
       contentType: "video",
       contentId: videoId,
       levelId: level.id,
     }).then(({ error }) => { if (!error) toast.success("+10 نقاط 🎬"); });
-  }, [user, videoId, level]);
+  }, [user, videoId, level, permsLoading, canPlay]);
 
   useEffect(() => {
     (async () => {
@@ -69,8 +73,16 @@ const VideoPlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="rounded-3xl overflow-hidden bg-black aspect-video shadow-medium">
-              <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full" />
+            <div className="rounded-3xl overflow-hidden bg-black aspect-video shadow-medium relative">
+              {!permsLoading && !canPlay("video", current.id, level.id) ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-white text-center p-6">
+                  <Lock className="w-14 h-14 text-white/80" />
+                  <p className="font-display text-xl">المحتوى مقفل</p>
+                  <p className="text-sm text-white/70 max-w-sm">لا تملك صلاحية تشغيل هذا الفيديو. يمكنك تصفّح القائمة فقط — تواصل مع المشرف لمنحك الصلاحية.</p>
+                </div>
+              ) : (
+                <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full" />
+              )}
             </div>
             <div className="mt-4">
               <h1 className="font-display text-2xl lg:text-3xl mb-2">{current.title}</h1>

@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Play, Gamepad2, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Play, Gamepad2, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { usePermissions } from "@/hooks/usePermissions";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -25,6 +26,7 @@ const toEmbedUrl = (input: string): string => {
 const GamePlayer = () => {
   const { slug, gameId } = useParams();
   const navigate = useNavigate();
+  const { canPlay, loading: permsLoading } = usePermissions();
   const [level, setLevel] = useState<any>(null);
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -96,6 +98,7 @@ const GamePlayer = () => {
   const prev = idx > 0 ? games[idx - 1] : null;
   const next = idx < games.length - 1 ? games[idx + 1] : null;
   const embedSrc = toEmbedUrl(current.url || "");
+  const allowed = !permsLoading && canPlay("game", current.id, level.id);
 
   return (
     <main dir="rtl" className="min-h-screen bg-background">
@@ -108,7 +111,13 @@ const GamePlayer = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="relative rounded-3xl overflow-hidden bg-black shadow-medium" style={{ aspectRatio: "4 / 3" }}>
-              {embedSrc ? (
+              {!allowed ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-white text-center p-6">
+                  <Lock className="w-14 h-14 text-white/80" />
+                  <p className="font-display text-xl">اللعبة مقفلة</p>
+                  <p className="text-sm text-white/70 max-w-sm">لا تملك صلاحية تشغيل هذه اللعبة. تواصل مع المشرف لمنحك الصلاحية.</p>
+                </div>
+              ) : embedSrc ? (
                 <>
                   <iframe
                     key={current.id}
