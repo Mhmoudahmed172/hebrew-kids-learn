@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
-  MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield,
+  MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield, UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
