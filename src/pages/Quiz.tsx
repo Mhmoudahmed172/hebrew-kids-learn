@@ -45,11 +45,15 @@ const Quiz = () => {
       <main dir="rtl" className="min-h-screen bg-background">
         <Navbar />
         <section className="container py-20">
-          <div className="max-w-md mx-auto text-center bg-card rounded-3xl p-10 border-2 border-border">
-            <Lock className="w-14 h-14 text-muted-foreground mx-auto mb-4" />
-            <h1 className="font-display text-2xl mb-2">الاختبار مقفل</h1>
-            <p className="text-muted-foreground mb-6">لا تملك صلاحية الدخول لهذا الاختبار. تواصل مع المشرف لمنحك الصلاحية.</p>
-            <Button variant="hero" onClick={() => navigate(-1)}>رجوع</Button>
+          <div className="max-w-xl mx-auto bg-card rounded-3xl border-2 border-border overflow-hidden">
+            <LockedContent
+              title="الاختبار مقفل"
+              message="لا تملك صلاحية الدخول لهذا الاختبار. اطلب الصلاحية من المشرف."
+              contextLabel={quiz.title}
+            />
+            <div className="p-4 border-t border-border flex justify-center">
+              <Button variant="outline" onClick={() => navigate(-1)}>رجوع</Button>
+            </div>
           </div>
         </section>
         <Footer />
