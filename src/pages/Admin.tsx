@@ -1553,7 +1553,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
           </div>
           <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
         </div>
-        <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={setSelectedLevel} />
+        <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={selectLevel} highlightId={lastSelectedId} />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent dir="rtl">
             <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} {titleLabel}</DialogTitle></DialogHeader>
