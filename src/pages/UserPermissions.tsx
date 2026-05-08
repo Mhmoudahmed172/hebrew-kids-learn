@@ -385,6 +385,8 @@ export default function UserPermissions() {
             );
           })()
         )}
+
+        {userId && <UserActivity userId={userId} />}
       </div>
     </div>
   );
