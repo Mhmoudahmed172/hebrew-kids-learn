@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
   MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield, UserPlus,
-  MoreHorizontal, AlertTriangle, UserCog,
+  MoreHorizontal, AlertTriangle, UserCog, ChevronLeft, PlayCircle, FolderOpen,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
