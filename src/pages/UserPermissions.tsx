@@ -4,12 +4,17 @@ import {
   ArrowRight, Shield, Save, Eye, Pencil, Trash2,
   LayoutDashboard, Video, Users, FileText, ClipboardCheck,
   Music, Gamepad2, MessageSquare, HelpCircle, ChevronDown, BookOpen,
+  Search, ChevronsDownUp, ChevronsUpDown, X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
