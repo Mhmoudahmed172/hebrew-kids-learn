@@ -73,8 +73,16 @@ const VideoPlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="rounded-3xl overflow-hidden bg-black aspect-video shadow-medium">
-              <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full" />
+            <div className="rounded-3xl overflow-hidden bg-black aspect-video shadow-medium relative">
+              {!permsLoading && !canPlay("video", current.id, level.id) ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-white text-center p-6">
+                  <Lock className="w-14 h-14 text-white/80" />
+                  <p className="font-display text-xl">المحتوى مقفل</p>
+                  <p className="text-sm text-white/70 max-w-sm">لا تملك صلاحية تشغيل هذا الفيديو. يمكنك تصفّح القائمة فقط — تواصل مع المشرف لمنحك الصلاحية.</p>
+                </div>
+              ) : (
+                <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full" />
+              )}
             </div>
             <div className="mt-4">
               <h1 className="font-display text-2xl lg:text-3xl mb-2">{current.title}</h1>
