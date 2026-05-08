@@ -757,6 +757,7 @@ const UsersSection = () => {
             <TableHead className="text-right">تغيير الدور</TableHead>
             <TableHead className="text-right">تغيير الحالة</TableHead>
             <TableHead className="text-right">بيانات الدخول</TableHead>
+            <TableHead className="text-right">الصلاحيات</TableHead>
             <TableHead className="text-right">حذف</TableHead>
           </TableRow></TableHeader>
           <TableBody>
