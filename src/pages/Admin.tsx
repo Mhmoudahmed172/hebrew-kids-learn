@@ -761,7 +761,7 @@ const UsersSection = () => {
             <TableHead className="text-right">حذف</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={9} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
               : filteredUsers.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
