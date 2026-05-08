@@ -4,7 +4,18 @@ import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
   MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield, UserPlus,
+  MoreHorizontal, AlertTriangle, UserCog,
 } from "lucide-react";
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
+  DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger,
+  DropdownMenuSubContent, DropdownMenuRadioGroup, DropdownMenuRadioItem,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
@@ -693,16 +704,23 @@ const UsersSection = () => {
     load();
   };
 
-  const deleteUser = async (u: any) => {
-    if (!confirm(`هل أنت متأكد من حذف المستخدم "${u.full_name || u.id}"؟ لا يمكن التراجع.`)) return;
+  // Delete confirmation dialog
+  const [deleteTarget, setDeleteTarget] = useState<any>(null);
+  const [deleteSaving, setDeleteSaving] = useState(false);
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleteSaving(true);
     const { data, error } = await supabase.functions.invoke("admin-update-user", {
-      body: { user_id: u.id, action: "delete" },
+      body: { user_id: deleteTarget.id, action: "delete" },
     });
+    setDeleteSaving(false);
     if (error || (data as any)?.error) {
       toast({ title: "فشل الحذف", description: (data as any)?.error || error?.message || "خطأ", variant: "destructive" });
       return;
     }
-    toast({ title: "تم حذف المستخدم" });
+    toast({ title: "✅ تم حذف المستخدم" });
+    setDeleteTarget(null);
     load();
   };
 
@@ -857,69 +875,133 @@ const UsersSection = () => {
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
-            <TableHead className="text-right">الاسم</TableHead>
-            <TableHead className="text-right">العمر</TableHead>
+            <TableHead className="text-right">المستخدم</TableHead>
             <TableHead className="text-right">الدور</TableHead>
             <TableHead className="text-right">الحالة</TableHead>
-            <TableHead className="text-right">تغيير الدور</TableHead>
-            <TableHead className="text-right">تغيير الحالة</TableHead>
-            <TableHead className="text-right">بيانات الدخول</TableHead>
-            <TableHead className="text-right">الصلاحيات</TableHead>
-            <TableHead className="text-right">حذف</TableHead>
+            <TableHead className="text-right w-[80px]">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={9} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
-              : filteredUsers.map((u) => (
-                <TableRow key={u.id}>
-                  <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
-                  <TableCell>{u.age || "-"}</TableCell>
-                  <TableCell>{u.roles.map((r: string) => <Badge key={r} className="ml-1">{r}</Badge>)}</TableCell>
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+              : filteredUsers.map((u) => {
+                const initials = (u.full_name || "?").trim().split(/\s+/).map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
+                const isAdmin = u.roles.includes("admin");
+                return (
+                <TableRow key={u.id} className="hover:bg-muted/40">
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-lg text-xs font-bold ${STATUS_COLORS[u.status] || "bg-muted"}`}>
+                    <div className="flex items-center gap-3">
+                      <Avatar className="w-10 h-10 shrink-0">
+                        <AvatarFallback className={isAdmin ? "bg-primary-gradient text-primary-foreground font-bold" : "bg-pink-soft text-pink font-bold"}>
+                          {initials || "؟"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="font-bold truncate">{u.full_name || "بدون اسم"}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {u.age ? `${u.age} سنوات` : "—"}
+                        </p>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    {u.roles.length === 0 ? (
+                      <Badge variant="outline" className="text-muted-foreground">بدون دور</Badge>
+                    ) : (
+                      u.roles.map((r: string) => (
+                        <Badge key={r} className={`ml-1 ${r === "admin" ? "bg-primary-gradient text-primary-foreground" : "bg-pink-soft text-pink"}`}>
+                          {r === "admin" ? "👑 مدير" : "👶 طفل"}
+                        </Badge>
+                      ))
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold ${STATUS_COLORS[u.status] || "bg-muted"}`}>
                       {STATUS_LABELS[u.status] || u.status || "—"}
                     </span>
                   </TableCell>
                   <TableCell>
-                    <Select value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
-                      <SelectTrigger className="w-28"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="admin">مدير</SelectItem>
-                        <SelectItem value="kid">طفل</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Select value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
-                      <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        {Object.entries(STATUS_LABELS).map(([k, l]) => (
-                          <SelectItem key={k} value={k}>{l}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="outline" onClick={() => openCred(u)}>
-                      <KeyRound className="w-4 h-4" /> تعديل
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="soft" asChild>
-                      <Link to={`/admin/users/${u.id}/permissions`}>
-                        <Shield className="w-4 h-4" /> صلاحيات
-                      </Link>
-                    </Button>
-                  </TableCell>
-                  <TableCell>
-                    <Button size="sm" variant="destructive" onClick={() => deleteUser(u)}>
-                      <Trash2 className="w-4 h-4" /> حذف
-                    </Button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button size="icon" variant="ghost" className="h-9 w-9">
+                          <MoreHorizontal className="w-4 h-4" />
+                          <span className="sr-only">إجراءات</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel className="text-xs text-muted-foreground">{u.full_name || "المستخدم"}</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem onClick={() => openCred(u)}>
+                          <KeyRound className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <Link to={`/admin/users/${u.id}/permissions`}>
+                            <Shield className="w-4 h-4 ml-2" /> الصلاحيات
+                          </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            <UserCog className="w-4 h-4 ml-2" /> تغيير الدور
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            <DropdownMenuRadioGroup value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
+                              <DropdownMenuRadioItem value="admin">👑 مدير</DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="kid">👶 طفل</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSub>
+                          <DropdownMenuSubTrigger>
+                            <CheckCircle2 className="w-4 h-4 ml-2" /> تغيير الحالة
+                          </DropdownMenuSubTrigger>
+                          <DropdownMenuSubContent>
+                            <DropdownMenuRadioGroup value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
+                              {Object.entries(STATUS_LABELS).map(([k, l]) => (
+                                <DropdownMenuRadioItem key={k} value={k}>{l}</DropdownMenuRadioItem>
+                              ))}
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuSubContent>
+                        </DropdownMenuSub>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                          onClick={() => setDeleteTarget(u)}
+                        >
+                          <Trash2 className="w-4 h-4 ml-2" /> حذف المستخدم
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
           </TableBody>
         </Table>
       </Card>
+
+      <AlertDialog open={!!deleteTarget} onOpenChange={(o) => !o && setDeleteTarget(null)}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center mb-2">
+              <AlertTriangle className="w-6 h-6 text-destructive" />
+            </div>
+            <AlertDialogTitle className="text-center">حذف المستخدم نهائياً؟</AlertDialogTitle>
+            <AlertDialogDescription className="text-center">
+              سيتم حذف <span className="font-bold text-foreground">{deleteTarget?.full_name || "هذا المستخدم"}</span> وجميع بياناته بشكل نهائي.
+              <br />
+              لا يمكن التراجع عن هذا الإجراء.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel disabled={deleteSaving}>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); confirmDelete(); }}
+              disabled={deleteSaving}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteSaving ? "جاري الحذف..." : <><Trash2 className="w-4 h-4 ml-1" /> نعم، احذف</>}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       <Dialog open={credOpen} onOpenChange={setCredOpen}>
         <DialogContent dir="rtl">
