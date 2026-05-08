@@ -452,6 +452,80 @@ const Overview = () => {
   );
 };
 
+// ============== LEVELS GRID (reusable) ==============
+const LEVEL_COLORS = [
+  "from-primary to-secondary",
+  "from-secondary to-mint",
+  "from-pink to-accent",
+  "from-accent to-primary",
+  "from-mint to-primary",
+];
+const LevelsGrid = ({ levels, items, unitLabel, onSelect }: {
+  levels: any[]; items: any[]; unitLabel: string; onSelect: (lv: any) => void;
+}) => {
+  const grouped = items.reduce<Record<string, any[]>>((acc, it) => {
+    const k = it.level_id || "_unassigned";
+    (acc[k] = acc[k] || []).push(it); return acc;
+  }, {});
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {levels.map((lv, i) => {
+        const count = grouped[lv.id]?.length || 0;
+        return (
+          <button key={lv.id} onClick={() => onSelect(lv)}
+            className="group relative overflow-hidden rounded-3xl border-2 border-border bg-card shadow-soft hover:shadow-medium hover:-translate-y-1 hover:border-primary transition-bounce text-right p-6">
+            <div className={`absolute -left-8 -top-8 w-32 h-32 rounded-full bg-gradient-to-br ${LEVEL_COLORS[i % LEVEL_COLORS.length]} opacity-20 group-hover:opacity-40 transition-opacity`} />
+            <div className="relative flex items-start justify-between">
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${LEVEL_COLORS[i % LEVEL_COLORS.length]} flex items-center justify-center text-primary-foreground shadow-soft`}>
+                <FolderOpen className="w-7 h-7" />
+              </div>
+              <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
+            </div>
+            <h3 className="font-display text-xl mt-4">{lv.title}</h3>
+            <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+              <PlayCircle className="w-4 h-4" />
+              <span>{count} {unitLabel}</span>
+            </div>
+          </button>
+        );
+      })}
+      {grouped["_unassigned"]?.length > 0 && (
+        <button onClick={() => onSelect({ id: "_unassigned", title: "بدون مستوى" })}
+          className="group relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:border-primary hover:bg-card transition-bounce text-right p-6">
+          <div className="flex items-start justify-between">
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+              <FolderOpen className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
+          </div>
+          <h3 className="font-display text-xl mt-4">بدون مستوى</h3>
+          <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+            <PlayCircle className="w-4 h-4" />
+            <span>{grouped["_unassigned"].length} {unitLabel}</span>
+          </div>
+        </button>
+      )}
+    </div>
+  );
+};
+
+const LevelBackHeader = ({ levelTitle, sectionLabel, onBack, action }: {
+  levelTitle: string; sectionLabel: string; onBack: () => void; action: React.ReactNode;
+}) => (
+  <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="flex items-center gap-3">
+      <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
+        <ChevronLeft className="w-5 h-5 rotate-180" />
+      </Button>
+      <div>
+        <div className="text-xs text-muted-foreground">{sectionLabel} / </div>
+        <h1 className="font-display text-2xl">{levelTitle}</h1>
+      </div>
+    </div>
+    {action}
+  </div>
+);
+
 // ============== VIDEOS ==============
 const VideosSection = () => {
   const [videos, setVideos] = useState<any[]>([]);
