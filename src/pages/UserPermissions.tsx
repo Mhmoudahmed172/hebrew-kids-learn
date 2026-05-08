@@ -51,7 +51,10 @@ export default function UserPermissions() {
   const [roles, setRoles] = useState<string[]>([]);
   const [perms, setPerms] = useState<Record<string, Perm>>({});
   const [levels, setLevels] = useState<LevelData[]>([]);
-  const [openLevel, setOpenLevel] = useState<string | null>(null);
+  const [openLevels, setOpenLevels] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const [filterType, setFilterType] = useState<"all" | "videos" | "songs" | "quizzes" | "games">("all");
+  const [accessFilter, setAccessFilter] = useState<"all" | "enabled" | "disabled">("all");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
