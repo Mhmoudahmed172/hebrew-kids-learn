@@ -630,6 +630,52 @@ const UsersSection = () => {
   const [filters, setFilters] = useState<Record<string, string>>({ role: "", status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
+  // Create user dialog state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [createSaving, setCreateSaving] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newAge, setNewAge] = useState("");
+  const [newRole, setNewRole] = useState<"admin" | "kid">("kid");
+  const [newStatus, setNewStatus] = useState<"active" | "inactive">("active");
+
+  const resetCreate = () => {
+    setNewName(""); setNewEmail(""); setNewPassword(""); setNewAge("");
+    setNewRole("kid"); setNewStatus("active");
+  };
+
+  const submitCreate = async () => {
+    if (!newEmail.trim() || !newPassword) {
+      toast({ title: "⚠️ بيانات ناقصة", description: "الإيميل وكلمة المرور مطلوبان", variant: "destructive" });
+      return;
+    }
+    setCreateSaving(true);
+    const { data, error } = await supabase.functions.invoke("admin-create-user", {
+      body: {
+        email: newEmail.trim(),
+        password: newPassword,
+        full_name: newName.trim() || null,
+        age: newAge ? Number(newAge) : null,
+        role: newRole,
+        status: newStatus,
+      },
+    });
+    setCreateSaving(false);
+    if (error || (data as any)?.error) {
+      toast({
+        title: "❌ فشل إنشاء المستخدم",
+        description: (data as any)?.error || error?.message || "خطأ غير متوقع",
+        variant: "destructive",
+      });
+      return;
+    }
+    toast({ title: "✅ تم إنشاء المستخدم بنجاح" });
+    setCreateOpen(false);
+    resetCreate();
+    load();
+  };
+
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     const { data: rolesData } = await supabase.from("user_roles").select("*");
