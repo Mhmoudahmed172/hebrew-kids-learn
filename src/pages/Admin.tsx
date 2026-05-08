@@ -1539,6 +1539,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
   };
 
   const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  const selectLevel = (lv: any) => { setSelectedLevel(lv); setLastSelectedId(lv.id); };
   const unitLabel = table === "songs" ? "أغنية" : "لعبة";
 
   if (!selectedLevel) {
