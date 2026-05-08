@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, Lock } from "lucide-react";
+import LockedContent from "@/components/LockedContent";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
