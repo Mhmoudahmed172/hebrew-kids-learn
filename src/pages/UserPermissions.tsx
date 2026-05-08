@@ -280,24 +280,29 @@ export default function UserPermissions() {
 
               {/* Toolbar: search + filters + expand/collapse */}
               <div className="flex flex-col md:flex-row gap-2 mb-4 p-3 rounded-xl bg-muted/40 border border-border">
-                <div className="relative flex-1 min-w-0">
-                  <Search className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
-                  <Input
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="ابحث عن مستوى أو فيديو أو أغنية..."
-                    className="pr-9 pl-9"
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => setSearch("")}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                      aria-label="مسح البحث"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  )}
+                <div className="relative flex-1 min-w-0 group">
+                  <div className="absolute -inset-0.5 rounded-full bg-primary-gradient opacity-0 group-focus-within:opacity-30 blur-md transition-opacity pointer-events-none" />
+                  <div className="relative flex items-center bg-card border-2 border-border rounded-full shadow-soft transition-smooth group-focus-within:border-primary group-focus-within:shadow-medium">
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-primary-soft text-primary">
+                      <Search className="w-4 h-4" />
+                    </span>
+                    <Input
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="ابحث عن مستوى أو فيديو أو أغنية..."
+                      className="pr-12 pl-10 h-12 rounded-full border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm font-medium placeholder:text-muted-foreground/70"
+                    />
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch("")}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-muted hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-bounce active:scale-90"
+                        aria-label="مسح البحث"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <Select value={filterType} onValueChange={(v: any) => setFilterType(v)}>
                   <SelectTrigger className="md:w-40"><SelectValue /></SelectTrigger>
