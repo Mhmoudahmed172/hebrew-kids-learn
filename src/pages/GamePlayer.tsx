@@ -111,7 +111,13 @@ const GamePlayer = () => {
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
             <div className="relative rounded-3xl overflow-hidden bg-black shadow-medium" style={{ aspectRatio: "4 / 3" }}>
-              {embedSrc ? (
+              {!allowed ? (
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-white text-center p-6">
+                  <Lock className="w-14 h-14 text-white/80" />
+                  <p className="font-display text-xl">اللعبة مقفلة</p>
+                  <p className="text-sm text-white/70 max-w-sm">لا تملك صلاحية تشغيل هذه اللعبة. تواصل مع المشرف لمنحك الصلاحية.</p>
+                </div>
+              ) : embedSrc ? (
                 <>
                   <iframe
                     key={current.id}
