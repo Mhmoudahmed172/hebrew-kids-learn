@@ -10,6 +10,7 @@ import GamePlayer from "./pages/GamePlayer.tsx";
 import VideoPlayer from "./pages/VideoPlayer.tsx";
 import Quiz from "./pages/Quiz.tsx";
 import Admin from "./pages/Admin.tsx";
+import UserPermissions from "./pages/UserPermissions.tsx";
 import Auth from "./pages/Auth.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
@@ -33,6 +34,7 @@ const App = () => (
             <Route path="/level/:slug/game/:gameId" element={<GamePlayer />} />
             <Route path="/quiz/:id" element={<Quiz />} />
             <Route path="/admin" element={<Admin />} />
+            <Route path="/admin/users/:userId/permissions" element={<UserPermissions />} />
             <Route path="/login" element={<Auth mode="login" />} />
             <Route path="/signup" element={<Auth mode="signup" />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

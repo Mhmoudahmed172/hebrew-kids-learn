@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
-  MessageSquare, HelpCircle, KeyRound, Mail, Search,
+  MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -757,10 +757,11 @@ const UsersSection = () => {
             <TableHead className="text-right">تغيير الدور</TableHead>
             <TableHead className="text-right">تغيير الحالة</TableHead>
             <TableHead className="text-right">بيانات الدخول</TableHead>
+            <TableHead className="text-right">الصلاحيات</TableHead>
             <TableHead className="text-right">حذف</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={8} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={9} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
               : filteredUsers.map((u) => (
                 <TableRow key={u.id}>
                   <TableCell className="font-bold">{u.full_name || "-"}</TableCell>
@@ -793,6 +794,13 @@ const UsersSection = () => {
                   <TableCell>
                     <Button size="sm" variant="outline" onClick={() => openCred(u)}>
                       <KeyRound className="w-4 h-4" /> تعديل
+                    </Button>
+                  </TableCell>
+                  <TableCell>
+                    <Button size="sm" variant="soft" asChild>
+                      <Link to={`/admin/users/${u.id}/permissions`}>
+                        <Shield className="w-4 h-4" /> صلاحيات
+                      </Link>
                     </Button>
                   </TableCell>
                   <TableCell>
