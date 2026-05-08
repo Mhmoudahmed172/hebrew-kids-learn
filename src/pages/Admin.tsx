@@ -460,21 +460,26 @@ const LEVEL_COLORS = [
   "from-accent to-primary",
   "from-mint to-primary",
 ];
-const LevelsGrid = ({ levels, items, unitLabel, onSelect }: {
-  levels: any[]; items: any[]; unitLabel: string; onSelect: (lv: any) => void;
+const LevelsGrid = ({ levels, items, unitLabel, onSelect, highlightId }: {
+  levels: any[]; items: any[]; unitLabel: string; onSelect: (lv: any) => void; highlightId?: string | null;
 }) => {
   const grouped = items.reduce<Record<string, any[]>>((acc, it) => {
     const k = it.level_id || "_unassigned";
     (acc[k] = acc[k] || []).push(it); return acc;
   }, {});
+  const highlightCls = (id: string) =>
+    highlightId === id ? "border-primary ring-4 ring-primary/20 shadow-medium -translate-y-0.5" : "";
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {levels.map((lv, i) => {
         const count = grouped[lv.id]?.length || 0;
         return (
           <button key={lv.id} onClick={() => onSelect(lv)}
-            className="group relative overflow-hidden rounded-3xl border-2 border-border bg-card shadow-soft hover:shadow-medium hover:-translate-y-1 hover:border-primary transition-bounce text-right p-6">
+            className={`group relative overflow-hidden rounded-3xl border-2 border-border bg-card shadow-soft hover:shadow-medium hover:-translate-y-1 hover:border-primary transition-bounce text-right p-6 ${highlightCls(lv.id)}`}>
             <div className={`absolute -left-8 -top-8 w-32 h-32 rounded-full bg-gradient-to-br ${LEVEL_COLORS[i % LEVEL_COLORS.length]} opacity-20 group-hover:opacity-40 transition-opacity`} />
+            {highlightId === lv.id && (
+              <div className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">آخر زيارة</div>
+            )}
             <div className="relative flex items-start justify-between">
               <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${LEVEL_COLORS[i % LEVEL_COLORS.length]} flex items-center justify-center text-primary-foreground shadow-soft`}>
                 <FolderOpen className="w-7 h-7" />
@@ -491,7 +496,10 @@ const LevelsGrid = ({ levels, items, unitLabel, onSelect }: {
       })}
       {grouped["_unassigned"]?.length > 0 && (
         <button onClick={() => onSelect({ id: "_unassigned", title: "بدون مستوى" })}
-          className="group relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:border-primary hover:bg-card transition-bounce text-right p-6">
+          className={`group relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:border-primary hover:bg-card transition-bounce text-right p-6 ${highlightCls("_unassigned")}`}>
+          {highlightId === "_unassigned" && (
+            <div className="absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold">آخر زيارة</div>
+          )}
           <div className="flex items-start justify-between">
             <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
               <FolderOpen className="w-7 h-7 text-muted-foreground" />
@@ -512,19 +520,40 @@ const LevelsGrid = ({ levels, items, unitLabel, onSelect }: {
 const LevelBackHeader = ({ levelTitle, sectionLabel, onBack, action }: {
   levelTitle: string; sectionLabel: string; onBack: () => void; action: React.ReactNode;
 }) => (
-  <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-    <div className="flex items-center gap-3">
-      <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
-        <ChevronLeft className="w-5 h-5 rotate-180" />
-      </Button>
-      <div>
-        <div className="text-xs text-muted-foreground">{sectionLabel} / </div>
+  <div className="mb-6 space-y-3">
+    {/* Breadcrumb */}
+    <nav aria-label="مسار التنقل" className="flex items-center gap-1.5 text-sm">
+      <button
+        onClick={onBack}
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-soft text-primary font-bold hover:bg-primary hover:text-primary-foreground transition-bounce active:scale-95"
+      >
+        <FolderOpen className="w-4 h-4" />
+        <span>{sectionLabel}</span>
+      </button>
+      <ChevronLeft className="w-4 h-4 text-muted-foreground rotate-180" />
+      <span className="px-3 py-1.5 rounded-full bg-muted text-foreground font-bold truncate max-w-[60vw]">
+        {levelTitle}
+      </span>
+    </nav>
+
+    {/* Title row with prominent back button + action */}
+    <div className="flex items-center justify-between flex-wrap gap-3">
+      <div className="flex items-center gap-3">
+        <Button
+          variant="outline"
+          onClick={onBack}
+          className="gap-2 rounded-full border-2 hover:border-primary hover:bg-primary-soft"
+        >
+          <ChevronLeft className="w-5 h-5" />
+          <span>رجوع للمستويات</span>
+        </Button>
         <h1 className="font-display text-2xl">{levelTitle}</h1>
       </div>
+      {action}
     </div>
-    {action}
   </div>
 );
+
 
 // ============== VIDEOS ==============
 const VideosSection = () => {
@@ -534,6 +563,7 @@ const VideosSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
   const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
@@ -561,15 +591,10 @@ const VideosSection = () => {
     return acc;
   }, {});
 
+  const selectLevel = (lv: any) => { setSelectedLevel(lv); setLastSelectedId(lv.id); };
+
   // ===== Level not selected: show levels grid =====
   if (!selectedLevel) {
-    const colors = [
-      "from-primary to-secondary",
-      "from-secondary to-mint",
-      "from-pink to-accent",
-      "from-accent to-primary",
-      "from-mint to-primary",
-    ];
     return (
       <div>
         <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
@@ -582,51 +607,7 @@ const VideosSection = () => {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {levels.map((lv, i) => {
-            const count = videosByLevel[lv.id]?.length || 0;
-            return (
-              <button
-                key={lv.id}
-                onClick={() => setSelectedLevel(lv)}
-                className="group relative overflow-hidden rounded-3xl border-2 border-border bg-card shadow-soft hover:shadow-medium hover:-translate-y-1 hover:border-primary transition-bounce text-right p-6"
-              >
-                <div className={`absolute -left-8 -top-8 w-32 h-32 rounded-full bg-gradient-to-br ${colors[i % colors.length]} opacity-20 group-hover:opacity-40 transition-opacity`} />
-                <div className="relative flex items-start justify-between">
-                  <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${colors[i % colors.length]} flex items-center justify-center text-primary-foreground shadow-soft`}>
-                    <FolderOpen className="w-7 h-7" />
-                  </div>
-                  <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
-                </div>
-                <h3 className="font-display text-xl mt-4">{lv.title}</h3>
-                <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                  <PlayCircle className="w-4 h-4" />
-                  <span>{count} فيديو</span>
-                </div>
-              </button>
-            );
-          })}
-
-          {/* Unassigned videos card */}
-          {videosByLevel["_unassigned"]?.length > 0 && (
-            <button
-              onClick={() => setSelectedLevel({ id: "_unassigned", title: "بدون مستوى" })}
-              className="group relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:border-primary hover:bg-card transition-bounce text-right p-6"
-            >
-              <div className="flex items-start justify-between">
-                <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
-                  <FolderOpen className="w-7 h-7 text-muted-foreground" />
-                </div>
-                <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
-              </div>
-              <h3 className="font-display text-xl mt-4">بدون مستوى</h3>
-              <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
-                <PlayCircle className="w-4 h-4" />
-                <span>{videosByLevel["_unassigned"].length} فيديو</span>
-              </div>
-            </button>
-          )}
-        </div>
+        <LevelsGrid levels={levels} items={videos} unitLabel="فيديو" onSelect={selectLevel} highlightId={lastSelectedId} />
 
         <VideoDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
       </div>
@@ -641,20 +622,12 @@ const VideosSection = () => {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
-        <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }} className="rounded-full">
-            <ChevronLeft className="w-5 h-5 rotate-180" />
-          </Button>
-          <div>
-            <div className="text-xs text-muted-foreground">الفيديوهات / </div>
-            <h1 className="font-display text-2xl">{selectedLevel.title} 🎬</h1>
-          </div>
-        </div>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
-          <Plus /> رفع فيديو جديد
-        </Button>
-      </div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} 🎬`}
+        sectionLabel="الفيديوهات"
+        onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
+        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> رفع فيديو جديد</Button>}
+      />
 
       <FilterBar
         query={query}
@@ -1334,6 +1307,8 @@ const QuizzesSection = () => {
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  const selectLevel = (lv: any) => { setSelectedLevel(lv); setLastSelectedId(lv.id); };
   const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
@@ -1361,7 +1336,7 @@ const QuizzesSection = () => {
           </div>
           <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
         </div>
-        <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={setSelectedLevel} />
+        <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={selectLevel} highlightId={lastSelectedId} />
         <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
       </div>
     );
@@ -1564,6 +1539,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
   };
 
   const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  const selectLevel = (lv: any) => { setSelectedLevel(lv); setLastSelectedId(lv.id); };
   const unitLabel = table === "songs" ? "أغنية" : "لعبة";
 
   if (!selectedLevel) {
@@ -1576,7 +1553,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
           </div>
           <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
         </div>
-        <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={setSelectedLevel} />
+        <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={selectLevel} highlightId={lastSelectedId} />
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogContent dir="rtl">
             <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} {titleLabel}</DialogTitle></DialogHeader>
