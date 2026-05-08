@@ -452,6 +452,80 @@ const Overview = () => {
   );
 };
 
+// ============== LEVELS GRID (reusable) ==============
+const LEVEL_COLORS = [
+  "from-primary to-secondary",
+  "from-secondary to-mint",
+  "from-pink to-accent",
+  "from-accent to-primary",
+  "from-mint to-primary",
+];
+const LevelsGrid = ({ levels, items, unitLabel, onSelect }: {
+  levels: any[]; items: any[]; unitLabel: string; onSelect: (lv: any) => void;
+}) => {
+  const grouped = items.reduce<Record<string, any[]>>((acc, it) => {
+    const k = it.level_id || "_unassigned";
+    (acc[k] = acc[k] || []).push(it); return acc;
+  }, {});
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {levels.map((lv, i) => {
+        const count = grouped[lv.id]?.length || 0;
+        return (
+          <button key={lv.id} onClick={() => onSelect(lv)}
+            className="group relative overflow-hidden rounded-3xl border-2 border-border bg-card shadow-soft hover:shadow-medium hover:-translate-y-1 hover:border-primary transition-bounce text-right p-6">
+            <div className={`absolute -left-8 -top-8 w-32 h-32 rounded-full bg-gradient-to-br ${LEVEL_COLORS[i % LEVEL_COLORS.length]} opacity-20 group-hover:opacity-40 transition-opacity`} />
+            <div className="relative flex items-start justify-between">
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${LEVEL_COLORS[i % LEVEL_COLORS.length]} flex items-center justify-center text-primary-foreground shadow-soft`}>
+                <FolderOpen className="w-7 h-7" />
+              </div>
+              <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
+            </div>
+            <h3 className="font-display text-xl mt-4">{lv.title}</h3>
+            <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+              <PlayCircle className="w-4 h-4" />
+              <span>{count} {unitLabel}</span>
+            </div>
+          </button>
+        );
+      })}
+      {grouped["_unassigned"]?.length > 0 && (
+        <button onClick={() => onSelect({ id: "_unassigned", title: "بدون مستوى" })}
+          className="group relative overflow-hidden rounded-3xl border-2 border-dashed border-border bg-muted/30 hover:border-primary hover:bg-card transition-bounce text-right p-6">
+          <div className="flex items-start justify-between">
+            <div className="w-14 h-14 rounded-2xl bg-muted flex items-center justify-center">
+              <FolderOpen className="w-7 h-7 text-muted-foreground" />
+            </div>
+            <ChevronLeft className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:-translate-x-1 transition-bounce" />
+          </div>
+          <h3 className="font-display text-xl mt-4">بدون مستوى</h3>
+          <div className="flex items-center gap-2 mt-3 text-sm text-muted-foreground">
+            <PlayCircle className="w-4 h-4" />
+            <span>{grouped["_unassigned"].length} {unitLabel}</span>
+          </div>
+        </button>
+      )}
+    </div>
+  );
+};
+
+const LevelBackHeader = ({ levelTitle, sectionLabel, onBack, action }: {
+  levelTitle: string; sectionLabel: string; onBack: () => void; action: React.ReactNode;
+}) => (
+  <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div className="flex items-center gap-3">
+      <Button variant="ghost" size="icon" onClick={onBack} className="rounded-full">
+        <ChevronLeft className="w-5 h-5 rotate-180" />
+      </Button>
+      <div>
+        <div className="text-xs text-muted-foreground">{sectionLabel} / </div>
+        <h1 className="font-display text-2xl">{levelTitle}</h1>
+      </div>
+    </div>
+    {action}
+  </div>
+);
+
 // ============== VIDEOS ==============
 const VideosSection = () => {
   const [videos, setVideos] = useState<any[]>([]);
@@ -1259,7 +1333,8 @@ const QuizzesSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<Record<string, string>>({ level: "", status: "" });
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
@@ -1276,12 +1351,35 @@ const QuizzesSection = () => {
     toast({ title: "تم الحذف" }); load();
   };
 
+  if (!selectedLevel) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h1 className="font-display text-3xl">الاختبارات ✅</h1>
+            <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة اختباراته</p>
+          </div>
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
+        </div>
+        <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={setSelectedLevel} />
+        <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
+      </div>
+    );
+  }
+
+  const levelItems = quizzes.filter((q) => (selectedLevel.id === "_unassigned" ? !q.level_id : q.level_id === selectedLevel.id));
+  const filtered = applyFilters(levelItems, query, ["title", "description"], {
+    status: { value: filters.status, getter: (q) => String(q.published) },
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl">الاختبارات ✅</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
-      </div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} ✅`}
+        sectionLabel="الاختبارات"
+        onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
+        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>}
+      />
       <FilterBar
         query={query}
         onQueryChange={setQuery}
@@ -1289,23 +1387,16 @@ const QuizzesSection = () => {
         values={filters}
         onValueChange={setF}
         filters={[
-          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
           { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
         ]}
       />
-      {(() => {
-        const filtered = applyFilters(quizzes, query, ["title", "description"], {
-          level: { value: filters.level, getter: (q) => q.level_id },
-          status: { value: filters.status, getter: (q) => String(q.published) },
-        });
-        return (
       <div className="grid lg:grid-cols-2 gap-4">
         {filtered.map((q) => (
           <Card key={q.id} className="p-5">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div>
                 <h3 className="font-bold text-lg">{q.title}</h3>
-                <p className="text-xs text-muted-foreground">{q.levels?.title} • {q.quiz_questions?.length || 0} سؤال</p>
+                <p className="text-xs text-muted-foreground">{q.quiz_questions?.length || 0} سؤال</p>
               </div>
               <div className="flex gap-1">
                 <Button size="icon" variant="ghost" onClick={() => { setEditing(q); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
@@ -1315,10 +1406,8 @@ const QuizzesSection = () => {
             {q.description && <p className="text-sm text-muted-foreground">{q.description}</p>}
           </Card>
         ))}
-        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد اختبارات"}</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد اختبارات في هذا المستوى"}</p>}
       </div>
-        );
-      })()}
 
       <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
@@ -1438,8 +1527,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState({ title: "", url: "", description: "", level_id: "", published: true });
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<Record<string, string>>({ level: "" });
-  const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
+
+
 
   const load = async () => {
     const { data } = await (supabase.from(table) as any).select("*, levels(title)").order("created_at", { ascending: false });
@@ -1474,48 +1563,102 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
     toast({ title: "تم الحذف" }); load();
   };
 
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const unitLabel = table === "songs" ? "أغنية" : "لعبة";
+
+  if (!selectedLevel) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h1 className="font-display text-3xl">{titleLabel}</h1>
+            <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة محتواه</p>
+          </div>
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
+        </div>
+        <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={setSelectedLevel} />
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent dir="rtl">
+            <DialogHeader><DialogTitle>{editing ? "تعديل" : "إضافة"} {titleLabel}</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <div><Label>العنوان</Label><Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} /></div>
+              <div>
+                <Label>المستوى *</Label>
+                <Select value={form.level_id} onValueChange={(v) => setForm({ ...form, level_id: v })}>
+                  <SelectTrigger><SelectValue placeholder="اختر المستوى" /></SelectTrigger>
+                  <SelectContent>
+                    {levels.map((l) => <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>{table === "games" ? "كود التضمين (iframe)" : "الرابط"}</Label>
+                {table === "games" ? (
+                  <>
+                    <Textarea value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" rows={4}
+                      placeholder='<iframe src="https://wordwall.net/ar/embed/..." width="500" height="380" frameborder="0" allowfullscreen></iframe>' />
+                    <p className="text-xs text-muted-foreground mt-1">الصق كود iframe كاملاً كما هو من Wordwall.</p>
+                  </>
+                ) : (
+                  <Input value={form.url} onChange={(e) => setForm({ ...form, url: e.target.value })} dir="ltr" />
+                )}
+              </div>
+              {hasDescription && <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
+              <Button variant="hero" onClick={save}>حفظ</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </div>
+    );
+  }
+
+  const levelItems = items.filter((it) => (selectedLevel.id === "_unassigned" ? !it.level_id : it.level_id === selectedLevel.id));
+  const filtered = applyFilters(levelItems, query, ["title", "description"], {});
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl">{titleLabel}</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
-      </div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} • ${titleLabel}`}
+        sectionLabel={titleLabel}
+        onBack={() => { setSelectedLevel(null); setQuery(""); }}
+        action={<Button variant="hero" onClick={() => { setEditing(null); setForm((f) => ({ ...f, level_id: selectedLevel.id === "_unassigned" ? "" : selectedLevel.id })); setOpen(true); }}><Plus /> إضافة</Button>}
+      />
       <FilterBar
         query={query}
         onQueryChange={setQuery}
-        searchPlaceholder={`ابحث بالعنوان...`}
-        values={filters}
-        onValueChange={setF}
-        filters={[
-          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
-        ]}
+        searchPlaceholder="ابحث بالعنوان..."
+        values={{}}
+        onValueChange={() => {}}
+        filters={[]}
       />
       <Card className="overflow-hidden">
         <Table>
           <TableHeader><TableRow>
             <TableHead className="text-right">العنوان</TableHead>
-            <TableHead className="text-right">المستوى</TableHead>
             <TableHead className="text-right">الرابط</TableHead>
             <TableHead className="text-right">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {(() => {
-              const filtered = applyFilters(items, query, ["title", "description"], {
-                level: { value: filters.level, getter: (it) => it.level_id },
-              });
-              if (filtered.length === 0) return <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر"}</TableCell></TableRow>;
-              return filtered.map((it: any) => (
-                <TableRow key={it.id}>
-                  <TableCell className="font-bold">{it.title}</TableCell>
-                  <TableCell><Badge variant="secondary">{it.levels?.title || "—"}</Badge></TableCell>
-                  <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
-                  <TableCell>
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                  </TableCell>
-                </TableRow>
-              ));
-            })()}
+            {filtered.length === 0 ? (
+              <TableRow><TableCell colSpan={3} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا توجد عناصر في هذا المستوى"}</TableCell></TableRow>
+            ) : filtered.map((it: any) => (
+              <TableRow key={it.id}>
+                <TableCell className="font-bold flex items-center gap-2">
+                  <div className="w-9 h-9 rounded-xl bg-primary-soft flex items-center justify-center text-primary">
+                    <PlayCircle className="w-5 h-5" />
+                  </div>
+                  {it.title}
+                </TableCell>
+                <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
+                <TableCell>
+                  <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
+                  <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                </TableCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </Card>
