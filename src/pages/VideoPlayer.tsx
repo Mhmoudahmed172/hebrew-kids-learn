@@ -22,13 +22,15 @@ const VideoPlayer = () => {
   // تسجيل المشاهدة عند فتح الفيديو
   useEffect(() => {
     if (!user || !videoId || !level) return;
+    if (permsLoading) return;
+    if (!canPlay("video", videoId, level.id)) return;
     recordProgress({
       userId: user.id,
       contentType: "video",
       contentId: videoId,
       levelId: level.id,
     }).then(({ error }) => { if (!error) toast.success("+10 نقاط 🎬"); });
-  }, [user, videoId, level]);
+  }, [user, videoId, level, permsLoading, canPlay]);
 
   useEffect(() => {
     (async () => {
