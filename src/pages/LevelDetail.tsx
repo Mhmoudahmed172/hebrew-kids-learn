@@ -13,6 +13,7 @@ import Footer from "@/components/landing/Footer";
 const LevelDetail = () => {
   const { slug } = useParams();
   const navigate = useNavigate();
+  const { canPlay, canView, loading: permsLoading } = usePermissions();
   const [level, setLevel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [songs, setSongs] = useState<any[]>([]);
