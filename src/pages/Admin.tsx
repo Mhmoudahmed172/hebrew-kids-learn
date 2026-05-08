@@ -1336,7 +1336,7 @@ const QuizzesSection = () => {
           </div>
           <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
         </div>
-        <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={setSelectedLevel} />
+        <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={selectLevel} highlightId={lastSelectedId} />
         <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
       </div>
     );
