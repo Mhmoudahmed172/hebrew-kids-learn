@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { ArrowRight, CheckCircle2, XCircle, Trophy } from "lucide-react";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { ArrowRight, CheckCircle2, XCircle, Trophy, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import { recordProgress } from "@/hooks/useUserPoints";
 import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
