@@ -5,6 +5,7 @@ import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck,
   Music, Gamepad2, MessageSquare, HelpCircle, ChevronDown, BookOpen,
   Search, ChevronsDownUp, ChevronsUpDown, X,
+  Activity, LogIn, Trophy, PlayCircle, Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
