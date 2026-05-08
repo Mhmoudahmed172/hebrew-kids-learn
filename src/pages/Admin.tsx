@@ -1333,7 +1333,8 @@ const QuizzesSection = () => {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [query, setQuery] = useState("");
-  const [filters, setFilters] = useState<Record<string, string>>({ level: "", status: "" });
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [filters, setFilters] = useState<Record<string, string>>({ status: "" });
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
@@ -1350,12 +1351,35 @@ const QuizzesSection = () => {
     toast({ title: "تم الحذف" }); load();
   };
 
+  if (!selectedLevel) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div>
+            <h1 className="font-display text-3xl">الاختبارات ✅</h1>
+            <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة اختباراته</p>
+          </div>
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
+        </div>
+        <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={setSelectedLevel} />
+        <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
+      </div>
+    );
+  }
+
+  const levelItems = quizzes.filter((q) => (selectedLevel.id === "_unassigned" ? !q.level_id : q.level_id === selectedLevel.id));
+  const filtered = applyFilters(levelItems, query, ["title", "description"], {
+    status: { value: filters.status, getter: (q) => String(q.published) },
+  });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="font-display text-3xl">الاختبارات ✅</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
-      </div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} ✅`}
+        sectionLabel="الاختبارات"
+        onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
+        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>}
+      />
       <FilterBar
         query={query}
         onQueryChange={setQuery}
@@ -1363,23 +1387,16 @@ const QuizzesSection = () => {
         values={filters}
         onValueChange={setF}
         filters={[
-          { key: "level", label: "المستوى", options: levels.map((l) => ({ label: l.title, value: l.id })) },
           { key: "status", label: "الحالة", options: [{ label: "منشور", value: "true" }, { label: "مخفي", value: "false" }] },
         ]}
       />
-      {(() => {
-        const filtered = applyFilters(quizzes, query, ["title", "description"], {
-          level: { value: filters.level, getter: (q) => q.level_id },
-          status: { value: filters.status, getter: (q) => String(q.published) },
-        });
-        return (
       <div className="grid lg:grid-cols-2 gap-4">
         {filtered.map((q) => (
           <Card key={q.id} className="p-5">
             <div className="flex items-start justify-between gap-2 mb-2">
               <div>
                 <h3 className="font-bold text-lg">{q.title}</h3>
-                <p className="text-xs text-muted-foreground">{q.levels?.title} • {q.quiz_questions?.length || 0} سؤال</p>
+                <p className="text-xs text-muted-foreground">{q.quiz_questions?.length || 0} سؤال</p>
               </div>
               <div className="flex gap-1">
                 <Button size="icon" variant="ghost" onClick={() => { setEditing(q); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
@@ -1389,10 +1406,8 @@ const QuizzesSection = () => {
             {q.description && <p className="text-sm text-muted-foreground">{q.description}</p>}
           </Card>
         ))}
-        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد اختبارات"}</p>}
+        {filtered.length === 0 && <p className="text-center text-muted-foreground col-span-2 py-10">{query ? "لا توجد نتائج مطابقة" : "لا توجد اختبارات في هذا المستوى"}</p>}
       </div>
-        );
-      })()}
 
       <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
     </div>
