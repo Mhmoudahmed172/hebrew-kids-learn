@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, Play, Gamepad2, Loader2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, Play, Gamepad2, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { usePermissions } from "@/hooks/usePermissions";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
