@@ -69,21 +69,37 @@ const FilterBar = ({
   values?: Record<string, string>;
   onValueChange?: (key: string, value: string) => void;
 }) => (
-  <div className="flex flex-col sm:flex-row gap-3 mb-4 flex-wrap">
-    <div className="relative w-full sm:w-72">
-      <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-      <Input value={query} onChange={(e) => onQueryChange(e.target.value)} placeholder={searchPlaceholder} className="pr-10" />
-      {query && (
-        <button type="button" onClick={() => onQueryChange("")}
-          className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground" aria-label="مسح">
-          <X className="w-3 h-3" />
-        </button>
-      )}
+  <div className="flex flex-col sm:flex-row gap-3 mb-5 flex-wrap items-stretch">
+    <div className="relative w-full sm:w-80 group">
+      <div className="absolute -inset-0.5 rounded-full bg-primary-gradient opacity-0 group-focus-within:opacity-30 blur-md transition-opacity pointer-events-none" />
+      <div className="relative flex items-center bg-card border-2 border-border rounded-full shadow-soft transition-smooth group-focus-within:border-primary group-focus-within:shadow-medium">
+        <span className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-8 h-8 rounded-full bg-primary-soft text-primary">
+          <Search className="w-4 h-4" />
+        </span>
+        <Input
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+          placeholder={searchPlaceholder}
+          className="pr-12 pl-10 h-12 rounded-full border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-sm font-medium placeholder:text-muted-foreground/70"
+        />
+        {query && (
+          <button
+            type="button"
+            onClick={() => onQueryChange("")}
+            className="absolute left-2 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-muted hover:bg-destructive hover:text-destructive-foreground text-muted-foreground transition-bounce active:scale-90"
+            aria-label="مسح"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
+      </div>
     </div>
     {filters.map((f) => (
       <Select key={f.key} value={values[f.key] ?? ""} onValueChange={(v) => onValueChange?.(f.key, v)}>
-        <SelectTrigger className="w-full sm:w-44"><SelectValue placeholder={f.label} /></SelectTrigger>
-        <SelectContent>
+        <SelectTrigger className="w-full sm:w-48 h-12 rounded-full border-2 bg-card shadow-soft hover:border-primary/50 hover:shadow-medium transition-smooth font-medium px-5">
+          <SelectValue placeholder={f.label} />
+        </SelectTrigger>
+        <SelectContent className="rounded-2xl">
           <SelectItem value="__all__">{f.label}: الكل</SelectItem>
           {f.options.map((o) => <SelectItem key={o.value} value={o.value}>{o.label}</SelectItem>)}
         </SelectContent>
