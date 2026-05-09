@@ -1679,7 +1679,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         levelTitle={`${selectedLevel.title} • ${titleLabel}`}
         sectionLabel={titleLabel}
         onBack={() => { setSelectedLevel(null); setQuery(""); }}
-        action={<Button variant="hero" onClick={() => { setEditing(null); setForm((f) => ({ ...f, level_id: selectedLevel.id === "_unassigned" ? "" : selectedLevel.id })); setOpen(true); }}><Plus /> إضافة</Button>}
+        action={perm.can_add ? <Button variant="hero" onClick={() => { setEditing(null); setForm((f) => ({ ...f, level_id: selectedLevel.id === "_unassigned" ? "" : selectedLevel.id })); setOpen(true); }}><Plus /> إضافة</Button> : null}
       />
       <FilterBar
         query={query}
