@@ -263,7 +263,7 @@ const Admin = () => {
           </Link>
         </div>
         <nav className="p-4 space-y-1">
-          {nav.map((item) => {
+          {visibleNav.map((item) => {
             const Icon = item.icon;
             const isActive = active === item.id;
             return (
@@ -295,7 +295,7 @@ const Admin = () => {
 
       <main className="flex-1 p-6 lg:p-10 overflow-x-hidden">
         <div className="lg:hidden mb-6 flex gap-2 overflow-x-auto">
-          {nav.map((item) => (
+          {visibleNav.map((item) => (
             <button key={item.id} onClick={() => setActive(item.id)}
               className={`whitespace-nowrap px-4 py-2 rounded-xl text-sm font-bold ${active === item.id ? "bg-primary text-primary-foreground" : "bg-card"}`}>
               {item.label}
