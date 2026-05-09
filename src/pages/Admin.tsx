@@ -1014,9 +1014,11 @@ const UsersSection = () => {
     <div>
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <h1 className="font-display text-3xl">المستخدمون 👥</h1>
-        <Button variant="hero" onClick={() => { resetCreate(); setCreateOpen(true); }}>
-          <UserPlus className="w-4 h-4" /> إضافة مستخدم
-        </Button>
+        {perm.can_add && (
+          <Button variant="hero" onClick={() => { resetCreate(); setCreateOpen(true); }}>
+            <UserPlus className="w-4 h-4" /> إضافة مستخدم
+          </Button>
+        )}
       </div>
 
       <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetCreate(); }}>
