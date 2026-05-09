@@ -112,13 +112,13 @@ export default function UserPermissions() {
   };
 
   const setAll = (section: string, value: boolean) => {
-    setPerms((s) => ({ ...s, [section]: { can_view: value, can_edit: value, can_delete: value } }));
+    setPerms((s) => ({ ...s, [section]: { can_view: value, can_edit: value, can_delete: value, can_add: value } }));
   };
 
   const setView = (section: string, value: boolean) => {
     setPerms((s) => {
       const cur = s[section] || empty();
-      return { ...s, [section]: { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false }) } };
+      return { ...s, [section]: { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false, can_add: false }) } };
     });
   };
 
