@@ -690,7 +690,7 @@ const VideosSection = () => {
         levelTitle={`${selectedLevel.title} 🎬`}
         sectionLabel="الفيديوهات"
         onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
-        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> رفع فيديو جديد</Button>}
+        action={perm.can_add ? <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> رفع فيديو جديد</Button> : null}
       />
 
       <FilterBar
