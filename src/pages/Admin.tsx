@@ -1802,7 +1802,7 @@ const TestimonialsSection = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
+        {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>}
       </div>
       <FilterBar
         query={query}
