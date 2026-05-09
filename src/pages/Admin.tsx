@@ -1573,6 +1573,7 @@ const QuizDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
 
 // ============== SIMPLE (songs/games) ==============
 const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" | "games"; titleLabel: string; hasDescription?: boolean }) => {
+  const perm = useSectionPerm(table as Section);
   const [items, setItems] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
