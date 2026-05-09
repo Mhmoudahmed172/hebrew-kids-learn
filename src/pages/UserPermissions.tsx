@@ -135,7 +135,7 @@ export default function UserPermissions() {
       ];
       ids.forEach(id => {
         const cur = next[id] || empty();
-        next[id] = { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false }) };
+        next[id] = { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false, can_add: false }) };
       });
       return next;
     });
