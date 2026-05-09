@@ -85,7 +85,7 @@ export default function UserPermissions() {
 
       const map: Record<string, Perm> = {};
       (pm || []).forEach((row: any) => {
-        map[row.section] = { can_view: row.can_view, can_edit: row.can_edit, can_delete: row.can_delete };
+        map[row.section] = { can_view: row.can_view, can_edit: row.can_edit, can_delete: row.can_delete, can_add: !!row.can_add };
       });
       setPerms(map);
 
