@@ -1377,6 +1377,7 @@ const LevelsSection = () => {
 
 // ============== QUIZZES ==============
 const QuizzesSection = () => {
+  const perm = useSectionPerm("quizzes");
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
