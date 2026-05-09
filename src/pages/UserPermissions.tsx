@@ -20,7 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-type Perm = { can_view: boolean; can_edit: boolean; can_delete: boolean };
+type Perm = { can_view: boolean; can_edit: boolean; can_delete: boolean; can_add: boolean };
 
 const STAFF_SECTIONS: { id: string; label: string; icon: any; desc: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, desc: "الإحصائيات والتقارير" },
@@ -34,7 +34,7 @@ const STAFF_SECTIONS: { id: string; label: string; icon: any; desc: string }[] =
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle, desc: "صفحة الأسئلة والأجوبة" },
 ];
 
-const empty = (): Perm => ({ can_view: false, can_edit: false, can_delete: false });
+const empty = (): Perm => ({ can_view: false, can_edit: false, can_delete: false, can_add: false });
 
 type LevelData = {
   id: string; title: string; slug: string;
