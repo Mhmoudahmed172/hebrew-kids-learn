@@ -1629,7 +1629,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
             <h1 className="font-display text-3xl">{titleLabel}</h1>
             <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة محتواه</p>
           </div>
-          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
+          {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>}
         </div>
         <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={selectLevel} highlightId={lastSelectedId} />
         <Dialog open={open} onOpenChange={setOpen}>
