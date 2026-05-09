@@ -1871,6 +1871,7 @@ const TestimonialsSection = () => {
 
 // ============== FAQS ==============
 const FaqsSection = () => {
+  const perm = useSectionPerm("faqs");
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
