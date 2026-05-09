@@ -729,8 +729,8 @@ const VideosSection = () => {
                 <TableCell><Badge variant={v.published ? "default" : "secondary"}>{v.published ? "منشور" : "مخفي"}</Badge></TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(v); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => remove(v.id, v.video_url)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(v); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                    {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(v.id, v.video_url)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                   </div>
                 </TableCell>
               </TableRow>
