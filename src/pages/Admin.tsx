@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   LayoutDashboard, Video, Users, FileText, ClipboardCheck, Music, Gamepad2,
@@ -186,11 +186,23 @@ const STATUS_COLORS: Record<string, string> = {
 
 const SECTION_IDS: Section[] = ["overview", "videos", "users", "content", "quizzes", "songs", "games", "testimonials", "faqs"];
 
+type SectionPerm = { can_view: boolean; can_edit: boolean; can_delete: boolean; can_add: boolean };
+type SectionPermsMap = Record<string, SectionPerm> | null; // null = unrestricted
+
+const FULL_PERM: SectionPerm = { can_view: true, can_edit: true, can_delete: true, can_add: true };
+
+const SectionPermsContext = createContext<SectionPermsMap>(null);
+export const useSectionPerm = (section: Section): SectionPerm => {
+  const map = useContext(SectionPermsContext);
+  if (!map) return FULL_PERM;
+  return map[section] || { can_view: false, can_edit: false, can_delete: false, can_add: false };
+};
+
 const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [allowedSections, setAllowedSections] = useState<Set<Section> | null>(null);
+  const [sectionPerms, setSectionPerms] = useState<SectionPermsMap>(null);
   const [permsLoading, setPermsLoading] = useState(true);
 
   // Load this admin's per-section permissions. If no rows exist → full access.
@@ -199,21 +211,30 @@ const Admin = () => {
     (async () => {
       const { data } = await supabase
         .from("user_permissions")
-        .select("section,can_view")
+        .select("section,can_view,can_edit,can_delete,can_add")
         .eq("user_id", user.id)
         .in("section", SECTION_IDS as string[]);
       if (!data || data.length === 0) {
-        setAllowedSections(null); // null = unrestricted
+        setSectionPerms(null);
       } else {
-        const allowed = new Set<Section>(["overview"]); // overview always available
-        data.forEach((r: any) => { if (r.can_view) allowed.add(r.section as Section); });
-        setAllowedSections(allowed);
+        const map: Record<string, SectionPerm> = {
+          overview: { can_view: true, can_edit: true, can_delete: true, can_add: true },
+        };
+        data.forEach((r: any) => {
+          map[r.section] = {
+            can_view: !!r.can_view,
+            can_edit: !!r.can_edit,
+            can_delete: !!r.can_delete,
+            can_add: !!r.can_add,
+          };
+        });
+        setSectionPerms(map);
       }
       setPermsLoading(false);
     })();
   }, [user]);
 
-  const isAllowed = (id: Section) => !allowedSections || allowedSections.has(id);
+  const isAllowed = (id: Section) => !sectionPerms || (sectionPerms[id]?.can_view === true);
   const visibleNav = nav.filter((n) => isAllowed(n.id));
 
   const paramSection = searchParams.get("section") as Section | null;
@@ -303,15 +324,17 @@ const Admin = () => {
           ))}
         </div>
 
-        {active === "overview" && <Overview />}
-        {active === "videos" && <VideosSection />}
-        {active === "users" && <UsersSection />}
-        {active === "content" && <LevelsSection />}
-        {active === "quizzes" && <QuizzesSection />}
-        {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
-        {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
-        {active === "testimonials" && <TestimonialsSection />}
-        {active === "faqs" && <FaqsSection />}
+        <SectionPermsContext.Provider value={sectionPerms}>
+          {active === "overview" && <Overview />}
+          {active === "videos" && <VideosSection />}
+          {active === "users" && <UsersSection />}
+          {active === "content" && <LevelsSection />}
+          {active === "quizzes" && <QuizzesSection />}
+          {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
+          {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
+          {active === "testimonials" && <TestimonialsSection />}
+          {active === "faqs" && <FaqsSection />}
+        </SectionPermsContext.Provider>
       </main>
     </div>
   );
@@ -595,6 +618,7 @@ const LevelBackHeader = ({ levelTitle, sectionLabel, onBack, action }: {
 
 // ============== VIDEOS ==============
 const VideosSection = () => {
+  const perm = useSectionPerm("videos");
   const [videos, setVideos] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -640,9 +664,11 @@ const VideosSection = () => {
             <h1 className="font-display text-3xl">الفيديوهات 🎬</h1>
             <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة فيديوهاته</p>
           </div>
-          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
-            <Plus /> رفع فيديو جديد
-          </Button>
+          {perm.can_add && (
+            <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus /> رفع فيديو جديد
+            </Button>
+          )}
         </div>
 
         <LevelsGrid levels={levels} items={videos} unitLabel="فيديو" onSelect={selectLevel} highlightId={lastSelectedId} />
@@ -664,7 +690,7 @@ const VideosSection = () => {
         levelTitle={`${selectedLevel.title} 🎬`}
         sectionLabel="الفيديوهات"
         onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
-        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> رفع فيديو جديد</Button>}
+        action={perm.can_add ? <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> رفع فيديو جديد</Button> : null}
       />
 
       <FilterBar
@@ -703,8 +729,8 @@ const VideosSection = () => {
                 <TableCell><Badge variant={v.published ? "default" : "secondary"}>{v.published ? "منشور" : "مخفي"}</Badge></TableCell>
                 <TableCell>
                   <div className="flex gap-2">
-                    <Button size="icon" variant="ghost" onClick={() => { setEditing(v); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => remove(v.id, v.video_url)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                    {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(v); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                    {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(v.id, v.video_url)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                   </div>
                 </TableCell>
               </TableRow>
@@ -818,6 +844,7 @@ const VideoDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
 
 // ============== USERS ==============
 const UsersSection = () => {
+  const perm = useSectionPerm("users");
   const [users, setUsers] = useState<any[]>([]);
   const [credOpen, setCredOpen] = useState(false);
   const [credUser, setCredUser] = useState<any>(null);
@@ -987,9 +1014,11 @@ const UsersSection = () => {
     <div>
       <div className="flex items-center justify-between gap-4 mb-6 flex-wrap">
         <h1 className="font-display text-3xl">المستخدمون 👥</h1>
-        <Button variant="hero" onClick={() => { resetCreate(); setCreateOpen(true); }}>
-          <UserPlus className="w-4 h-4" /> إضافة مستخدم
-        </Button>
+        {perm.can_add && (
+          <Button variant="hero" onClick={() => { resetCreate(); setCreateOpen(true); }}>
+            <UserPlus className="w-4 h-4" /> إضافة مستخدم
+          </Button>
+        )}
       </div>
 
       <Dialog open={createOpen} onOpenChange={(o) => { setCreateOpen(o); if (!o) resetCreate(); }}>
@@ -1118,44 +1147,52 @@ const UsersSection = () => {
                       <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel className="text-xs text-muted-foreground">{u.full_name || "المستخدم"}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => openCred(u)}>
-                          <KeyRound className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
-                        </DropdownMenuItem>
+                        {perm.can_edit && (
+                          <DropdownMenuItem onClick={() => openCred(u)}>
+                            <KeyRound className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem asChild>
                           <Link to={`/admin/users/${u.id}/permissions`}>
                             <Shield className="w-4 h-4 ml-2" /> الصلاحيات
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>
-                            <UserCog className="w-4 h-4 ml-2" /> تغيير الدور
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuSubContent>
-                            <DropdownMenuRadioGroup value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
-                              <DropdownMenuRadioItem value="admin">👑 مدير</DropdownMenuRadioItem>
-                              <DropdownMenuRadioItem value="kid">👶 طفل</DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>
-                            <CheckCircle2 className="w-4 h-4 ml-2" /> تغيير الحالة
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuSubContent>
-                            <DropdownMenuRadioGroup value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
-                              {Object.entries(STATUS_LABELS).map(([k, l]) => (
-                                <DropdownMenuRadioItem key={k} value={k}>{l}</DropdownMenuRadioItem>
-                              ))}
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                          onClick={() => setDeleteTarget(u)}
-                        >
-                          <Trash2 className="w-4 h-4 ml-2" /> حذف المستخدم
-                        </DropdownMenuItem>
+                        {perm.can_edit && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                              <UserCog className="w-4 h-4 ml-2" /> تغيير الدور
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              <DropdownMenuRadioGroup value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
+                                <DropdownMenuRadioItem value="admin">👑 مدير</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="kid">👶 طفل</DropdownMenuRadioItem>
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
+                        {perm.can_edit && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                              <CheckCircle2 className="w-4 h-4 ml-2" /> تغيير الحالة
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              <DropdownMenuRadioGroup value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
+                                {Object.entries(STATUS_LABELS).map(([k, l]) => (
+                                  <DropdownMenuRadioItem key={k} value={k}>{l}</DropdownMenuRadioItem>
+                                ))}
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
+                        {perm.can_delete && <DropdownMenuSeparator />}
+                        {perm.can_delete && (
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                            onClick={() => setDeleteTarget(u)}
+                          >
+                            <Trash2 className="w-4 h-4 ml-2" /> حذف المستخدم
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
@@ -1228,6 +1265,7 @@ const UsersSection = () => {
 
 // ============== LEVELS ==============
 const LevelsSection = () => {
+  const perm = useSectionPerm("content");
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -1267,7 +1305,7 @@ const LevelsSection = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl">المستويات 📚</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>
+        {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>}
       </div>
       <FilterBar
         query={query}
@@ -1301,8 +1339,8 @@ const LevelsSection = () => {
                 <TableCell>{l.sort_order}</TableCell>
                 <TableCell><Badge variant={l.published ? "default" : "secondary"}>{l.published ? "منشور" : "مخفي"}</Badge></TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => { setEditing(l); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => remove(l.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(l); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                  {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(l.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                 </TableCell>
               </TableRow>
               ));
@@ -1339,6 +1377,7 @@ const LevelsSection = () => {
 
 // ============== QUIZZES ==============
 const QuizzesSection = () => {
+  const perm = useSectionPerm("quizzes");
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -1372,7 +1411,7 @@ const QuizzesSection = () => {
             <h1 className="font-display text-3xl">الاختبارات ✅</h1>
             <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة اختباراته</p>
           </div>
-          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
+          {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>}
         </div>
         <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={selectLevel} highlightId={lastSelectedId} />
         <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
@@ -1391,7 +1430,7 @@ const QuizzesSection = () => {
         levelTitle={`${selectedLevel.title} ✅`}
         sectionLabel="الاختبارات"
         onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
-        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>}
+        action={perm.can_add ? <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button> : null}
       />
       <FilterBar
         query={query}
@@ -1412,8 +1451,8 @@ const QuizzesSection = () => {
                 <p className="text-xs text-muted-foreground">{q.quiz_questions?.length || 0} سؤال</p>
               </div>
               <div className="flex gap-1">
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(q); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(q); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
               </div>
             </div>
             {q.description && <p className="text-sm text-muted-foreground">{q.description}</p>}
@@ -1534,6 +1573,7 @@ const QuizDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
 
 // ============== SIMPLE (songs/games) ==============
 const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" | "games"; titleLabel: string; hasDescription?: boolean }) => {
+  const perm = useSectionPerm(table as Section);
   const [items, setItems] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
@@ -1589,7 +1629,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
             <h1 className="font-display text-3xl">{titleLabel}</h1>
             <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة محتواه</p>
           </div>
-          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>
+          {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة</Button>}
         </div>
         <LevelsGrid levels={levels} items={items} unitLabel={unitLabel} onSelect={selectLevel} highlightId={lastSelectedId} />
         <Dialog open={open} onOpenChange={setOpen}>
@@ -1639,7 +1679,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
         levelTitle={`${selectedLevel.title} • ${titleLabel}`}
         sectionLabel={titleLabel}
         onBack={() => { setSelectedLevel(null); setQuery(""); }}
-        action={<Button variant="hero" onClick={() => { setEditing(null); setForm((f) => ({ ...f, level_id: selectedLevel.id === "_unassigned" ? "" : selectedLevel.id })); setOpen(true); }}><Plus /> إضافة</Button>}
+        action={perm.can_add ? <Button variant="hero" onClick={() => { setEditing(null); setForm((f) => ({ ...f, level_id: selectedLevel.id === "_unassigned" ? "" : selectedLevel.id })); setOpen(true); }}><Plus /> إضافة</Button> : null}
       />
       <FilterBar
         query={query}
@@ -1669,8 +1709,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
                 </TableCell>
                 <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                  {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                 </TableCell>
               </TableRow>
             ))}
@@ -1724,6 +1764,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
 
 // ============== TESTIMONIALS ==============
 const TestimonialsSection = () => {
+  const perm = useSectionPerm("testimonials");
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -1761,7 +1802,7 @@ const TestimonialsSection = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl">آراء العملاء 💬</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>
+        {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة رأي</Button>}
       </div>
       <FilterBar
         query={query}
@@ -1790,8 +1831,8 @@ const TestimonialsSection = () => {
               </div>
               <div className="flex gap-1">
                 <Badge variant={t.published ? "default" : "secondary"}>{t.published ? "منشور" : "مخفي"}</Badge>
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(t); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(t); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
               </div>
             </div>
             <p className="text-sm text-muted-foreground">{t.text}</p>
@@ -1830,6 +1871,7 @@ const TestimonialsSection = () => {
 
 // ============== FAQS ==============
 const FaqsSection = () => {
+  const perm = useSectionPerm("faqs");
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -1868,7 +1910,7 @@ const FaqsSection = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl">الأسئلة الشائعة ❓</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>
+        {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة سؤال</Button>}
       </div>
       <FilterBar
         query={query}
@@ -1900,8 +1942,8 @@ const FaqsSection = () => {
               </div>
               <div className="flex gap-1 shrink-0">
                 <Badge variant={f.published ? "default" : "secondary"}>{f.published ? "منشور" : "مخفي"}</Badge>
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(f); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(f); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
               </div>
             </div>
           </Card>

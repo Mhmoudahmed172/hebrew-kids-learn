@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
-  ArrowRight, Shield, Save, Eye, Pencil, Trash2,
+  ArrowRight, Shield, Save, Eye, Pencil, Trash2, Plus,
   LayoutDashboard, Video, Users, FileText, ClipboardCheck,
   Music, Gamepad2, MessageSquare, HelpCircle, ChevronDown, BookOpen,
   Search, ChevronsDownUp, ChevronsUpDown, X,
@@ -20,7 +20,7 @@ import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
-type Perm = { can_view: boolean; can_edit: boolean; can_delete: boolean };
+type Perm = { can_view: boolean; can_edit: boolean; can_delete: boolean; can_add: boolean };
 
 const STAFF_SECTIONS: { id: string; label: string; icon: any; desc: string }[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard, desc: "الإحصائيات والتقارير" },
@@ -34,7 +34,7 @@ const STAFF_SECTIONS: { id: string; label: string; icon: any; desc: string }[] =
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle, desc: "صفحة الأسئلة والأجوبة" },
 ];
 
-const empty = (): Perm => ({ can_view: false, can_edit: false, can_delete: false });
+const empty = (): Perm => ({ can_view: false, can_edit: false, can_delete: false, can_add: false });
 
 type LevelData = {
   id: string; title: string; slug: string;
@@ -85,7 +85,7 @@ export default function UserPermissions() {
 
       const map: Record<string, Perm> = {};
       (pm || []).forEach((row: any) => {
-        map[row.section] = { can_view: row.can_view, can_edit: row.can_edit, can_delete: row.can_delete };
+        map[row.section] = { can_view: row.can_view, can_edit: row.can_edit, can_delete: row.can_delete, can_add: !!row.can_add };
       });
       setPerms(map);
 
@@ -105,20 +105,20 @@ export default function UserPermissions() {
     setPerms((s) => {
       const cur = s[section] || empty();
       const next = { ...cur, [key]: !cur[key] };
-      if ((key === "can_edit" || key === "can_delete") && next[key]) next.can_view = true;
-      if (key === "can_view" && !next.can_view) { next.can_edit = false; next.can_delete = false; }
+      if ((key === "can_edit" || key === "can_delete" || key === "can_add") && next[key]) next.can_view = true;
+      if (key === "can_view" && !next.can_view) { next.can_edit = false; next.can_delete = false; next.can_add = false; }
       return { ...s, [section]: next };
     });
   };
 
   const setAll = (section: string, value: boolean) => {
-    setPerms((s) => ({ ...s, [section]: { can_view: value, can_edit: value, can_delete: value } }));
+    setPerms((s) => ({ ...s, [section]: { can_view: value, can_edit: value, can_delete: value, can_add: value } }));
   };
 
   const setView = (section: string, value: boolean) => {
     setPerms((s) => {
       const cur = s[section] || empty();
-      return { ...s, [section]: { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false }) } };
+      return { ...s, [section]: { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false, can_add: false }) } };
     });
   };
 
@@ -135,7 +135,7 @@ export default function UserPermissions() {
       ];
       ids.forEach(id => {
         const cur = next[id] || empty();
-        next[id] = { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false }) };
+        next[id] = { ...cur, can_view: value, ...(value ? {} : { can_edit: false, can_delete: false, can_add: false }) };
       });
       return next;
     });
@@ -213,7 +213,7 @@ export default function UserPermissions() {
               {STAFF_SECTIONS.map((s) => {
                 const Icon = s.icon;
                 const p = perms[s.id] || empty();
-                const allOn = p.can_view && p.can_edit && p.can_delete;
+                const allOn = p.can_view && p.can_edit && p.can_delete && p.can_add;
                 return (
                   <div key={s.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border border-border hover:border-primary/40 transition-colors">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -227,6 +227,7 @@ export default function UserPermissions() {
                     </div>
                     <div className="flex flex-wrap items-center gap-4">
                       <PermBox label="عرض" icon={Eye} checked={p.can_view} onChange={() => toggle(s.id, "can_view")} />
+                      <PermBox label="إضافة" icon={Plus} checked={p.can_add} onChange={() => toggle(s.id, "can_add")} />
                       <PermBox label="تعديل" icon={Pencil} checked={p.can_edit} onChange={() => toggle(s.id, "can_edit")} />
                       <PermBox label="حذف" icon={Trash2} checked={p.can_delete} onChange={() => toggle(s.id, "can_delete")} />
                       <Button size="sm" variant={allOn ? "outline" : "soft"} onClick={() => setAll(s.id, !allOn)}>

@@ -476,6 +476,7 @@ export type Database = {
       }
       user_permissions: {
         Row: {
+          can_add: boolean
           can_delete: boolean
           can_edit: boolean
           can_view: boolean
@@ -486,6 +487,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          can_add?: boolean
           can_delete?: boolean
           can_edit?: boolean
           can_view?: boolean
@@ -496,6 +498,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          can_add?: boolean
           can_delete?: boolean
           can_edit?: boolean
           can_view?: boolean
