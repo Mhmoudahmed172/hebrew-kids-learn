@@ -1430,7 +1430,7 @@ const QuizzesSection = () => {
         levelTitle={`${selectedLevel.title} ✅`}
         sectionLabel="الاختبارات"
         onBack={() => { setSelectedLevel(null); setQuery(""); setFilters({ status: "" }); }}
-        action={<Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>}
+        action={perm.can_add ? <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button> : null}
       />
       <FilterBar
         query={query}
