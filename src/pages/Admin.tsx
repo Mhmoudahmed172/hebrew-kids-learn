@@ -1339,8 +1339,8 @@ const LevelsSection = () => {
                 <TableCell>{l.sort_order}</TableCell>
                 <TableCell><Badge variant={l.published ? "default" : "secondary"}>{l.published ? "منشور" : "مخفي"}</Badge></TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => { setEditing(l); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => remove(l.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(l); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                  {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(l.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                 </TableCell>
               </TableRow>
               ));
