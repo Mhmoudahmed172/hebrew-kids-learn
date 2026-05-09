@@ -105,8 +105,8 @@ export default function UserPermissions() {
     setPerms((s) => {
       const cur = s[section] || empty();
       const next = { ...cur, [key]: !cur[key] };
-      if ((key === "can_edit" || key === "can_delete") && next[key]) next.can_view = true;
-      if (key === "can_view" && !next.can_view) { next.can_edit = false; next.can_delete = false; }
+      if ((key === "can_edit" || key === "can_delete" || key === "can_add") && next[key]) next.can_view = true;
+      if (key === "can_view" && !next.can_view) { next.can_edit = false; next.can_delete = false; next.can_add = false; }
       return { ...s, [section]: next };
     });
   };
