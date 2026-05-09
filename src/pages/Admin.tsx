@@ -1305,7 +1305,7 @@ const LevelsSection = () => {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="font-display text-3xl">المستويات 📚</h1>
-        <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>
+        {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> إضافة مستوى</Button>}
       </div>
       <FilterBar
         query={query}
