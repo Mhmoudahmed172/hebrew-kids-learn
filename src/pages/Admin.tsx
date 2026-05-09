@@ -1942,8 +1942,8 @@ const FaqsSection = () => {
               </div>
               <div className="flex gap-1 shrink-0">
                 <Badge variant={f.published ? "default" : "secondary"}>{f.published ? "منشور" : "مخفي"}</Badge>
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(f); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(f); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(f.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
               </div>
             </div>
           </Card>
