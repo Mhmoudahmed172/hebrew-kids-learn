@@ -191,9 +191,9 @@ type SectionPermsMap = Record<string, SectionPerm> | null; // null = unrestricte
 
 const FULL_PERM: SectionPerm = { can_view: true, can_edit: true, can_delete: true, can_add: true };
 
-const SectionPermsContext = React.createContext<SectionPermsMap>(null);
+const SectionPermsContext = createContext<SectionPermsMap>(null);
 export const useSectionPerm = (section: Section): SectionPerm => {
-  const map = React.useContext(SectionPermsContext);
+  const map = useContext(SectionPermsContext);
   if (!map) return FULL_PERM;
   return map[section] || { can_view: false, can_edit: false, can_delete: false, can_add: false };
 };
