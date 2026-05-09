@@ -1265,6 +1265,7 @@ const UsersSection = () => {
 
 // ============== LEVELS ==============
 const LevelsSection = () => {
+  const perm = useSectionPerm("content");
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
