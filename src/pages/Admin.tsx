@@ -618,6 +618,7 @@ const LevelBackHeader = ({ levelTitle, sectionLabel, onBack, action }: {
 
 // ============== VIDEOS ==============
 const VideosSection = () => {
+  const perm = useSectionPerm("videos");
   const [videos, setVideos] = useState<any[]>([]);
   const [levels, setLevels] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
