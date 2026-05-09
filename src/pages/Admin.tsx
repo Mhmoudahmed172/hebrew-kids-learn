@@ -664,9 +664,11 @@ const VideosSection = () => {
             <h1 className="font-display text-3xl">الفيديوهات 🎬</h1>
             <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة فيديوهاته</p>
           </div>
-          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
-            <Plus /> رفع فيديو جديد
-          </Button>
+          {perm.can_add && (
+            <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus /> رفع فيديو جديد
+            </Button>
+          )}
         </div>
 
         <LevelsGrid levels={levels} items={videos} unitLabel="فيديو" onSelect={selectLevel} highlightId={lastSelectedId} />
