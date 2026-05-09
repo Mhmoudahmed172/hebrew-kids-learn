@@ -1709,8 +1709,8 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
                 </TableCell>
                 <TableCell className="text-xs truncate max-w-xs">{it.url || "-"}</TableCell>
                 <TableCell>
-                  <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                  <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                  {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(it); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                  {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(it.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
                 </TableCell>
               </TableRow>
             ))}
