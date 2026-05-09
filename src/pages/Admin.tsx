@@ -1831,8 +1831,8 @@ const TestimonialsSection = () => {
               </div>
               <div className="flex gap-1">
                 <Badge variant={t.published ? "default" : "secondary"}>{t.published ? "منشور" : "مخفي"}</Badge>
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(t); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(t); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
               </div>
             </div>
             <p className="text-sm text-muted-foreground">{t.text}</p>
