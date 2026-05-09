@@ -213,7 +213,7 @@ export default function UserPermissions() {
               {STAFF_SECTIONS.map((s) => {
                 const Icon = s.icon;
                 const p = perms[s.id] || empty();
-                const allOn = p.can_view && p.can_edit && p.can_delete;
+                const allOn = p.can_view && p.can_edit && p.can_delete && p.can_add;
                 return (
                   <div key={s.id} className="flex flex-col sm:flex-row sm:items-center gap-4 p-4 rounded-xl border border-border hover:border-primary/40 transition-colors">
                     <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -227,6 +227,7 @@ export default function UserPermissions() {
                     </div>
                     <div className="flex flex-wrap items-center gap-4">
                       <PermBox label="عرض" icon={Eye} checked={p.can_view} onChange={() => toggle(s.id, "can_view")} />
+                      <PermBox label="إضافة" icon={Plus} checked={p.can_add} onChange={() => toggle(s.id, "can_add")} />
                       <PermBox label="تعديل" icon={Pencil} checked={p.can_edit} onChange={() => toggle(s.id, "can_edit")} />
                       <PermBox label="حذف" icon={Trash2} checked={p.can_delete} onChange={() => toggle(s.id, "can_delete")} />
                       <Button size="sm" variant={allOn ? "outline" : "soft"} onClick={() => setAll(s.id, !allOn)}>
