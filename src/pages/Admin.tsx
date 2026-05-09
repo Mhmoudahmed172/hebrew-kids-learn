@@ -186,11 +186,23 @@ const STATUS_COLORS: Record<string, string> = {
 
 const SECTION_IDS: Section[] = ["overview", "videos", "users", "content", "quizzes", "songs", "games", "testimonials", "faqs"];
 
+type SectionPerm = { can_view: boolean; can_edit: boolean; can_delete: boolean; can_add: boolean };
+type SectionPermsMap = Record<string, SectionPerm> | null; // null = unrestricted
+
+const FULL_PERM: SectionPerm = { can_view: true, can_edit: true, can_delete: true, can_add: true };
+
+const SectionPermsContext = React.createContext<SectionPermsMap>(null);
+export const useSectionPerm = (section: Section): SectionPerm => {
+  const map = React.useContext(SectionPermsContext);
+  if (!map) return FULL_PERM;
+  return map[section] || { can_view: false, can_edit: false, can_delete: false, can_add: false };
+};
+
 const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [allowedSections, setAllowedSections] = useState<Set<Section> | null>(null);
+  const [sectionPerms, setSectionPerms] = useState<SectionPermsMap>(null);
   const [permsLoading, setPermsLoading] = useState(true);
 
   // Load this admin's per-section permissions. If no rows exist → full access.
@@ -199,21 +211,30 @@ const Admin = () => {
     (async () => {
       const { data } = await supabase
         .from("user_permissions")
-        .select("section,can_view")
+        .select("section,can_view,can_edit,can_delete,can_add")
         .eq("user_id", user.id)
         .in("section", SECTION_IDS as string[]);
       if (!data || data.length === 0) {
-        setAllowedSections(null); // null = unrestricted
+        setSectionPerms(null);
       } else {
-        const allowed = new Set<Section>(["overview"]); // overview always available
-        data.forEach((r: any) => { if (r.can_view) allowed.add(r.section as Section); });
-        setAllowedSections(allowed);
+        const map: Record<string, SectionPerm> = {
+          overview: { can_view: true, can_edit: true, can_delete: true, can_add: true },
+        };
+        data.forEach((r: any) => {
+          map[r.section] = {
+            can_view: !!r.can_view,
+            can_edit: !!r.can_edit,
+            can_delete: !!r.can_delete,
+            can_add: !!r.can_add,
+          };
+        });
+        setSectionPerms(map);
       }
       setPermsLoading(false);
     })();
   }, [user]);
 
-  const isAllowed = (id: Section) => !allowedSections || allowedSections.has(id);
+  const isAllowed = (id: Section) => !sectionPerms || (sectionPerms[id]?.can_view === true);
   const visibleNav = nav.filter((n) => isAllowed(n.id));
 
   const paramSection = searchParams.get("section") as Section | null;
