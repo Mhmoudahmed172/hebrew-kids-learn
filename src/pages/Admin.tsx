@@ -1147,44 +1147,52 @@ const UsersSection = () => {
                       <DropdownMenuContent align="end" className="w-56">
                         <DropdownMenuLabel className="text-xs text-muted-foreground">{u.full_name || "المستخدم"}</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem onClick={() => openCred(u)}>
-                          <KeyRound className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
-                        </DropdownMenuItem>
+                        {perm.can_edit && (
+                          <DropdownMenuItem onClick={() => openCred(u)}>
+                            <KeyRound className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem asChild>
                           <Link to={`/admin/users/${u.id}/permissions`}>
                             <Shield className="w-4 h-4 ml-2" /> الصلاحيات
                           </Link>
                         </DropdownMenuItem>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>
-                            <UserCog className="w-4 h-4 ml-2" /> تغيير الدور
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuSubContent>
-                            <DropdownMenuRadioGroup value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
-                              <DropdownMenuRadioItem value="admin">👑 مدير</DropdownMenuRadioItem>
-                              <DropdownMenuRadioItem value="kid">👶 طفل</DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                        <DropdownMenuSub>
-                          <DropdownMenuSubTrigger>
-                            <CheckCircle2 className="w-4 h-4 ml-2" /> تغيير الحالة
-                          </DropdownMenuSubTrigger>
-                          <DropdownMenuSubContent>
-                            <DropdownMenuRadioGroup value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
-                              {Object.entries(STATUS_LABELS).map(([k, l]) => (
-                                <DropdownMenuRadioItem key={k} value={k}>{l}</DropdownMenuRadioItem>
-                              ))}
-                            </DropdownMenuRadioGroup>
-                          </DropdownMenuSubContent>
-                        </DropdownMenuSub>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                          className="text-destructive focus:text-destructive focus:bg-destructive/10"
-                          onClick={() => setDeleteTarget(u)}
-                        >
-                          <Trash2 className="w-4 h-4 ml-2" /> حذف المستخدم
-                        </DropdownMenuItem>
+                        {perm.can_edit && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                              <UserCog className="w-4 h-4 ml-2" /> تغيير الدور
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              <DropdownMenuRadioGroup value={u.roles[0] || ""} onValueChange={(v: any) => setRole(u.id, v)}>
+                                <DropdownMenuRadioItem value="admin">👑 مدير</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="kid">👶 طفل</DropdownMenuRadioItem>
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
+                        {perm.can_edit && (
+                          <DropdownMenuSub>
+                            <DropdownMenuSubTrigger>
+                              <CheckCircle2 className="w-4 h-4 ml-2" /> تغيير الحالة
+                            </DropdownMenuSubTrigger>
+                            <DropdownMenuSubContent>
+                              <DropdownMenuRadioGroup value={u.status || "active"} onValueChange={(v) => setStatus(u.id, v)}>
+                                {Object.entries(STATUS_LABELS).map(([k, l]) => (
+                                  <DropdownMenuRadioItem key={k} value={k}>{l}</DropdownMenuRadioItem>
+                                ))}
+                              </DropdownMenuRadioGroup>
+                            </DropdownMenuSubContent>
+                          </DropdownMenuSub>
+                        )}
+                        {perm.can_delete && <DropdownMenuSeparator />}
+                        {perm.can_delete && (
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive focus:bg-destructive/10"
+                            onClick={() => setDeleteTarget(u)}
+                          >
+                            <Trash2 className="w-4 h-4 ml-2" /> حذف المستخدم
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </TableCell>
