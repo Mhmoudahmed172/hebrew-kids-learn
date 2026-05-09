@@ -190,9 +190,37 @@ const Admin = () => {
   const { user, isAdmin, loading, signOut } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const [allowedSections, setAllowedSections] = useState<Set<Section> | null>(null);
+  const [permsLoading, setPermsLoading] = useState(true);
+
+  // Load this admin's per-section permissions. If no rows exist → full access.
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { data } = await supabase
+        .from("user_permissions")
+        .select("section,can_view")
+        .eq("user_id", user.id)
+        .in("section", SECTION_IDS as string[]);
+      if (!data || data.length === 0) {
+        setAllowedSections(null); // null = unrestricted
+      } else {
+        const allowed = new Set<Section>(["overview"]); // overview always available
+        data.forEach((r: any) => { if (r.can_view) allowed.add(r.section as Section); });
+        setAllowedSections(allowed);
+      }
+      setPermsLoading(false);
+    })();
+  }, [user]);
+
+  const isAllowed = (id: Section) => !allowedSections || allowedSections.has(id);
+  const visibleNav = nav.filter((n) => isAllowed(n.id));
+
   const paramSection = searchParams.get("section") as Section | null;
-  const active: Section = paramSection && SECTION_IDS.includes(paramSection) ? paramSection : "overview";
+  const requested: Section = paramSection && SECTION_IDS.includes(paramSection) ? paramSection : "overview";
+  const active: Section = isAllowed(requested) ? requested : "overview";
   const setActive = (id: Section) => {
+    if (!isAllowed(id)) return;
     const next = new URLSearchParams(searchParams);
     if (id === "overview") next.delete("section");
     else next.set("section", id);
@@ -208,7 +236,17 @@ const Admin = () => {
     }
   }, [user, isAdmin, loading, navigate]);
 
-  if (loading || !user || !isAdmin) {
+  // If user navigates to a now-forbidden section, bounce them back to overview
+  useEffect(() => {
+    if (permsLoading) return;
+    if (paramSection && !isAllowed(paramSection)) {
+      const next = new URLSearchParams(searchParams);
+      next.delete("section");
+      setSearchParams(next, { replace: true });
+    }
+  }, [permsLoading, paramSection]);
+
+  if (loading || !user || !isAdmin || permsLoading) {
     return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
   }
 
