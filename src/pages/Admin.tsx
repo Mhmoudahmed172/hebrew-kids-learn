@@ -1411,7 +1411,7 @@ const QuizzesSection = () => {
             <h1 className="font-display text-3xl">الاختبارات ✅</h1>
             <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة اختباراته</p>
           </div>
-          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>
+          {perm.can_add && <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}><Plus /> اختبار جديد</Button>}
         </div>
         <LevelsGrid levels={levels} items={quizzes} unitLabel="اختبار" onSelect={selectLevel} highlightId={lastSelectedId} />
         <QuizDialog open={open} onClose={() => setOpen(false)} editing={editing} levels={levels} onSaved={load} />
