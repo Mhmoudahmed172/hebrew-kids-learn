@@ -1764,6 +1764,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
 
 // ============== TESTIMONIALS ==============
 const TestimonialsSection = () => {
+  const perm = useSectionPerm("testimonials");
   const [items, setItems] = useState<any[]>([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<any>(null);
