@@ -324,15 +324,17 @@ const Admin = () => {
           ))}
         </div>
 
-        {active === "overview" && <Overview />}
-        {active === "videos" && <VideosSection />}
-        {active === "users" && <UsersSection />}
-        {active === "content" && <LevelsSection />}
-        {active === "quizzes" && <QuizzesSection />}
-        {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
-        {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
-        {active === "testimonials" && <TestimonialsSection />}
-        {active === "faqs" && <FaqsSection />}
+        <SectionPermsContext.Provider value={sectionPerms}>
+          {active === "overview" && <Overview />}
+          {active === "videos" && <VideosSection />}
+          {active === "users" && <UsersSection />}
+          {active === "content" && <LevelsSection />}
+          {active === "quizzes" && <QuizzesSection />}
+          {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
+          {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
+          {active === "testimonials" && <TestimonialsSection />}
+          {active === "faqs" && <FaqsSection />}
+        </SectionPermsContext.Provider>
       </main>
     </div>
   );
