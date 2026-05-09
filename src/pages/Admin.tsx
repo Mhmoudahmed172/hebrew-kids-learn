@@ -844,6 +844,7 @@ const VideoDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
 
 // ============== USERS ==============
 const UsersSection = () => {
+  const perm = useSectionPerm("users");
   const [users, setUsers] = useState<any[]>([]);
   const [credOpen, setCredOpen] = useState(false);
   const [credUser, setCredUser] = useState<any>(null);
