@@ -1451,8 +1451,8 @@ const QuizzesSection = () => {
                 <p className="text-xs text-muted-foreground">{q.quiz_questions?.length || 0} سؤال</p>
               </div>
               <div className="flex gap-1">
-                <Button size="icon" variant="ghost" onClick={() => { setEditing(q); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>
-                <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                {perm.can_edit && <Button size="icon" variant="ghost" onClick={() => { setEditing(q); setOpen(true); }}><Pencil className="w-4 h-4" /></Button>}
+                {perm.can_delete && <Button size="icon" variant="ghost" onClick={() => remove(q.id)}><Trash2 className="w-4 h-4 text-destructive" /></Button>}
               </div>
             </div>
             {q.description && <p className="text-sm text-muted-foreground">{q.description}</p>}
