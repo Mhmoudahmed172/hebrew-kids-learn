@@ -1126,6 +1126,9 @@ const UsersSection = () => {
                     </div>
                   </TableCell>
                   <TableCell>
+                    <span className="text-sm text-muted-foreground break-all" dir="ltr">{u.email || "—"}</span>
+                  </TableCell>
+                  <TableCell>
                     {u.roles.length === 0 ? (
                       <Badge variant="outline" className="text-muted-foreground">بدون دور</Badge>
                     ) : (
