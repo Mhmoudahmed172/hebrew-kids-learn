@@ -1009,7 +1009,7 @@ const UsersSection = () => {
     }
   };
 
-  const filteredUsers = applyFilters(users, query, ["full_name"], {
+  const filteredUsers = applyFilters(users, query, ["full_name", "email"], {
     role: { value: filters.role, getter: (u) => u.roles },
     status: { value: filters.status, getter: (u) => u.status },
   });
