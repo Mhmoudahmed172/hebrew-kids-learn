@@ -906,8 +906,12 @@ const UsersSection = () => {
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     const { data: rolesData } = await supabase.from("user_roles").select("*");
+    const { data: emailsRes } = await supabase.functions.invoke("admin-update-user", { body: { action: "list" } });
+    const emails: Record<string, string> = (emailsRes as any)?.emails || {};
     const merged = (profiles || []).map((p) => ({
-      ...p, roles: (rolesData || []).filter((r) => r.user_id === p.id).map((r) => r.role),
+      ...p,
+      roles: (rolesData || []).filter((r) => r.user_id === p.id).map((r) => r.role),
+      email: emails[p.id] || "",
     }));
     setUsers(merged);
   };
