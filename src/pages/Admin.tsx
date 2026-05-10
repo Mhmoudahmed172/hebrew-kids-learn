@@ -1152,11 +1152,13 @@ const UsersSection = () => {
                             <KeyRound className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem asChild>
-                          <Link to={`/admin/users/${u.id}/permissions`}>
-                            <Shield className="w-4 h-4 ml-2" /> الصلاحيات
-                          </Link>
-                        </DropdownMenuItem>
+                        {perm.can_edit && (
+                          <DropdownMenuItem asChild>
+                            <Link to={`/admin/users/${u.id}/permissions`}>
+                              <Shield className="w-4 h-4 ml-2" /> الصلاحيات
+                            </Link>
+                          </DropdownMenuItem>
+                        )}
                         {perm.can_edit && (
                           <DropdownMenuSub>
                             <DropdownMenuSubTrigger>
