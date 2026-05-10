@@ -906,8 +906,12 @@ const UsersSection = () => {
   const load = async () => {
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     const { data: rolesData } = await supabase.from("user_roles").select("*");
+    const { data: emailsRes } = await supabase.functions.invoke("admin-update-user", { body: { action: "list" } });
+    const emails: Record<string, string> = (emailsRes as any)?.emails || {};
     const merged = (profiles || []).map((p) => ({
-      ...p, roles: (rolesData || []).filter((r) => r.user_id === p.id).map((r) => r.role),
+      ...p,
+      roles: (rolesData || []).filter((r) => r.user_id === p.id).map((r) => r.role),
+      email: emails[p.id] || "",
     }));
     setUsers(merged);
   };
@@ -1005,7 +1009,7 @@ const UsersSection = () => {
     }
   };
 
-  const filteredUsers = applyFilters(users, query, ["full_name"], {
+  const filteredUsers = applyFilters(users, query, ["full_name", "email"], {
     role: { value: filters.role, getter: (u) => u.roles },
     status: { value: filters.status, getter: (u) => u.status },
   });
@@ -1079,7 +1083,7 @@ const UsersSection = () => {
       <FilterBar
         query={query}
         onQueryChange={setQuery}
-        searchPlaceholder="ابحث بالاسم..."
+        searchPlaceholder="ابحث بالاسم أو البريد..."
         values={filters}
         onValueChange={setF}
         filters={[
@@ -1094,12 +1098,13 @@ const UsersSection = () => {
         <Table>
           <TableHeader><TableRow>
             <TableHead className="text-right">المستخدم</TableHead>
+            <TableHead className="text-right">البريد الإلكتروني</TableHead>
             <TableHead className="text-right">الدور</TableHead>
             <TableHead className="text-right">الحالة</TableHead>
             <TableHead className="text-right w-[80px]">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
               : filteredUsers.map((u) => {
                 const initials = (u.full_name || "?").trim().split(/\s+/).map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
                 const isAdmin = u.roles.includes("admin");
@@ -1119,6 +1124,9 @@ const UsersSection = () => {
                         </p>
                       </div>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm text-muted-foreground break-all" dir="ltr">{u.email || "—"}</span>
                   </TableCell>
                   <TableCell>
                     {u.roles.length === 0 ? (
