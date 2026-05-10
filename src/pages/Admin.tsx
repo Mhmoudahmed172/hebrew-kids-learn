@@ -1083,7 +1083,7 @@ const UsersSection = () => {
       <FilterBar
         query={query}
         onQueryChange={setQuery}
-        searchPlaceholder="ابحث بالاسم..."
+        searchPlaceholder="ابحث بالاسم أو البريد..."
         values={filters}
         onValueChange={setF}
         filters={[
