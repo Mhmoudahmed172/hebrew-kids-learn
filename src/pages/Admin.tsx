@@ -1098,12 +1098,13 @@ const UsersSection = () => {
         <Table>
           <TableHeader><TableRow>
             <TableHead className="text-right">المستخدم</TableHead>
+            <TableHead className="text-right">البريد الإلكتروني</TableHead>
             <TableHead className="text-right">الدور</TableHead>
             <TableHead className="text-right">الحالة</TableHead>
             <TableHead className="text-right w-[80px]">إجراءات</TableHead>
           </TableRow></TableHeader>
           <TableBody>
-            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={4} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
+            {filteredUsers.length === 0 ? <TableRow><TableCell colSpan={5} className="text-center py-10 text-muted-foreground">{query ? "لا توجد نتائج مطابقة" : "لا يوجد مستخدمون"}</TableCell></TableRow>
               : filteredUsers.map((u) => {
                 const initials = (u.full_name || "?").trim().split(/\s+/).map((s: string) => s[0]).slice(0, 2).join("").toUpperCase();
                 const isAdmin = u.roles.includes("admin");
