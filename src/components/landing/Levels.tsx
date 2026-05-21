@@ -3,6 +3,7 @@ import { Star, Lock, BookOpen, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useReveal } from "@/hooks/useReveal";
 
 // Per-level visual theme (icon bg, name color, button, dot, hebrew sample)
 const themes = [
@@ -107,118 +108,119 @@ const Levels = () => {
           />
 
           <div className="space-y-16 md:space-y-24">
-            {levels.map((lvl, i) => {
-              const t = themes[i % themes.length];
-              const isRight = i % 2 === 0; // 1st right, 2nd left, ...
-              const stars = Math.max(0, Math.min(3, Number(lvl.stars ?? (t.locked ? 0 : 3 - Math.floor(i / 2)))));
-              const lessonCount = lvl.lessons_count ?? lvl.total_lessons ?? 12;
-
-              return (
-                <div
-                  key={lvl.id}
-                  className="relative grid grid-cols-1 md:grid-cols-2 items-center gap-6"
-                >
-                  {/* Number dot on the line */}
-                  <div className="absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
-                    <div
-                      className={`relative w-14 h-14 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}
-                    >
-                      <span className="font-display text-2xl text-white font-extrabold">
-                        {i + 1}
-                      </span>
-                      {t.youAreHere && (
-                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow-soft flex items-center gap-1">
-                          <Sparkles className="w-3 h-3" />
-                          أنت هنا
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Card column — right or left */}
-                  <div
-                    className={
-                      isRight
-                        ? "md:col-start-1 md:pl-12 md:pr-0"
-                        : "md:col-start-2 md:pr-12 md:pl-0"
-                    }
-                  >
-                    <article
-                      className={`group bg-card rounded-3xl p-6 md:p-7 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${
-                        t.locked ? "opacity-90" : ""
-                      }`}
-                    >
-                      {/* Top row: icon + hebrew chip */}
-                      <div className="flex items-center justify-between gap-3 mb-4">
-                        <div
-                          className={`w-12 h-12 rounded-2xl ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}
-                        >
-                          {t.locked ? (
-                            <Lock className="w-5 h-5" />
-                          ) : (
-                            <BookOpen className="w-5 h-5" />
-                          )}
-                        </div>
-                        <div className="px-3 py-1.5 rounded-xl bg-muted/70 border border-border/50">
-                          <span className="font-display text-xl font-extrabold text-foreground">
-                            {t.hebrew}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Texts */}
-                      <p className={`text-xs font-bold mb-1 ${t.nameText}`}>
-                        المستوى {i + 1}
-                      </p>
-                      <h3 className="font-display text-2xl text-foreground mb-2">
-                        {lvl.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-5">
-                        {lvl.description || "ابدأ مغامرة جديدة واكتشف المزيد من الكلمات والمهارات."}
-                      </p>
-
-                      {/* Meta row: stars + lessons */}
-                      <div className="flex items-center justify-between mb-5">
-                        <div className="flex items-center gap-1">
-                          {[0, 1, 2].map((s) => (
-                            <Star
-                              key={s}
-                              className={`w-4 h-4 ${
-                                s < stars
-                                  ? "fill-orange text-orange"
-                                  : "text-muted-foreground/40"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                        <div className="text-xs text-muted-foreground font-bold flex items-center gap-1">
-                          <BookOpen className="w-3.5 h-3.5" />
-                          {lessonCount} درس
-                        </div>
-                      </div>
-
-                      {/* CTA */}
-                      {t.locked ? (
-                        <Button disabled className={`w-full ${t.btn}`}>
-                          <Lock className="w-4 h-4" />
-                          مقفل
-                        </Button>
-                      ) : (
-                        <Button asChild className={`w-full ${t.btn}`}>
-                          <Link to={`/level/${lvl.slug}`}>
-                            {t.youAreHere ? "تابع المغامرة" : "ابدأ المستوى"}
-                          </Link>
-                        </Button>
-                      )}
-                    </article>
-                  </div>
-                </div>
-              );
-            })}
+            {levels.map((lvl, i) => (
+              <LevelRow key={lvl.id} lvl={lvl} index={i} />
+            ))}
           </div>
         </div>
       </div>
     </section>
+  );
+};
+
+interface LevelRowProps {
+  lvl: any;
+  index: number;
+}
+
+const LevelRow = ({ lvl, index }: LevelRowProps) => {
+  const t = themes[index % themes.length];
+  const isRight = index % 2 === 0;
+  const stars = Math.max(
+    0,
+    Math.min(3, Number(lvl.stars ?? (t.locked ? 0 : 3 - Math.floor(index / 2)))),
+  );
+  const lessonCount = lvl.lessons_count ?? lvl.total_lessons ?? 12;
+  const { ref, visible } = useReveal<HTMLDivElement>();
+
+  return (
+    <div className="relative grid grid-cols-1 md:grid-cols-2 items-center gap-6">
+      {/* Number dot on the line */}
+      <div className="absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
+        <div
+          className={`relative w-14 h-14 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}
+        >
+          <span className="font-display text-2xl text-white font-extrabold">
+            {index + 1}
+          </span>
+          {t.youAreHere && (
+            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow-soft flex items-center gap-1">
+              <Sparkles className="w-3 h-3" />
+              أنت هنا
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Card column — right or left, with side-slide reveal */}
+      <div
+        ref={ref}
+        className={`${
+          isRight
+            ? "md:col-start-1 md:pl-12 md:pr-0 reveal-right"
+            : "md:col-start-2 md:pr-12 md:pl-0 reveal-left"
+        } ${visible ? "is-visible" : ""}`}
+      >
+        <article
+          className={`group bg-card rounded-3xl p-6 md:p-7 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${
+            t.locked ? "opacity-90" : ""
+          }`}
+        >
+          {/* Top row: icon + hebrew chip */}
+          <div className="flex items-center justify-between gap-3 mb-4">
+            <div
+              className={`w-12 h-12 rounded-2xl ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}
+            >
+              {t.locked ? <Lock className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
+            </div>
+            <div className="px-3 py-1.5 rounded-xl bg-muted/70 border border-border/50">
+              <span className="font-display text-xl font-extrabold text-foreground">
+                {t.hebrew}
+              </span>
+            </div>
+          </div>
+
+          {/* Texts */}
+          <p className={`text-xs font-bold mb-1 ${t.nameText}`}>المستوى {index + 1}</p>
+          <h3 className="font-display text-2xl text-foreground mb-2">{lvl.title}</h3>
+          <p className="text-sm text-muted-foreground line-clamp-2 mb-5">
+            {lvl.description || "ابدأ مغامرة جديدة واكتشف المزيد من الكلمات والمهارات."}
+          </p>
+
+          {/* Meta row: stars + lessons */}
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-1">
+              {[0, 1, 2].map((s) => (
+                <Star
+                  key={s}
+                  className={`w-4 h-4 ${
+                    s < stars ? "fill-orange text-orange" : "text-muted-foreground/40"
+                  }`}
+                />
+              ))}
+            </div>
+            <div className="text-xs text-muted-foreground font-bold flex items-center gap-1">
+              <BookOpen className="w-3.5 h-3.5" />
+              {lessonCount} درس
+            </div>
+          </div>
+
+          {/* CTA */}
+          {t.locked ? (
+            <Button disabled className={`w-full ${t.btn}`}>
+              <Lock className="w-4 h-4" />
+              مقفل
+            </Button>
+          ) : (
+            <Button asChild className={`w-full ${t.btn}`}>
+              <Link to={`/level/${lvl.slug}`}>
+                {t.youAreHere ? "تابع المغامرة" : "ابدأ المستوى"}
+              </Link>
+            </Button>
+          )}
+        </article>
+      </div>
+    </div>
   );
 };
 
