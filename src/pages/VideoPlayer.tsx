@@ -59,6 +59,16 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
+  // اجلب رابطاً موقّتاً للفيديو الحالي
+  useEffect(() => {
+    setSignedUrl(null);
+    if (!videoId || !user || permsLoading || !level) return;
+    if (!canPlay("video", videoId, level.id)) return;
+    const v = videos.find((x) => x.id === videoId);
+    if (!v?.video_url) return;
+    getSignedVideoUrl(v.video_url).then(setSignedUrl);
+  }, [videoId, videos, user, permsLoading, level, canPlay]);
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
   if (!level) return <div className="min-h-screen flex items-center justify-center">المستوى غير موجود</div>;
 
