@@ -22,7 +22,7 @@ const FAQ = () => {
     <section id="faq" className="py-24 bg-muted/40">
       <div className="container max-w-3xl">
         <div className="text-center mb-12">
-          <span className="inline-block bg-accent-soft text-accent-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+          <span className="inline-block bg-accent-soft text-accent-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-4 text-slate-700">
             ❓ الأسئلة الشائعة
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
