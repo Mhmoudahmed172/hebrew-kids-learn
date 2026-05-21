@@ -117,7 +117,19 @@ const LevelDetail = () => {
                     >
                       {!allowed && <LockBadge />}
                       <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
-                        {v.thumbnail_url ? <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" /> : <VideoIcon className="w-12 h-12 text-muted-foreground" />}
+                        {v.thumbnail_url ? (
+                          <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
+                        ) : v.video_url ? (
+                          <video
+                            src={`${v.video_url}#t=0.1`}
+                            preload="metadata"
+                            muted
+                            playsInline
+                            className="w-full h-full object-cover pointer-events-none"
+                          />
+                        ) : (
+                          <VideoIcon className="w-12 h-12 text-muted-foreground" />
+                        )}
                         <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-colors">
                           <div className="w-14 h-14 rounded-full bg-primary text-primary-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                             {allowed ? <Play className="w-6 h-6 mr-1" /> : <Lock className="w-6 h-6" />}
