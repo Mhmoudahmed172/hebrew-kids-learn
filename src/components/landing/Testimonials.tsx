@@ -32,7 +32,7 @@ const Testimonials = () => {
   return (
     <section className="py-24 relative overflow-hidden">
       <div className="container">
-        <div className="text-right max-w-3xl mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="inline-block bg-mint-soft text-mint px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             ⭐ آراء العائلات
           </span>
