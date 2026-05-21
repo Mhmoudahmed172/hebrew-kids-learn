@@ -20,17 +20,28 @@ const VideoPlayer = () => {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // تسجيل المشاهدة عند فتح الفيديو
+  // تسجيل المشاهدة عند فتح الفيديو (مرة واحدة فقط لكل فيديو)
   useEffect(() => {
     if (!user || !videoId || !level) return;
     if (permsLoading) return;
     if (!canPlay("video", videoId, level.id)) return;
-    recordProgress({
-      userId: user.id,
-      contentType: "video",
-      contentId: videoId,
-      levelId: level.id,
-    }).then(({ error }) => { if (!error) toast.success("+10 نقاط 🎬"); });
+    (async () => {
+      const { data: existing } = await supabase
+        .from("user_progress")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("content_type", "video")
+        .eq("content_id", videoId)
+        .maybeSingle();
+      if (existing) return; // سبق وشاهد هذا الفيديو
+      const { error } = await recordProgress({
+        userId: user.id,
+        contentType: "video",
+        contentId: videoId,
+        levelId: level.id,
+      });
+      if (!error) toast.success("+10 نقاط 🎬");
+    })();
   }, [user, videoId, level, permsLoading, canPlay]);
 
   useEffect(() => {
