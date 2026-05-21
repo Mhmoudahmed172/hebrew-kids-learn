@@ -83,7 +83,7 @@ const Levels = () => {
     >
       <div className="container max-w-5xl">
         {/* Header */}
-        <div className="text-center max-w-3xl mx-auto mb-20 reveal is-visible">
+        <div className="max-w-3xl mx-auto mb-20 reveal is-visible">
           <span className="inline-block bg-primary-soft text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             🎮 رحلة المغامرة
           </span>
