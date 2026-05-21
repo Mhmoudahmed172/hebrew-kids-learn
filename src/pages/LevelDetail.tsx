@@ -95,7 +95,7 @@ const LevelDetail = () => {
         </div>
 
         <Tabs defaultValue="videos" className="w-full" dir="rtl">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mr-0 ml-auto mb-8 h-auto" dir="rtl">
+          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto mb-8 h-auto">
             <TabsTrigger value="videos" className="gap-2 py-3"><VideoIcon className="w-4 h-4" /> فيديوهات ({videos.length})</TabsTrigger>
             <TabsTrigger value="songs" className="gap-2 py-3"><Music className="w-4 h-4" /> أغاني ({songs.length})</TabsTrigger>
             <TabsTrigger value="games" className="gap-2 py-3"><Gamepad2 className="w-4 h-4" /> ألعاب ({games.length})</TabsTrigger>
