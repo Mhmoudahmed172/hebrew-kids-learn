@@ -76,14 +76,14 @@ const LevelDetail = () => {
         <Link to="/" className="inline-flex items-center gap-2 text-sm font-bold text-primary mb-6 hover:underline">
           <ArrowRight className="w-4 h-4 rotate-180" /> العودة للرئيسية
         </Link>
-        <div className="mb-10 text-center max-w-3xl mx-auto">
+        <div className="mb-10 text-right max-w-3xl">
           <h1 className="font-display text-4xl lg:text-5xl mb-4 inline-flex items-center gap-3">
             {level.title}
             {levelLocked && <Lock className="w-6 h-6 text-muted-foreground" />}
           </h1>
           {level.description && <p className="text-lg text-muted-foreground">{level.description}</p>}
           {levelLocked && (
-            <div className="mt-5 max-w-2xl mx-auto">
+            <div className="mt-5 max-w-2xl">
               <LockedContent
                 variant="banner"
                 title="هذا المستوى مقفل"
@@ -94,7 +94,7 @@ const LevelDetail = () => {
           )}
         </div>
 
-        <Tabs defaultValue="videos" className="w-full">
+        <Tabs defaultValue="videos" className="w-full" dir="rtl">
           <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto mb-8 h-auto">
             <TabsTrigger value="videos" className="gap-2 py-3"><VideoIcon className="w-4 h-4" /> فيديوهات ({videos.length})</TabsTrigger>
             <TabsTrigger value="songs" className="gap-2 py-3"><Music className="w-4 h-4" /> أغاني ({songs.length})</TabsTrigger>
