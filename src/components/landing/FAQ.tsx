@@ -21,7 +21,7 @@ const FAQ = () => {
   return (
     <section id="faq" className="py-24 bg-muted/40">
       <div className="container max-w-3xl">
-        <div className="text-center mb-12">
+        <div className="text-right mb-12">
           <span className="inline-block bg-accent-soft text-accent-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             ❓ الأسئلة الشائعة
           </span>

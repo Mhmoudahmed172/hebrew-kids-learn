@@ -43,7 +43,7 @@ const Pricing = () => {
       <div className="container relative">
         <div
           ref={head.ref}
-          className={`text-center max-w-3xl mx-auto mb-16 reveal ${head.visible ? "is-visible" : ""}`}
+          className={`text-right max-w-3xl mb-16 reveal ${head.visible ? "is-visible" : ""}`}
         >
           <span className="inline-block bg-primary-soft text-primary px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             💎 الباقات
