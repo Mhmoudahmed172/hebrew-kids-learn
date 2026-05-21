@@ -3,6 +3,7 @@ import { Star, Lock, BookOpen, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useReveal } from "@/hooks/useReveal";
 
 // Per-level visual theme (icon bg, name color, button, dot, hebrew sample)
 const themes = [
