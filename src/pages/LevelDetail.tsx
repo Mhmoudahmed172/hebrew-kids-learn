@@ -21,6 +21,7 @@ const LevelDetail = () => {
   const [songs, setSongs] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
