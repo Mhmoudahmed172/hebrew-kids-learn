@@ -20,6 +20,7 @@ const VideoPlayer = () => {
   const [level, setLevel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
   // تسجيل المشاهدة عند فتح الفيديو (مرة واحدة فقط لكل فيديو)
   useEffect(() => {
