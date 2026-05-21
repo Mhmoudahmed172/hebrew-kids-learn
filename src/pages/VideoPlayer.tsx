@@ -7,6 +7,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import { recordProgress } from "@/hooks/useUserPoints";
+import { getSignedVideoUrl } from "@/lib/videoUrl";
 import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -19,6 +20,7 @@ const VideoPlayer = () => {
   const [level, setLevel] = useState<any>(null);
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [signedUrl, setSignedUrl] = useState<string | null>(null);
 
   // تسجيل المشاهدة عند فتح الفيديو (مرة واحدة فقط لكل فيديو)
   useEffect(() => {
@@ -56,6 +58,16 @@ const VideoPlayer = () => {
       setLoading(false);
     })();
   }, [slug]);
+
+  // اجلب رابطاً موقّتاً للفيديو الحالي
+  useEffect(() => {
+    setSignedUrl(null);
+    if (!videoId || !user || permsLoading || !level) return;
+    if (!canPlay("video", videoId, level.id)) return;
+    const v = videos.find((x) => x.id === videoId);
+    if (!v?.video_url) return;
+    getSignedVideoUrl(v.video_url).then(setSignedUrl);
+  }, [videoId, videos, user, permsLoading, level, canPlay]);
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
   if (!level) return <div className="min-h-screen flex items-center justify-center">المستوى غير موجود</div>;
@@ -95,10 +107,10 @@ const VideoPlayer = () => {
                   message="لا تملك صلاحية تشغيل هذا الفيديو. يمكنك تصفّح القائمة فقط."
                   contextLabel={current.title}
                 />
-              ) : (
+              ) : signedUrl ? (
                 <video
                   key={current.id}
-                  src={current.video_url}
+                  src={signedUrl}
                   controls
                   autoPlay
                   controlsList="nodownload noremoteplayback noplaybackrate"
@@ -106,6 +118,10 @@ const VideoPlayer = () => {
                   onContextMenu={(e) => e.preventDefault()}
                   className="w-full h-full bg-black pointer-events-auto"
                 />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                  جاري تحميل الفيديو...
+                </div>
               )}
             </div>
             <div className="mt-4">

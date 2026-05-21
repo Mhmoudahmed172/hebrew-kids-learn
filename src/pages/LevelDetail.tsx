@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
+import { getSignedVideoUrl } from "@/lib/videoUrl";
 import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
@@ -20,6 +21,7 @@ const LevelDetail = () => {
   const [songs, setSongs] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,6 +40,17 @@ const LevelDetail = () => {
         setSongs(s.data || []);
         setGames(g.data || []);
         setQuizzes(q.data || []);
+
+        // اجلب روابط معاينة موقّتة لكل فيديو (للغلاف فقط)
+        const vids = v.data || [];
+        const entries = await Promise.all(
+          vids.map(async (vd: any) => {
+            if (vd.thumbnail_url) return [vd.id, ""] as const;
+            const url = await getSignedVideoUrl(vd.video_url, 60 * 30);
+            return [vd.id, url || ""] as const;
+          })
+        );
+        setPreviewUrls(Object.fromEntries(entries));
       }
       setLoading(false);
     })();
@@ -119,12 +132,15 @@ const LevelDetail = () => {
                       <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
                         {v.thumbnail_url ? (
                           <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
-                        ) : v.video_url ? (
+                        ) : previewUrls[v.id] ? (
                           <video
-                            src={`${v.video_url}#t=0.1`}
+                            src={`${previewUrls[v.id]}#t=0.1`}
                             preload="metadata"
                             muted
                             playsInline
+                            controlsList="nodownload"
+                            disablePictureInPicture
+                            onContextMenu={(e) => e.preventDefault()}
                             className="w-full h-full object-cover pointer-events-none"
                           />
                         ) : (
