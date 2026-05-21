@@ -17,7 +17,7 @@ const Hero = () => {
               <span className="text-sm font-bold text-foreground/80">منصة آمنة ومعتمدة لتعليم العبرية للأطفال</span>
             </div>
 
-            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15]">
+            <h1 className="font-display sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] text-6xl text-right border-0">
               طفلك يتعلم العبرية{" "}
               <span className="text-gradient-fun">بثقة ومتعة</span>{" "}
               من أول درس
