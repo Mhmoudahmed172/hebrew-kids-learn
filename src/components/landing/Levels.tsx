@@ -223,8 +223,5 @@ const LevelRow = ({ lvl, index }: LevelRowProps) => {
     </div>
   );
 };
-    </section>
-  );
-};
 
 export default Levels;
