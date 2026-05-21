@@ -20,17 +20,28 @@ const VideoPlayer = () => {
   const [videos, setVideos] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // تسجيل المشاهدة عند فتح الفيديو
+  // تسجيل المشاهدة عند فتح الفيديو (مرة واحدة فقط لكل فيديو)
   useEffect(() => {
     if (!user || !videoId || !level) return;
     if (permsLoading) return;
     if (!canPlay("video", videoId, level.id)) return;
-    recordProgress({
-      userId: user.id,
-      contentType: "video",
-      contentId: videoId,
-      levelId: level.id,
-    }).then(({ error }) => { if (!error) toast.success("+10 نقاط 🎬"); });
+    (async () => {
+      const { data: existing } = await supabase
+        .from("user_progress")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("content_type", "video")
+        .eq("content_id", videoId)
+        .maybeSingle();
+      if (existing) return; // سبق وشاهد هذا الفيديو
+      const { error } = await recordProgress({
+        userId: user.id,
+        contentType: "video",
+        contentId: videoId,
+        levelId: level.id,
+      });
+      if (!error) toast.success("+10 نقاط 🎬");
+    })();
   }, [user, videoId, level, permsLoading, canPlay]);
 
   useEffect(() => {
@@ -74,7 +85,10 @@ const VideoPlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="rounded-3xl overflow-hidden aspect-video shadow-medium relative bg-muted">
+            <div
+              className="rounded-3xl overflow-hidden aspect-video shadow-medium relative bg-muted select-none"
+              onContextMenu={(e) => e.preventDefault()}
+            >
               {!permsLoading && !canPlay("video", current.id, level.id) ? (
                 <LockedContent
                   title="الفيديو مقفل"
@@ -82,7 +96,16 @@ const VideoPlayer = () => {
                   contextLabel={current.title}
                 />
               ) : (
-                <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full bg-black" />
+                <video
+                  key={current.id}
+                  src={current.video_url}
+                  controls
+                  autoPlay
+                  controlsList="nodownload noremoteplayback noplaybackrate"
+                  disablePictureInPicture
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="w-full h-full bg-black pointer-events-auto"
+                />
               )}
             </div>
             <div className="mt-4">
