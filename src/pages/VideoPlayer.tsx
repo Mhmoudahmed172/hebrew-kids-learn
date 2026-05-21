@@ -107,10 +107,10 @@ const VideoPlayer = () => {
                   message="لا تملك صلاحية تشغيل هذا الفيديو. يمكنك تصفّح القائمة فقط."
                   contextLabel={current.title}
                 />
-              ) : (
+              ) : signedUrl ? (
                 <video
                   key={current.id}
-                  src={current.video_url}
+                  src={signedUrl}
                   controls
                   autoPlay
                   controlsList="nodownload noremoteplayback noplaybackrate"
@@ -118,6 +118,10 @@ const VideoPlayer = () => {
                   onContextMenu={(e) => e.preventDefault()}
                   className="w-full h-full bg-black pointer-events-auto"
                 />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                  جاري تحميل الفيديو...
+                </div>
               )}
             </div>
             <div className="mt-4">
