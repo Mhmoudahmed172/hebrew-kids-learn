@@ -85,7 +85,10 @@ const VideoPlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="rounded-3xl overflow-hidden aspect-video shadow-medium relative bg-muted">
+            <div
+              className="rounded-3xl overflow-hidden aspect-video shadow-medium relative bg-muted select-none"
+              onContextMenu={(e) => e.preventDefault()}
+            >
               {!permsLoading && !canPlay("video", current.id, level.id) ? (
                 <LockedContent
                   title="الفيديو مقفل"
@@ -93,7 +96,16 @@ const VideoPlayer = () => {
                   contextLabel={current.title}
                 />
               ) : (
-                <video key={current.id} src={current.video_url} controls autoPlay className="w-full h-full bg-black" />
+                <video
+                  key={current.id}
+                  src={current.video_url}
+                  controls
+                  autoPlay
+                  controlsList="nodownload noremoteplayback noplaybackrate"
+                  disablePictureInPicture
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="w-full h-full bg-black pointer-events-auto"
+                />
               )}
             </div>
             <div className="mt-4">
