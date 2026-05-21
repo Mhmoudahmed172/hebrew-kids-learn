@@ -74,15 +74,27 @@ const Quiz = () => {
     if (current + 1 >= total) {
       setDone(true);
       if (user && quiz) {
-        const { error } = await recordProgress({
-          userId: user.id,
-          contentType: "quiz",
-          contentId: quiz.id,
-          levelId: quiz.level_id,
-          score,
-          maxScore: total,
-        });
-        if (!error) toast.success(`+${score * 5} نقطة! 🎉`);
+        // تحقق إذا سبق وأنجز هذا الاختبار
+        const { data: existing } = await supabase
+          .from("user_progress")
+          .select("id")
+          .eq("user_id", user.id)
+          .eq("content_type", "quiz")
+          .eq("content_id", quiz.id)
+          .maybeSingle();
+        if (existing) {
+          toast.info("لقد أنجزت هذا الاختبار سابقاً — لا نقاط إضافية");
+        } else {
+          const { error } = await recordProgress({
+            userId: user.id,
+            contentType: "quiz",
+            contentId: quiz.id,
+            levelId: quiz.level_id,
+            score,
+            maxScore: total,
+          });
+          if (!error) toast.success(`+${score * 5} نقطة! 🎉`);
+        }
       }
     } else {
       setCurrent(current + 1);
