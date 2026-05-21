@@ -40,6 +40,17 @@ const LevelDetail = () => {
         setSongs(s.data || []);
         setGames(g.data || []);
         setQuizzes(q.data || []);
+
+        // اجلب روابط معاينة موقّتة لكل فيديو (للغلاف فقط)
+        const vids = v.data || [];
+        const entries = await Promise.all(
+          vids.map(async (vd: any) => {
+            if (vd.thumbnail_url) return [vd.id, ""] as const;
+            const url = await getSignedVideoUrl(vd.video_url, 60 * 30);
+            return [vd.id, url || ""] as const;
+          })
+        );
+        setPreviewUrls(Object.fromEntries(entries));
       }
       setLoading(false);
     })();
