@@ -5,7 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useReveal } from "@/hooks/useReveal";
 
-// Per-level visual theme
 const themes = [
   { iconBg: "bg-mint", iconText: "text-mint-foreground", nameText: "text-mint", dot: "bg-mint", btn: "bg-mint text-mint-foreground hover:bg-mint/90", hebrew: "א", locked: false, youAreHere: false },
   { iconBg: "bg-secondary", iconText: "text-secondary-foreground", nameText: "text-secondary", dot: "bg-secondary", btn: "bg-secondary text-secondary-foreground hover:bg-secondary/90", hebrew: "ב", locked: false, youAreHere: false },
@@ -15,6 +14,8 @@ const themes = [
 ];
 
 const PER_ROW = 4;
+const STAGGER_PX = 56; // vertical offset between alternating cards
+const ROW_HEIGHT = 360; // approx card+pin row height
 
 const Levels = () => {
   const [levels, setLevels] = useState<any[]>([]);
@@ -49,7 +50,6 @@ const Levels = () => {
       </svg>
 
       <div className="container max-w-6xl relative">
-        {/* Header */}
         <div className="max-w-3xl mx-auto mb-14 text-center reveal is-visible">
           <span className="inline-flex items-center gap-1.5 bg-primary-soft text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             <MapPin className="w-4 h-4" /> خريطة المغامرة
@@ -62,42 +62,50 @@ const Levels = () => {
           </p>
         </div>
 
-        {/* Mobile: simple vertical stack */}
+        {/* Mobile */}
         <div className="md:hidden space-y-5">
           {levels.map((lvl, i) => (
             <LevelCard key={lvl.id} lvl={lvl} index={i} />
           ))}
         </div>
 
-        {/* Desktop: horizontal map */}
-        <div className="hidden md:block space-y-16">
+        {/* Desktop adventure map */}
+        <div className="hidden md:block">
           {rows.map((row, rowIdx) => {
             const reverse = rowIdx % 2 === 1;
             const ordered = reverse ? [...row].reverse() : row;
             const isLastRow = rowIdx === rows.length - 1;
+
             return (
-              <div key={rowIdx} className="relative">
-                {/* Snake path connecting pins in this row */}
+              <div key={rowIdx} className="relative" style={{ marginBottom: isLastRow ? 0 : 80 }}>
+                {/* Continuous snaking path through pin centers (handles stagger) */}
                 <RowPath count={row.length} reverse={reverse} />
 
                 <div
                   className="relative grid gap-5"
-                  style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}
+                  style={{
+                    gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
+                    minHeight: ROW_HEIGHT,
+                  }}
                 >
                   {ordered.map((lvl, i) => {
                     const originalIdx = reverse
                       ? rowIdx * PER_ROW + (row.length - 1 - i)
                       : rowIdx * PER_ROW + i;
+                    // alternate up / down based on visual position
+                    const offsetClass = i % 2 === 0 ? "" : `mt-[${STAGGER_PX}px]`;
                     return (
-                      <LevelCard key={lvl.id} lvl={lvl} index={originalIdx} compact />
+                      <div
+                        key={lvl.id}
+                        style={{ marginTop: i % 2 === 0 ? 0 : STAGGER_PX }}
+                      >
+                        <LevelCard lvl={lvl} index={originalIdx} compact />
+                      </div>
                     );
                   })}
                 </div>
 
-                {/* Connector down to next row, on the end-side of the snake */}
-                {!isLastRow && (
-                  <RowConnector reverse={reverse} cols={row.length} />
-                )}
+                {!isLastRow && <RowConnector reverse={reverse} cols={row.length} />}
               </div>
             );
           })}
@@ -107,71 +115,78 @@ const Levels = () => {
   );
 };
 
-/* -------- Snake path through pin centers in a row -------- */
+/* -------- Continuous snake through pin centers (with stagger) -------- */
 const RowPath = ({ count, reverse }: { count: number; reverse: boolean }) => {
-  if (count < 2) return null;
-  // Pin centers sit at top of card. With grid of N cols, center x = (i + 0.5) / N * 100
+  if (count < 1) return null;
+  // viewBox: x 0-100 across the row, y 0-100 mapped to ROW_HEIGHT
+  // Pin sits ~24px from top of card; staggered cards push the odd-indexed pins down by STAGGER_PX.
+  // Convert px → viewBox-y: 100 * px / ROW_HEIGHT
+  const pinTopY = (24 / ROW_HEIGHT) * 100; // ~6.7
+  const staggerY = (STAGGER_PX / ROW_HEIGHT) * 100; // ~15.5
+
   const pts = Array.from({ length: count }, (_, i) => {
-    const visualIdx = reverse ? count - 1 - i : i;
-    const x = ((visualIdx + 0.5) / count) * 100;
-    return { x, y: 18 }; // y in viewBox units; pin sits around top
+    const x = ((i + 0.5) / count) * 100;
+    const y = pinTopY + (i % 2 === 0 ? 0 : staggerY);
+    return { x, y };
   });
 
-  // Build a smooth path with gentle vertical wave between pins
+  // Smooth bezier through points
   let d = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) {
     const prev = pts[i - 1];
     const cur = pts[i];
     const midX = (prev.x + cur.x) / 2;
-    const dipY = i % 2 === 0 ? 6 : 42; // alternate up/down for a snake feel
-    d += ` C ${midX} ${dipY}, ${midX} ${dipY}, ${cur.x} ${cur.y}`;
+    d += ` C ${midX} ${prev.y}, ${midX} ${cur.y}, ${cur.x} ${cur.y}`;
   }
-
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 100 50"
-      preserveAspectRatio="none"
-      className="absolute -top-2 left-0 w-full h-16 pointer-events-none"
-    >
-      <path
-        d={d}
-        fill="none"
-        stroke="url(#lvl-path-grad)"
-        strokeWidth="0.6"
-        strokeLinecap="round"
-        strokeDasharray="0.6 2"
-        opacity="0.75"
-        vectorEffect="non-scaling-stroke"
-        style={{ strokeWidth: 3 } as any}
-      />
-    </svg>
-  );
-};
-
-/* -------- Vertical connector to next row -------- */
-const RowConnector = ({ reverse, cols }: { reverse: boolean; cols: number }) => {
-  // End side: if reverse=false (LTR), snake ends on the right → drop on right
-  // The next row starts on that same side, so vertical line lives there.
-  const endX = reverse ? (0.5 / cols) * 100 : ((cols - 0.5) / cols) * 100;
-  const d = `M ${endX} 0 C ${endX} 60, ${endX} 60, ${endX} 100`;
 
   return (
     <svg
       aria-hidden
       viewBox="0 0 100 100"
       preserveAspectRatio="none"
-      className="absolute left-0 -bottom-16 w-full h-16 pointer-events-none"
+      className="absolute inset-0 w-full pointer-events-none z-0"
+      style={{ height: ROW_HEIGHT, transform: reverse ? "scaleX(-1)" : undefined }}
     >
       <path
         d={d}
         fill="none"
         stroke="url(#lvl-path-grad)"
-        strokeWidth="0.6"
         strokeLinecap="round"
-        strokeDasharray="0.6 2"
-        opacity="0.75"
-        style={{ strokeWidth: 3 } as any}
+        strokeDasharray="0.8 2.4"
+        opacity="0.85"
+        vectorEffect="non-scaling-stroke"
+        strokeWidth={3}
+      />
+    </svg>
+  );
+};
+
+/* -------- Vertical connector to next row (continuous) -------- */
+const RowConnector = ({ reverse, cols }: { reverse: boolean; cols: number }) => {
+  // last visual pin of this row lives at column index (cols-1)
+  // If cols-1 is odd → that pin is staggered down; next row's first pin (visual idx 0) is at top.
+  // Connector x = end side of current row, then curves to start side of next row (same edge because next row is reversed).
+  const lastIsStaggered = (cols - 1) % 2 === 1;
+  const endX = reverse ? (0.5 / cols) * 100 : ((cols - 0.5) / cols) * 100;
+  const startY = lastIsStaggered ? 60 : 20;
+  const d = `M ${endX} ${startY} C ${endX} 80, ${endX} 90, ${endX} 100`;
+
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 100 100"
+      preserveAspectRatio="none"
+      className="absolute left-0 right-0 w-full pointer-events-none"
+      style={{ height: 80, bottom: -80 }}
+    >
+      <path
+        d={d}
+        fill="none"
+        stroke="url(#lvl-path-grad)"
+        strokeLinecap="round"
+        strokeDasharray="0.8 2.4"
+        opacity="0.85"
+        strokeWidth={3}
       />
     </svg>
   );
@@ -185,8 +200,7 @@ const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; c
   const { ref, visible } = useReveal<HTMLDivElement>();
 
   return (
-    <div ref={ref} className={`reveal ${visible ? "is-visible" : ""} relative`}>
-      {/* Numbered pin */}
+    <div ref={ref} className={`reveal ${visible ? "is-visible" : ""} relative z-10`}>
       <div className="flex justify-center -mb-4 relative z-10">
         <div className={`relative w-10 h-10 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}>
           <span className="font-display text-sm text-white font-extrabold">{index + 1}</span>
