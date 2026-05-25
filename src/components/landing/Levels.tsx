@@ -14,8 +14,11 @@ const themes = [
 ];
 
 const PER_ROW = 4;
-const STAGGER_PX = 56; // vertical offset between alternating cards
-const ROW_HEIGHT = 360; // approx card+pin row height
+const STAGGER_PX = 64; // vertical offset for staggered cards
+const PIN_Y_TOP = 20;  // pin center y for non-staggered cards (px from row top)
+const PIN_Y_BOTTOM = PIN_Y_TOP + STAGGER_PX; // staggered pin center y
+const PATH_BAND_HEIGHT = PIN_Y_BOTTOM + 12; // SVG band covering all pin centers
+const ROW_GAP = 96; // vertical space between rows for connector
 
 const Levels = () => {
   const [levels, setLevels] = useState<any[]>([]);
@@ -38,7 +41,6 @@ const Levels = () => {
       <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-mint/20 blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute bottom-10 -left-20 w-80 h-80 rounded-full bg-pink/20 blur-3xl" />
 
-      {/* Shared gradient defs */}
       <svg aria-hidden width="0" height="0" className="absolute">
         <defs>
           <linearGradient id="lvl-path-grad" x1="0" x2="1">
@@ -69,43 +71,52 @@ const Levels = () => {
           ))}
         </div>
 
-        {/* Desktop adventure map */}
-        <div className="hidden md:block">
+        {/* Desktop adventure map — force LTR so DOM order = visual order */}
+        <div className="hidden md:block" dir="ltr">
           {rows.map((row, rowIdx) => {
             const reverse = rowIdx % 2 === 1;
             const ordered = reverse ? [...row].reverse() : row;
             const isLastRow = rowIdx === rows.length - 1;
+            const lastVisualIdx = row.length - 1;
+            const lastIsStaggered = lastVisualIdx % 2 === 1;
 
             return (
-              <div key={rowIdx} className="relative" style={{ marginBottom: isLastRow ? 0 : 80 }}>
-                {/* Continuous snaking path through pin centers (handles stagger) */}
-                <RowPath count={row.length} reverse={reverse} />
+              <div
+                key={rowIdx}
+                className="relative"
+                style={{ marginBottom: isLastRow ? 0 : ROW_GAP }}
+              >
+                {/* Continuous path through pin centers */}
+                <RowPath count={row.length} />
+
+                {/* Connector arc down to next row, on end-of-snake side */}
+                {!isLastRow && (
+                  <RowConnector
+                    cols={row.length}
+                    lastIsStaggered={lastIsStaggered}
+                    endOnRight={!reverse}
+                  />
+                )}
 
                 <div
                   className="relative grid gap-5"
-                  style={{
-                    gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))`,
-                    minHeight: ROW_HEIGHT,
-                  }}
+                  style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}
                 >
                   {ordered.map((lvl, i) => {
                     const originalIdx = reverse
                       ? rowIdx * PER_ROW + (row.length - 1 - i)
                       : rowIdx * PER_ROW + i;
-                    // alternate up / down based on visual position
-                    const offsetClass = i % 2 === 0 ? "" : `mt-[${STAGGER_PX}px]`;
                     return (
                       <div
                         key={lvl.id}
                         style={{ marginTop: i % 2 === 0 ? 0 : STAGGER_PX }}
+                        dir="rtl"
                       >
                         <LevelCard lvl={lvl} index={originalIdx} compact />
                       </div>
                     );
                   })}
                 </div>
-
-                {!isLastRow && <RowConnector reverse={reverse} cols={row.length} />}
               </div>
             );
           })}
@@ -115,78 +126,86 @@ const Levels = () => {
   );
 };
 
-/* -------- Continuous snake through pin centers (with stagger) -------- */
-const RowPath = ({ count, reverse }: { count: number; reverse: boolean }) => {
+/* -------- Smooth dashed path through all pin centers in a row -------- */
+const RowPath = ({ count }: { count: number }) => {
   if (count < 1) return null;
-  // viewBox: x 0-100 across the row, y 0-100 mapped to ROW_HEIGHT
-  // Pin sits ~24px from top of card; staggered cards push the odd-indexed pins down by STAGGER_PX.
-  // Convert px → viewBox-y: 100 * px / ROW_HEIGHT
-  const pinTopY = (24 / ROW_HEIGHT) * 100; // ~6.7
-  const staggerY = (STAGGER_PX / ROW_HEIGHT) * 100; // ~15.5
+  // x in percent of viewBox width 1000, y in actual px (viewBox height = PATH_BAND_HEIGHT)
+  const W = 1000;
+  const pts = Array.from({ length: count }, (_, i) => ({
+    x: ((i + 0.5) / count) * W,
+    y: i % 2 === 0 ? PIN_Y_TOP : PIN_Y_BOTTOM,
+  }));
 
-  const pts = Array.from({ length: count }, (_, i) => {
-    const x = ((i + 0.5) / count) * 100;
-    const y = pinTopY + (i % 2 === 0 ? 0 : staggerY);
-    return { x, y };
-  });
-
-  // Smooth bezier through points
   let d = `M ${pts[0].x} ${pts[0].y}`;
   for (let i = 1; i < pts.length; i++) {
     const prev = pts[i - 1];
     const cur = pts[i];
     const midX = (prev.x + cur.x) / 2;
+    // bezier control points create soft S-curve between staggered pins
     d += ` C ${midX} ${prev.y}, ${midX} ${cur.y}, ${cur.x} ${cur.y}`;
   }
 
   return (
     <svg
       aria-hidden
-      viewBox="0 0 100 100"
+      viewBox={`0 0 ${W} ${PATH_BAND_HEIGHT}`}
       preserveAspectRatio="none"
-      className="absolute inset-0 w-full pointer-events-none z-0"
-      style={{ height: ROW_HEIGHT, transform: reverse ? "scaleX(-1)" : undefined }}
+      className="absolute left-0 right-0 top-0 w-full pointer-events-none z-0"
+      style={{ height: PATH_BAND_HEIGHT }}
     >
       <path
         d={d}
         fill="none"
         stroke="url(#lvl-path-grad)"
         strokeLinecap="round"
-        strokeDasharray="0.8 2.4"
-        opacity="0.85"
+        strokeWidth={3.5}
+        strokeDasharray="2 8"
+        opacity="0.9"
         vectorEffect="non-scaling-stroke"
-        strokeWidth={3}
       />
     </svg>
   );
 };
 
-/* -------- Vertical connector to next row (continuous) -------- */
-const RowConnector = ({ reverse, cols }: { reverse: boolean; cols: number }) => {
-  // last visual pin of this row lives at column index (cols-1)
-  // If cols-1 is odd → that pin is staggered down; next row's first pin (visual idx 0) is at top.
-  // Connector x = end side of current row, then curves to start side of next row (same edge because next row is reversed).
-  const lastIsStaggered = (cols - 1) % 2 === 1;
-  const endX = reverse ? (0.5 / cols) * 100 : ((cols - 0.5) / cols) * 100;
-  const startY = lastIsStaggered ? 60 : 20;
-  const d = `M ${endX} ${startY} C ${endX} 80, ${endX} 90, ${endX} 100`;
+/* -------- Vertical curved connector between rows -------- */
+const RowConnector = ({
+  cols,
+  lastIsStaggered,
+  endOnRight,
+}: {
+  cols: number;
+  lastIsStaggered: boolean;
+  endOnRight: boolean;
+}) => {
+  const W = 1000;
+  const H = ROW_GAP + 40;
+  // x position of last pin in current row
+  const endX = endOnRight ? ((cols - 0.5) / cols) * W : (0.5 / cols) * W;
+  // start y: just below where last pin sits inside the row
+  const startY = lastIsStaggered ? PIN_Y_BOTTOM + 140 : PIN_Y_TOP + 140; // below card body
+  const midY = startY + (H - startY) * 0.5;
+
+  // For next row, first pin (visual idx 0) will be on the SAME side (because next row is reversed),
+  // and it's at PIN_Y_TOP (i=0). So connector lands at endX, y = H (which is just before next row top).
+  const d = `M ${endX} ${startY} C ${endX} ${midY}, ${endX} ${midY}, ${endX} ${H}`;
 
   return (
     <svg
       aria-hidden
-      viewBox="0 0 100 100"
+      viewBox={`0 0 ${W} ${H}`}
       preserveAspectRatio="none"
-      className="absolute left-0 right-0 w-full pointer-events-none"
-      style={{ height: 80, bottom: -80 }}
+      className="absolute left-0 right-0 w-full pointer-events-none z-0"
+      style={{ height: H, top: 0 }}
     >
       <path
         d={d}
         fill="none"
         stroke="url(#lvl-path-grad)"
         strokeLinecap="round"
-        strokeDasharray="0.8 2.4"
-        opacity="0.85"
-        strokeWidth={3}
+        strokeWidth={3.5}
+        strokeDasharray="2 8"
+        opacity="0.9"
+        vectorEffect="non-scaling-stroke"
       />
     </svg>
   );
