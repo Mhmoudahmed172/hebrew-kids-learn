@@ -1,225 +1,229 @@
 import { useEffect, useState } from "react";
-import { Star, Lock, BookOpen, Sparkles } from "lucide-react";
+import { Star, Lock, BookOpen, Sparkles, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useReveal } from "@/hooks/useReveal";
 
-// Per-level visual theme (icon bg, name color, button, dot, hebrew sample)
+// Per-level visual theme
 const themes = [
-  {
-    // 1 — green
-    iconBg: "bg-mint",
-    iconText: "text-mint-foreground",
-    nameText: "text-mint",
-    dot: "bg-mint",
-    btn: "bg-mint text-mint-foreground hover:bg-mint/90",
-    hebrew: "א",
-    locked: false,
-    youAreHere: false,
-  },
-  {
-    // 2 — green
-    iconBg: "bg-mint",
-    iconText: "text-mint-foreground",
-    nameText: "text-mint",
-    dot: "bg-mint",
-    btn: "bg-mint text-mint-foreground hover:bg-mint/90",
-    hebrew: "ב",
-    locked: false,
-    youAreHere: false,
-  },
-  {
-    // 3 — purple + "you are here"
-    iconBg: "bg-primary",
-    iconText: "text-primary-foreground",
-    nameText: "text-primary",
-    dot: "bg-primary",
-    btn: "bg-primary text-primary-foreground hover:bg-primary/90",
-    hebrew: "ג",
-    locked: false,
-    youAreHere: true,
-  },
-  {
-    // 4 — gold/grey locked
-    iconBg: "bg-muted",
-    iconText: "text-muted-foreground",
-    nameText: "text-muted-foreground",
-    dot: "bg-gradient-to-br from-[hsl(40_50%_70%)] to-[hsl(40_30%_55%)]",
-    btn: "bg-muted text-muted-foreground hover:bg-muted",
-    hebrew: "ד",
-    locked: true,
-    youAreHere: false,
-  },
-  {
-    // 5 — pink locked
-    iconBg: "bg-pink-soft",
-    iconText: "text-pink",
-    nameText: "text-pink",
-    dot: "bg-pink",
-    btn: "bg-pink/20 text-pink hover:bg-pink/30",
-    hebrew: "ה",
-    locked: true,
-    youAreHere: false,
-  },
+  { iconBg: "bg-mint", iconText: "text-mint-foreground", nameText: "text-mint", dot: "bg-mint", btn: "bg-mint text-mint-foreground hover:bg-mint/90", hebrew: "א", locked: false, youAreHere: false },
+  { iconBg: "bg-secondary", iconText: "text-secondary-foreground", nameText: "text-secondary", dot: "bg-secondary", btn: "bg-secondary text-secondary-foreground hover:bg-secondary/90", hebrew: "ב", locked: false, youAreHere: false },
+  { iconBg: "bg-primary", iconText: "text-primary-foreground", nameText: "text-primary", dot: "bg-primary", btn: "bg-primary text-primary-foreground hover:bg-primary/90", hebrew: "ג", locked: false, youAreHere: true },
+  { iconBg: "bg-muted", iconText: "text-muted-foreground", nameText: "text-muted-foreground", dot: "bg-gradient-to-br from-[hsl(40_50%_70%)] to-[hsl(40_30%_55%)]", btn: "bg-muted text-muted-foreground hover:bg-muted", hebrew: "ד", locked: true, youAreHere: false },
+  { iconBg: "bg-pink-soft", iconText: "text-pink", nameText: "text-pink", dot: "bg-pink", btn: "bg-pink/20 text-pink hover:bg-pink/30", hebrew: "ה", locked: true, youAreHere: false },
 ];
 
 const Levels = () => {
   const [levels, setLevels] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase
-      .from("levels")
-      .select("*")
-      .eq("published", true)
-      .order("sort_order")
+    supabase.from("levels").select("*").eq("published", true).order("sort_order")
       .then(({ data }) => setLevels(data || []));
   }, []);
+
+  // chunk into rows of 3 for the snaking horizontal path
+  const perRow = 3;
+  const rows: any[][] = [];
+  for (let i = 0; i < levels.length; i += perRow) {
+    rows.push(levels.slice(i, i + perRow));
+  }
 
   return (
     <section
       id="levels"
       className="py-24 relative overflow-hidden bg-gradient-to-b from-background via-primary-soft/40 to-background"
     >
-      <div className="container max-w-5xl">
+      {/* Decorative blobs */}
+      <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-mint/20 blur-3xl" />
+      <div aria-hidden className="pointer-events-none absolute bottom-10 -left-20 w-80 h-80 rounded-full bg-pink/20 blur-3xl" />
+
+      <div className="container max-w-6xl relative">
         {/* Header */}
-        <div className="max-w-3xl mx-auto mb-20 reveal is-visible">
-          <span className="inline-block bg-primary-soft text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
-            🎮 رحلة المغامرة
+        <div className="max-w-3xl mx-auto mb-16 text-center reveal is-visible">
+          <span className="inline-flex items-center gap-1.5 bg-primary-soft text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+            <MapPin className="w-4 h-4" /> خريطة المغامرة
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
-            مستويات <span className="text-gradient-fun">شيّقة</span> تنتظر طفلك
+            اتبع المسار واكتشف <span className="text-gradient-fun">عالم العبرية</span>
           </h2>
           <p className="text-lg text-muted-foreground">
-            كل مستوى مغامرة جديدة، ومع كل إنجاز يكتشف طفلك عالماً أوسع من الكلمات والمعرفة.
+            كل محطة على الخريطة مغامرة جديدة وكنز من الكلمات بانتظار طفلك.
           </p>
         </div>
 
-        {/* Timeline */}
-        <div className="relative">
-          {/* Vertical gradient line */}
-          <div
-            aria-hidden
-            className="absolute top-0 bottom-0 right-1/2 translate-x-1/2 w-[3px] rounded-full"
-            style={{
-              background:
-                "linear-gradient(to bottom, hsl(var(--mint)) 0%, hsl(var(--primary)) 50%, hsl(var(--pink)) 100%)",
-            }}
-          />
+        {/* Mobile fallback: simple vertical stack */}
+        <div className="md:hidden space-y-6">
+          {levels.map((lvl, i) => (
+            <LevelCard key={lvl.id} lvl={lvl} index={i} />
+          ))}
+        </div>
 
-          <div className="space-y-16 md:space-y-24">
-            {levels.map((lvl, i) => (
-              <LevelRow key={lvl.id} lvl={lvl} index={i} />
-            ))}
-          </div>
+        {/* Desktop: horizontal snaking map */}
+        <div className="hidden md:block space-y-24">
+          {rows.map((row, rowIdx) => {
+            const reverse = rowIdx % 2 === 1; // alternate direction
+            const ordered = reverse ? [...row].reverse() : row;
+            return (
+              <div key={rowIdx} className="relative">
+                {/* Curved path SVG behind cards */}
+                <PathSvg count={row.length} reverse={reverse} />
+
+                <div className={`relative grid gap-6 ${row.length === 3 ? "grid-cols-3" : row.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+                  {ordered.map((lvl, i) => {
+                    // global index for theme + numbering — based on original order
+                    const originalIdx = reverse
+                      ? rowIdx * perRow + (row.length - 1 - i)
+                      : rowIdx * perRow + i;
+                    // vertical stagger for map feel
+                    const offset = i % 2 === 0 ? "md:-translate-y-4" : "md:translate-y-6";
+                    return (
+                      <div key={lvl.id} className={`${offset}`}>
+                        <LevelCard lvl={lvl} index={originalIdx} compact />
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Curved connector to next row (only if there's another row) */}
+                {rowIdx < rows.length - 1 && (
+                  <RowConnector reverse={reverse} />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 };
 
-interface LevelRowProps {
-  lvl: any;
-  index: number;
-}
-
-const LevelRow = ({ lvl, index }: LevelRowProps) => {
-  const t = themes[index % themes.length];
-  const isRight = index % 2 === 0;
-  const stars = Math.max(
-    0,
-    Math.min(3, Number(lvl.stars ?? (t.locked ? 0 : 3 - Math.floor(index / 2)))),
+/* ---------------- Path SVG between cards in same row ---------------- */
+const PathSvg = ({ count, reverse }: { count: number; reverse: boolean }) => {
+  if (count < 2) return null;
+  // Snaking curve across cards, dashed
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 1000 200"
+      preserveAspectRatio="none"
+      className="absolute inset-0 w-full h-full pointer-events-none"
+    >
+      <defs>
+        <linearGradient id="lvl-path" x1="0" x2="1">
+          <stop offset="0%" stopColor="hsl(var(--mint))" />
+          <stop offset="50%" stopColor="hsl(var(--primary))" />
+          <stop offset="100%" stopColor="hsl(var(--pink))" />
+        </linearGradient>
+      </defs>
+      <path
+        d={
+          reverse
+            ? "M 950 100 C 750 20, 550 180, 350 100 S 100 40, 50 120"
+            : "M 50 100 C 250 20, 450 180, 650 100 S 900 40, 950 120"
+        }
+        fill="none"
+        stroke="url(#lvl-path)"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray="2 12"
+        opacity="0.55"
+      />
+    </svg>
   );
+};
+
+/* ---------------- Curved connector between rows ---------------- */
+const RowConnector = ({ reverse }: { reverse: boolean }) => {
+  // If row went LTR (reverse=false), the next row goes RTL → connect right side down
+  // If row went RTL (reverse=true), connect left side down
+  return (
+    <svg
+      aria-hidden
+      viewBox="0 0 200 120"
+      preserveAspectRatio="none"
+      className="absolute left-0 right-0 -bottom-24 mx-auto w-[96%] h-24 pointer-events-none"
+    >
+      <path
+        d={
+          reverse
+            ? "M 20 0 C 20 60, 60 100, 100 100 S 180 60, 180 120"
+            : "M 180 0 C 180 60, 140 100, 100 100 S 20 60, 20 120"
+        }
+        fill="none"
+        stroke="url(#lvl-path)"
+        strokeWidth="3"
+        strokeLinecap="round"
+        strokeDasharray="2 12"
+        opacity="0.55"
+      />
+    </svg>
+  );
+};
+
+/* ---------------- Compact level card (map pin) ---------------- */
+const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; compact?: boolean }) => {
+  const t = themes[index % themes.length];
+  const stars = Math.max(0, Math.min(3, Number(lvl.stars ?? (t.locked ? 0 : 3 - Math.floor(index / 2)))));
   const lessonCount = lvl.lessons_count ?? lvl.total_lessons ?? 12;
   const { ref, visible } = useReveal<HTMLDivElement>();
 
   return (
-    <div className="relative grid grid-cols-1 md:grid-cols-2 items-center gap-6">
-      {/* Number dot on the line */}
-      <div className="absolute right-1/2 translate-x-1/2 top-1/2 -translate-y-1/2 z-10">
-        <div
-          className={`relative w-14 h-14 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}
-        >
-          <span className="font-display text-2xl text-white font-extrabold">
-            {index + 1}
-          </span>
+    <div ref={ref} className={`reveal ${visible ? "is-visible" : ""} relative`}>
+      {/* Numbered map pin on top */}
+      <div className="flex justify-center -mb-5 relative z-10">
+        <div className={`relative w-12 h-12 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}>
+          <span className="font-display text-lg text-white font-extrabold">{index + 1}</span>
           {t.youAreHere && (
-            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-xs font-bold px-3 py-1 rounded-full shadow-soft flex items-center gap-1">
-              <Sparkles className="w-3 h-3" />
-              أنت هنا
+            <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-soft flex items-center gap-1">
+              <Sparkles className="w-3 h-3" /> أنت هنا
             </span>
           )}
         </div>
       </div>
 
-      {/* Card column — right or left, with side-slide reveal */}
-      <div
-        ref={ref}
-        className={`${
-          isRight
-            ? "md:col-start-1 md:pl-12 md:pr-0 reveal-right"
-            : "md:col-start-2 md:pr-12 md:pl-0 reveal-left"
-        } ${visible ? "is-visible" : ""}`}
+      <article
+        className={`group bg-card rounded-2xl ${compact ? "p-4" : "p-5"} pt-7 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${t.locked ? "opacity-90" : ""}`}
       >
-        <article
-          className={`group bg-card rounded-3xl p-6 md:p-7 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${
-            t.locked ? "opacity-90" : ""
-          }`}
-        >
-          {/* Top row: icon + hebrew chip */}
-          <div className="flex items-center justify-between gap-3 mb-4">
-            <div
-              className={`w-12 h-12 rounded-2xl ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}
-            >
-              {t.locked ? <Lock className="w-5 h-5" /> : <BookOpen className="w-5 h-5" />}
-            </div>
-            <div className="px-3 py-1.5 rounded-xl bg-muted/70 border border-border/50">
-              <span className="font-display text-xl font-extrabold text-foreground">
-                {t.hebrew}
-              </span>
-            </div>
+        <div className="flex items-center justify-between gap-2 mb-3">
+          <div className={`w-9 h-9 rounded-xl ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}>
+            {t.locked ? <Lock className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
           </div>
-
-          {/* Texts */}
-          <p className={`text-xs font-bold mb-1 ${t.nameText}`}>المستوى {index + 1}</p>
-          <h3 className="font-display text-2xl text-foreground mb-2">{lvl.title}</h3>
-          <p className="text-sm text-muted-foreground line-clamp-2 mb-5">
-            {lvl.description || "ابدأ مغامرة جديدة واكتشف المزيد من الكلمات والمهارات."}
-          </p>
-
-          {/* Meta row: stars + lessons */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-1">
-              {[0, 1, 2].map((s) => (
-                <Star
-                  key={s}
-                  className={`w-4 h-4 ${
-                    s < stars ? "fill-orange text-orange" : "text-muted-foreground/40"
-                  }`}
-                />
-              ))}
-            </div>
-            <div className="text-xs text-muted-foreground font-bold flex items-center gap-1">
-              <BookOpen className="w-3.5 h-3.5" />
-              {lessonCount} درس
-            </div>
+          <div className="px-2.5 py-1 rounded-lg bg-muted/70 border border-border/50">
+            <span className="font-display text-base font-extrabold text-foreground">{t.hebrew}</span>
           </div>
+        </div>
 
-          {/* CTA */}
-          {t.locked ? (
-            <Button disabled className={`w-full ${t.btn}`}>
-              <Lock className="w-4 h-4" />
-              مقفل
-            </Button>
-          ) : (
-            <Button asChild className={`w-full ${t.btn}`}>
-              <Link to={`/level/${lvl.slug}`}>
-                {t.youAreHere ? "تابع المغامرة" : "ابدأ المستوى"}
-              </Link>
-            </Button>
-          )}
-        </article>
-      </div>
+        <p className={`text-[11px] font-bold mb-0.5 ${t.nameText}`}>المستوى {index + 1}</p>
+        <h3 className="font-display text-lg text-foreground mb-1.5 line-clamp-1">{lvl.title}</h3>
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 min-h-[2rem]">
+          {lvl.description || "ابدأ مغامرة جديدة واكتشف المزيد من الكلمات والمهارات."}
+        </p>
+
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-0.5">
+            {[0, 1, 2].map((s) => (
+              <Star key={s} className={`w-3.5 h-3.5 ${s < stars ? "fill-orange text-orange" : "text-muted-foreground/40"}`} />
+            ))}
+          </div>
+          <div className="text-[11px] text-muted-foreground font-bold flex items-center gap-1">
+            <BookOpen className="w-3 h-3" />
+            {lessonCount} درس
+          </div>
+        </div>
+
+        {t.locked ? (
+          <Button disabled size="sm" className={`w-full ${t.btn}`}>
+            <Lock className="w-3.5 h-3.5" /> مقفل
+          </Button>
+        ) : (
+          <Button asChild size="sm" className={`w-full ${t.btn}`}>
+            <Link to={`/level/${lvl.slug}`}>
+              {t.youAreHere ? "تابع المغامرة" : "ابدأ المستوى"}
+            </Link>
+          </Button>
+        )}
+      </article>
     </div>
   );
 };
