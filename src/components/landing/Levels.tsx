@@ -126,10 +126,9 @@ const Levels = () => {
   );
 };
 
-/* -------- Smooth dashed path through all pin centers in a row -------- */
+/* -------- Smooth path through all pin centers in a row -------- */
 const RowPath = ({ count }: { count: number }) => {
   if (count < 1) return null;
-  // x in percent of viewBox width 1000, y in actual px (viewBox height = PATH_BAND_HEIGHT)
   const W = 1000;
   const pts = Array.from({ length: count }, (_, i) => ({
     x: ((i + 0.5) / count) * W,
@@ -141,7 +140,6 @@ const RowPath = ({ count }: { count: number }) => {
     const prev = pts[i - 1];
     const cur = pts[i];
     const midX = (prev.x + cur.x) / 2;
-    // bezier control points create soft S-curve between staggered pins
     d += ` C ${midX} ${prev.y}, ${midX} ${cur.y}, ${cur.x} ${cur.y}`;
   }
 
@@ -153,14 +151,35 @@ const RowPath = ({ count }: { count: number }) => {
       className="absolute left-0 right-0 top-0 w-full pointer-events-none z-0"
       style={{ height: PATH_BAND_HEIGHT }}
     >
+      {/* Soft halo underline */}
       <path
         d={d}
         fill="none"
         stroke="url(#lvl-path-grad)"
         strokeLinecap="round"
-        strokeWidth={3.5}
-        strokeDasharray="2 8"
-        opacity="0.9"
+        strokeWidth={10}
+        opacity="0.18"
+        vectorEffect="non-scaling-stroke"
+      />
+      {/* Solid continuous flowing line */}
+      <path
+        d={d}
+        fill="none"
+        stroke="url(#lvl-path-grad)"
+        strokeLinecap="round"
+        strokeWidth={4}
+        opacity="0.85"
+        vectorEffect="non-scaling-stroke"
+      />
+      {/* Footstep dots overlay (treasure-map feel) */}
+      <path
+        d={d}
+        fill="none"
+        stroke="#ffffff"
+        strokeLinecap="round"
+        strokeWidth={4}
+        strokeDasharray="0.1 14"
+        opacity="0.85"
         vectorEffect="non-scaling-stroke"
       />
     </svg>
