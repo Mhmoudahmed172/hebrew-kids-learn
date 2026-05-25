@@ -216,16 +216,9 @@ const RowConnector = ({
       className="absolute left-0 right-0 w-full pointer-events-none z-0"
       style={{ height: H, top: 0 }}
     >
-      <path
-        d={d}
-        fill="none"
-        stroke="url(#lvl-path-grad)"
-        strokeLinecap="round"
-        strokeWidth={3.5}
-        strokeDasharray="2 8"
-        opacity="0.9"
-        vectorEffect="non-scaling-stroke"
-      />
+      <path d={d} fill="none" stroke="url(#lvl-path-grad)" strokeLinecap="round" strokeWidth={10} opacity="0.18" vectorEffect="non-scaling-stroke" />
+      <path d={d} fill="none" stroke="url(#lvl-path-grad)" strokeLinecap="round" strokeWidth={4} opacity="0.85" vectorEffect="non-scaling-stroke" />
+      <path d={d} fill="none" stroke="#ffffff" strokeLinecap="round" strokeWidth={4} strokeDasharray="0.1 14" opacity="0.85" vectorEffect="non-scaling-stroke" />
     </svg>
   );
 };
