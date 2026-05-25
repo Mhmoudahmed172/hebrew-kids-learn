@@ -14,6 +14,8 @@ const themes = [
   { iconBg: "bg-pink-soft", iconText: "text-pink", nameText: "text-pink", dot: "bg-pink", btn: "bg-pink/20 text-pink hover:bg-pink/30", hebrew: "ה", locked: true, youAreHere: false },
 ];
 
+const PER_ROW = 4;
+
 const Levels = () => {
   const [levels, setLevels] = useState<any[]>([]);
 
@@ -22,25 +24,33 @@ const Levels = () => {
       .then(({ data }) => setLevels(data || []));
   }, []);
 
-  // chunk into rows of 3 for the snaking horizontal path
-  const perRow = 3;
   const rows: any[][] = [];
-  for (let i = 0; i < levels.length; i += perRow) {
-    rows.push(levels.slice(i, i + perRow));
+  for (let i = 0; i < levels.length; i += PER_ROW) {
+    rows.push(levels.slice(i, i + PER_ROW));
   }
 
   return (
     <section
       id="levels"
-      className="py-24 relative overflow-hidden bg-gradient-to-b from-background via-primary-soft/40 to-background"
+      className="py-20 relative overflow-hidden bg-gradient-to-b from-background via-primary-soft/40 to-background"
     >
-      {/* Decorative blobs */}
       <div aria-hidden className="pointer-events-none absolute -top-20 -right-20 w-72 h-72 rounded-full bg-mint/20 blur-3xl" />
       <div aria-hidden className="pointer-events-none absolute bottom-10 -left-20 w-80 h-80 rounded-full bg-pink/20 blur-3xl" />
 
+      {/* Shared gradient defs */}
+      <svg aria-hidden width="0" height="0" className="absolute">
+        <defs>
+          <linearGradient id="lvl-path-grad" x1="0" x2="1">
+            <stop offset="0%" stopColor="hsl(var(--mint))" />
+            <stop offset="50%" stopColor="hsl(var(--primary))" />
+            <stop offset="100%" stopColor="hsl(var(--pink))" />
+          </linearGradient>
+        </defs>
+      </svg>
+
       <div className="container max-w-6xl relative">
         {/* Header */}
-        <div className="max-w-3xl mx-auto mb-16 text-center reveal is-visible">
+        <div className="max-w-3xl mx-auto mb-14 text-center reveal is-visible">
           <span className="inline-flex items-center gap-1.5 bg-primary-soft text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             <MapPin className="w-4 h-4" /> خريطة المغامرة
           </span>
@@ -52,42 +62,41 @@ const Levels = () => {
           </p>
         </div>
 
-        {/* Mobile fallback: simple vertical stack */}
-        <div className="md:hidden space-y-6">
+        {/* Mobile: simple vertical stack */}
+        <div className="md:hidden space-y-5">
           {levels.map((lvl, i) => (
             <LevelCard key={lvl.id} lvl={lvl} index={i} />
           ))}
         </div>
 
-        {/* Desktop: horizontal snaking map */}
-        <div className="hidden md:block space-y-24">
+        {/* Desktop: horizontal map */}
+        <div className="hidden md:block space-y-16">
           {rows.map((row, rowIdx) => {
-            const reverse = rowIdx % 2 === 1; // alternate direction
+            const reverse = rowIdx % 2 === 1;
             const ordered = reverse ? [...row].reverse() : row;
+            const isLastRow = rowIdx === rows.length - 1;
             return (
               <div key={rowIdx} className="relative">
-                {/* Curved path SVG behind cards */}
-                <PathSvg count={row.length} reverse={reverse} />
+                {/* Snake path connecting pins in this row */}
+                <RowPath count={row.length} reverse={reverse} />
 
-                <div className={`relative grid gap-6 ${row.length === 3 ? "grid-cols-3" : row.length === 2 ? "grid-cols-2" : "grid-cols-1"}`}>
+                <div
+                  className="relative grid gap-5"
+                  style={{ gridTemplateColumns: `repeat(${row.length}, minmax(0, 1fr))` }}
+                >
                   {ordered.map((lvl, i) => {
-                    // global index for theme + numbering — based on original order
                     const originalIdx = reverse
-                      ? rowIdx * perRow + (row.length - 1 - i)
-                      : rowIdx * perRow + i;
-                    // vertical stagger for map feel
-                    const offset = i % 2 === 0 ? "md:-translate-y-4" : "md:translate-y-6";
+                      ? rowIdx * PER_ROW + (row.length - 1 - i)
+                      : rowIdx * PER_ROW + i;
                     return (
-                      <div key={lvl.id} className={`${offset}`}>
-                        <LevelCard lvl={lvl} index={originalIdx} compact />
-                      </div>
+                      <LevelCard key={lvl.id} lvl={lvl} index={originalIdx} compact />
                     );
                   })}
                 </div>
 
-                {/* Curved connector to next row (only if there's another row) */}
-                {rowIdx < rows.length - 1 && (
-                  <RowConnector reverse={reverse} />
+                {/* Connector down to next row, on the end-side of the snake */}
+                {!isLastRow && (
+                  <RowConnector reverse={reverse} cols={row.length} />
                 )}
               </div>
             );
@@ -98,70 +107,77 @@ const Levels = () => {
   );
 };
 
-/* ---------------- Path SVG between cards in same row ---------------- */
-const PathSvg = ({ count, reverse }: { count: number; reverse: boolean }) => {
+/* -------- Snake path through pin centers in a row -------- */
+const RowPath = ({ count, reverse }: { count: number; reverse: boolean }) => {
   if (count < 2) return null;
-  // Snaking curve across cards, dashed
+  // Pin centers sit at top of card. With grid of N cols, center x = (i + 0.5) / N * 100
+  const pts = Array.from({ length: count }, (_, i) => {
+    const visualIdx = reverse ? count - 1 - i : i;
+    const x = ((visualIdx + 0.5) / count) * 100;
+    return { x, y: 18 }; // y in viewBox units; pin sits around top
+  });
+
+  // Build a smooth path with gentle vertical wave between pins
+  let d = `M ${pts[0].x} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    const prev = pts[i - 1];
+    const cur = pts[i];
+    const midX = (prev.x + cur.x) / 2;
+    const dipY = i % 2 === 0 ? 6 : 42; // alternate up/down for a snake feel
+    d += ` C ${midX} ${dipY}, ${midX} ${dipY}, ${cur.x} ${cur.y}`;
+  }
+
   return (
     <svg
       aria-hidden
-      viewBox="0 0 1000 200"
+      viewBox="0 0 100 50"
       preserveAspectRatio="none"
-      className="absolute inset-0 w-full h-full pointer-events-none"
+      className="absolute -top-2 left-0 w-full h-16 pointer-events-none"
     >
-      <defs>
-        <linearGradient id="lvl-path" x1="0" x2="1">
-          <stop offset="0%" stopColor="hsl(var(--mint))" />
-          <stop offset="50%" stopColor="hsl(var(--primary))" />
-          <stop offset="100%" stopColor="hsl(var(--pink))" />
-        </linearGradient>
-      </defs>
       <path
-        d={
-          reverse
-            ? "M 950 100 C 750 20, 550 180, 350 100 S 100 40, 50 120"
-            : "M 50 100 C 250 20, 450 180, 650 100 S 900 40, 950 120"
-        }
+        d={d}
         fill="none"
-        stroke="url(#lvl-path)"
-        strokeWidth="3"
+        stroke="url(#lvl-path-grad)"
+        strokeWidth="0.6"
         strokeLinecap="round"
-        strokeDasharray="2 12"
-        opacity="0.55"
+        strokeDasharray="0.6 2"
+        opacity="0.75"
+        vectorEffect="non-scaling-stroke"
+        style={{ strokeWidth: 3 } as any}
       />
     </svg>
   );
 };
 
-/* ---------------- Curved connector between rows ---------------- */
-const RowConnector = ({ reverse }: { reverse: boolean }) => {
-  // If row went LTR (reverse=false), the next row goes RTL → connect right side down
-  // If row went RTL (reverse=true), connect left side down
+/* -------- Vertical connector to next row -------- */
+const RowConnector = ({ reverse, cols }: { reverse: boolean; cols: number }) => {
+  // End side: if reverse=false (LTR), snake ends on the right → drop on right
+  // The next row starts on that same side, so vertical line lives there.
+  const endX = reverse ? (0.5 / cols) * 100 : ((cols - 0.5) / cols) * 100;
+  const d = `M ${endX} 0 C ${endX} 60, ${endX} 60, ${endX} 100`;
+
   return (
     <svg
       aria-hidden
-      viewBox="0 0 200 120"
+      viewBox="0 0 100 100"
       preserveAspectRatio="none"
-      className="absolute left-0 right-0 -bottom-24 mx-auto w-[96%] h-24 pointer-events-none"
+      className="absolute left-0 -bottom-16 w-full h-16 pointer-events-none"
     >
       <path
-        d={
-          reverse
-            ? "M 20 0 C 20 60, 60 100, 100 100 S 180 60, 180 120"
-            : "M 180 0 C 180 60, 140 100, 100 100 S 20 60, 20 120"
-        }
+        d={d}
         fill="none"
-        stroke="url(#lvl-path)"
-        strokeWidth="3"
+        stroke="url(#lvl-path-grad)"
+        strokeWidth="0.6"
         strokeLinecap="round"
-        strokeDasharray="2 12"
-        opacity="0.55"
+        strokeDasharray="0.6 2"
+        opacity="0.75"
+        style={{ strokeWidth: 3 } as any}
       />
     </svg>
   );
 };
 
-/* ---------------- Compact level card (map pin) ---------------- */
+/* -------- Compact level card -------- */
 const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; compact?: boolean }) => {
   const t = themes[index % themes.length];
   const stars = Math.max(0, Math.min(3, Number(lvl.stars ?? (t.locked ? 0 : 3 - Math.floor(index / 2)))));
@@ -170,56 +186,56 @@ const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; c
 
   return (
     <div ref={ref} className={`reveal ${visible ? "is-visible" : ""} relative`}>
-      {/* Numbered map pin on top */}
-      <div className="flex justify-center -mb-5 relative z-10">
-        <div className={`relative w-12 h-12 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}>
-          <span className="font-display text-lg text-white font-extrabold">{index + 1}</span>
+      {/* Numbered pin */}
+      <div className="flex justify-center -mb-4 relative z-10">
+        <div className={`relative w-10 h-10 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}>
+          <span className="font-display text-sm text-white font-extrabold">{index + 1}</span>
           {t.youAreHere && (
-            <span className="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-[10px] font-bold px-2 py-0.5 rounded-full shadow-soft flex items-center gap-1">
-              <Sparkles className="w-3 h-3" /> أنت هنا
+            <span className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-soft flex items-center gap-1">
+              <Sparkles className="w-2.5 h-2.5" /> أنت هنا
             </span>
           )}
         </div>
       </div>
 
       <article
-        className={`group bg-card rounded-2xl ${compact ? "p-4" : "p-5"} pt-7 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${t.locked ? "opacity-90" : ""}`}
+        className={`group bg-card rounded-2xl ${compact ? "p-3" : "p-4"} pt-6 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${t.locked ? "opacity-90" : ""}`}
       >
-        <div className="flex items-center justify-between gap-2 mb-3">
-          <div className={`w-9 h-9 rounded-xl ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}>
-            {t.locked ? <Lock className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+        <div className="flex items-center justify-between gap-2 mb-2">
+          <div className={`w-8 h-8 rounded-lg ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}>
+            {t.locked ? <Lock className="w-3.5 h-3.5" /> : <BookOpen className="w-3.5 h-3.5" />}
           </div>
-          <div className="px-2.5 py-1 rounded-lg bg-muted/70 border border-border/50">
-            <span className="font-display text-base font-extrabold text-foreground">{t.hebrew}</span>
+          <div className="px-2 py-0.5 rounded-md bg-muted/70 border border-border/50">
+            <span className="font-display text-sm font-extrabold text-foreground">{t.hebrew}</span>
           </div>
         </div>
 
-        <p className={`text-[11px] font-bold mb-0.5 ${t.nameText}`}>المستوى {index + 1}</p>
-        <h3 className="font-display text-lg text-foreground mb-1.5 line-clamp-1">{lvl.title}</h3>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-3 min-h-[2rem]">
-          {lvl.description || "ابدأ مغامرة جديدة واكتشف المزيد من الكلمات والمهارات."}
+        <p className={`text-[10px] font-bold mb-0.5 ${t.nameText}`}>المستوى {index + 1}</p>
+        <h3 className="font-display text-sm text-foreground mb-1 line-clamp-1">{lvl.title}</h3>
+        <p className="text-[11px] text-muted-foreground line-clamp-2 mb-2 min-h-[1.75rem]">
+          {lvl.description || "ابدأ مغامرة جديدة واكتشف المزيد."}
         </p>
 
-        <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center justify-between mb-2">
           <div className="flex items-center gap-0.5">
             {[0, 1, 2].map((s) => (
-              <Star key={s} className={`w-3.5 h-3.5 ${s < stars ? "fill-orange text-orange" : "text-muted-foreground/40"}`} />
+              <Star key={s} className={`w-3 h-3 ${s < stars ? "fill-orange text-orange" : "text-muted-foreground/40"}`} />
             ))}
           </div>
-          <div className="text-[11px] text-muted-foreground font-bold flex items-center gap-1">
-            <BookOpen className="w-3 h-3" />
-            {lessonCount} درس
+          <div className="text-[10px] text-muted-foreground font-bold flex items-center gap-1">
+            <BookOpen className="w-2.5 h-2.5" />
+            {lessonCount}
           </div>
         </div>
 
         {t.locked ? (
-          <Button disabled size="sm" className={`w-full ${t.btn}`}>
-            <Lock className="w-3.5 h-3.5" /> مقفل
+          <Button disabled size="sm" className={`w-full h-8 text-xs ${t.btn}`}>
+            <Lock className="w-3 h-3" /> مقفل
           </Button>
         ) : (
-          <Button asChild size="sm" className={`w-full ${t.btn}`}>
+          <Button asChild size="sm" className={`w-full h-8 text-xs ${t.btn}`}>
             <Link to={`/level/${lvl.slug}`}>
-              {t.youAreHere ? "تابع المغامرة" : "ابدأ المستوى"}
+              {t.youAreHere ? "تابع" : "ابدأ"}
             </Link>
           </Button>
         )}
