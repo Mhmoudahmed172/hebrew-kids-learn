@@ -1367,7 +1367,28 @@ const LevelsSection = () => {
             <div><Label>المعرّف (إنجليزي بدون مسافات)</Label><Input value={form.slug} onChange={(e) => setForm({ ...form, slug: e.target.value })} /></div>
             <div><Label>الوصف</Label><Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} /></div>
             <div className="grid grid-cols-2 gap-3">
-              <div><Label>اللون</Label><Input value={form.color} onChange={(e) => setForm({ ...form, color: e.target.value })} /></div>
+              <div>
+                <Label>اللون</Label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {[
+                    { key: "mint", cls: "bg-mint" },
+                    { key: "primary", cls: "bg-primary" },
+                    { key: "secondary", cls: "bg-secondary" },
+                    { key: "accent", cls: "bg-accent" },
+                    { key: "pink", cls: "bg-pink" },
+                    { key: "orange", cls: "bg-orange" },
+                    { key: "teal", cls: "bg-teal" },
+                  ].map((c) => (
+                    <button
+                      key={c.key}
+                      type="button"
+                      onClick={() => setForm({ ...form, color: c.key })}
+                      title={c.key}
+                      className={`w-8 h-8 rounded-full ${c.cls} shadow-soft ring-offset-2 ring-offset-background transition-all ${form.color === c.key ? "ring-2 ring-foreground scale-110" : "hover:scale-105"}`}
+                    />
+                  ))}
+                </div>
+              </div>
               <div><Label>الترتيب</Label><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: +e.target.value })} /></div>
             </div>
             <div className="flex items-center gap-2">
