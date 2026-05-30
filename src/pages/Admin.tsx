@@ -1794,19 +1794,9 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
 
 
 // ============== GAMES (dedicated) ==============
-const extractIframeSrc = (input: string): string => {
-  if (!input) return "";
-  const m = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
-  if (m) return m[1];
-  try {
-    const u = new URL(input);
-    if (u.hostname.includes("wordwall.net")) {
-      const r = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
-      if (r) return `https://wordwall.net/embed/${r[1]}?themeId=1&templateId=3&fontStackId=0`;
-    }
-    return input;
-  } catch { return ""; }
-};
+// نقبل كود HTML كاملاً (سواء كان <iframe> أو HTML عادي). يُعرض داخل إطار آمن عبر srcDoc.
+const isLikelyHtml = (s: string) => /<\s*[a-zA-Z][^>]*>/.test(s || "");
+
 
 const GamesSection = () => {
   const perm = useSectionPerm("games");
@@ -1837,8 +1827,8 @@ const GamesSection = () => {
   const save = async () => {
     if (!form.title.trim()) { toast({ title: "اسم اللعبة مطلوب", variant: "destructive" }); return; }
     if (!form.level_id) { toast({ title: "اختر المستوى", variant: "destructive" }); return; }
-    if (!form.url.trim()) { toast({ title: "كود التضمين مطلوب", variant: "destructive" }); return; }
-    if (!extractIframeSrc(form.url)) { toast({ title: "كود التضمين غير صحيح", description: "تأكد من لصق كود <iframe> كاملاً", variant: "destructive" }); return; }
+    if (!form.url.trim()) { toast({ title: "كود HTML مطلوب", variant: "destructive" }); return; }
+    if (!isLikelyHtml(form.url)) { toast({ title: "كود HTML غير صحيح", description: "الصق كود HTML كاملاً", variant: "destructive" }); return; }
     const payload = { title: form.title.trim(), url: form.url.trim(), description: form.description.trim(), level_id: form.level_id, published: form.published };
     const { error } = editing
       ? await supabase.from("games").update(payload).eq("id", editing.id)
@@ -1931,12 +1921,12 @@ const GamesSection = () => {
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((g: any) => {
-            const src = extractIframeSrc(g.url || "");
+            const html = g.url || "";
             return (
               <Card key={g.id} className="overflow-hidden group hover:shadow-medium transition-bounce">
                 <div className="relative aspect-video bg-muted overflow-hidden">
-                  {src ? (
-                    <iframe src={src} title={g.title} className="w-full h-full pointer-events-none" style={{ border: 0 }} />
+                  {html ? (
+                    <iframe srcDoc={html} title={g.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full pointer-events-none" style={{ border: 0 }} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Gamepad2 className="w-10 h-10" />
@@ -1992,7 +1982,7 @@ const GamesSection = () => {
           <DialogHeader><DialogTitle>{preview?.title}</DialogTitle></DialogHeader>
           {preview && (
             <div className="aspect-video bg-muted rounded-xl overflow-hidden">
-              <iframe src={extractIframeSrc(preview.url || "")} title={preview.title} className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
+              <iframe srcDoc={preview.url || ""} title={preview.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
             </div>
           )}
         </DialogContent>
@@ -2002,7 +1992,7 @@ const GamesSection = () => {
 };
 
 const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: any) => {
-  const previewSrc = extractIframeSrc(form.url);
+  const previewHtml = isLikelyHtml(form.url) ? form.url : "";
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent dir="rtl" className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -2027,23 +2017,24 @@ const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: a
             </Select>
           </div>
           <div>
-            <Label>كود التضمين (iframe) *</Label>
+            <Label>كود HTML للعبة *</Label>
             <Textarea
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
               dir="ltr"
-              rows={4}
-              placeholder='<iframe src="https://wordwall.net/ar/embed/..." width="500" height="380" frameborder="0" allowfullscreen></iframe>'
+              rows={6}
+              className="font-mono text-xs"
+              placeholder={'<!DOCTYPE html>\n<html>\n  <head>...</head>\n  <body>...</body>\n</html>'}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              الصق كود iframe كاملاً من Wordwall أو أي موقع ألعاب يدعم التضمين.
+              الصق كود HTML كاملاً للعبة. سيتم عرضه داخل إطار آمن (sandbox).
             </p>
           </div>
-          {previewSrc && (
+          {previewHtml && (
             <div>
               <Label className="flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> معاينة مباشرة</Label>
               <div className="aspect-video bg-muted rounded-xl overflow-hidden border-2 border-primary/20">
-                <iframe src={previewSrc} title="معاينة" className="w-full h-full" style={{ border: 0 }} />
+                <iframe srcDoc={previewHtml} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
               </div>
             </div>
           )}

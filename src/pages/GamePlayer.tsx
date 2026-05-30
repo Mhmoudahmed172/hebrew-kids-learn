@@ -9,8 +9,10 @@ import { usePermissions } from "@/hooks/usePermissions";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-// استخراج src من كود iframe، أو تحويل رابط Wordwall العادي إلى رابط embed
-const toEmbedUrl = (input: string): string => {
+// نخزّن الآن كود HTML كامل للعبة. نعرضه عبر srcDoc داخل iframe sandbox آمن.
+// نحافظ على التوافق مع الألعاب القديمة المخزّنة كرابط/كود iframe قديم.
+const isHtml = (s: string) => /<\s*[a-zA-Z][^>]*>/.test(s || "");
+const legacyEmbedUrl = (input: string): string => {
   if (!input) return "";
   const iframeMatch = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
   if (iframeMatch) return iframeMatch[1];
@@ -20,8 +22,8 @@ const toEmbedUrl = (input: string): string => {
       const m = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
       if (m) return `https://wordwall.net/embed/${m[1]}?themeId=1&templateId=3&fontStackId=0`;
     }
-  } catch {}
-  return input;
+    return input;
+  } catch { return ""; }
 };
 
 const GamePlayer = () => {
@@ -98,7 +100,11 @@ const GamePlayer = () => {
 
   const prev = idx > 0 ? games[idx - 1] : null;
   const next = idx < games.length - 1 ? games[idx + 1] : null;
-  const embedSrc = toEmbedUrl(current.url || "");
+  const raw = current.url || "";
+  // إن كان HTML كاملاً (يحتوي على <html> أو وسوم body/script أو iframe كامل) نستخدم srcDoc.
+  // غير ذلك نعتبره رابطاً (توافق رجعي).
+  const useSrcDoc = isHtml(raw) && !/^https?:\/\//i.test(raw.trim());
+  const legacySrc = useSrcDoc ? "" : legacyEmbedUrl(raw);
   const allowed = !permsLoading && canPlay("game", current.id, level.id);
 
   return (
@@ -111,21 +117,22 @@ const GamePlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="relative rounded-3xl overflow-hidden bg-muted shadow-medium" style={{ aspectRatio: "4 / 3" }}>
+            <div className="relative rounded-3xl overflow-hidden bg-muted shadow-medium border-4 border-primary/10" style={{ aspectRatio: "4 / 3" }}>
               {!allowed ? (
                 <LockedContent
                   title="اللعبة مقفلة"
                   message="لا تملك صلاحية تشغيل هذه اللعبة."
                   contextLabel={current.title}
                 />
-              ) : embedSrc ? (
+              ) : (useSrcDoc || legacySrc) ? (
                 <>
                   <iframe
                     key={current.id}
-                    src={embedSrc}
+                    {...(useSrcDoc ? { srcDoc: raw } : { src: legacySrc })}
                     title={current.title}
                     onLoad={() => setIframeLoading(false)}
-                    className="w-full h-full block"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
+                    className="w-full h-full block bg-white"
                     style={{ border: 0 }}
                     allow="fullscreen; autoplay; encrypted-media"
                     allowFullScreen
@@ -138,7 +145,7 @@ const GamePlayer = () => {
                   )}
                 </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/70">لا يوجد كود تضمين للعبة</div>
+                <div className="w-full h-full flex items-center justify-center text-white/70">لا يوجد كود للعبة</div>
               )}
             </div>
             <div className="mt-4">
