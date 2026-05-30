@@ -9,8 +9,10 @@ import { usePermissions } from "@/hooks/usePermissions";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
-// استخراج src من كود iframe، أو تحويل رابط Wordwall العادي إلى رابط embed
-const toEmbedUrl = (input: string): string => {
+// نخزّن الآن كود HTML كامل للعبة. نعرضه عبر srcDoc داخل iframe sandbox آمن.
+// نحافظ على التوافق مع الألعاب القديمة المخزّنة كرابط/كود iframe قديم.
+const isHtml = (s: string) => /<\s*[a-zA-Z][^>]*>/.test(s || "");
+const legacyEmbedUrl = (input: string): string => {
   if (!input) return "";
   const iframeMatch = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
   if (iframeMatch) return iframeMatch[1];
@@ -20,8 +22,8 @@ const toEmbedUrl = (input: string): string => {
       const m = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
       if (m) return `https://wordwall.net/embed/${m[1]}?themeId=1&templateId=3&fontStackId=0`;
     }
-  } catch {}
-  return input;
+    return input;
+  } catch { return ""; }
 };
 
 const GamePlayer = () => {
