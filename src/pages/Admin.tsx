@@ -1982,7 +1982,7 @@ const GamesSection = () => {
           <DialogHeader><DialogTitle>{preview?.title}</DialogTitle></DialogHeader>
           {preview && (
             <div className="aspect-video bg-muted rounded-xl overflow-hidden">
-              <iframe src={extractIframeSrc(preview.url || "")} title={preview.title} className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
+              <iframe srcDoc={preview.url || ""} title={preview.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
             </div>
           )}
         </DialogContent>
