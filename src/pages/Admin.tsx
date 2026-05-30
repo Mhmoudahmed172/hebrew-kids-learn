@@ -1923,11 +1923,12 @@ const GamesSection = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {filtered.map((g: any) => {
             const html = g.url || "";
+            const asUrl = /^https?:\/\//i.test(html.trim());
             return (
               <Card key={g.id} className="overflow-hidden group hover:shadow-medium transition-bounce">
                 <div className="relative aspect-video bg-muted overflow-hidden">
                   {html ? (
-                    <iframe srcDoc={html} title={g.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full pointer-events-none" style={{ border: 0 }} />
+                    <iframe {...(asUrl ? { src: html } : { srcDoc: html })} title={g.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full pointer-events-none" style={{ border: 0 }} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Gamepad2 className="w-10 h-10" />
