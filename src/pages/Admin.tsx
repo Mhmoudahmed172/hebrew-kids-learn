@@ -1992,7 +1992,7 @@ const GamesSection = () => {
 };
 
 const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: any) => {
-  const previewSrc = extractIframeSrc(form.url);
+  const previewHtml = isLikelyHtml(form.url) ? form.url : "";
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent dir="rtl" className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -2017,23 +2017,24 @@ const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: a
             </Select>
           </div>
           <div>
-            <Label>كود التضمين (iframe) *</Label>
+            <Label>كود HTML للعبة *</Label>
             <Textarea
               value={form.url}
               onChange={(e) => setForm({ ...form, url: e.target.value })}
               dir="ltr"
-              rows={4}
-              placeholder='<iframe src="https://wordwall.net/ar/embed/..." width="500" height="380" frameborder="0" allowfullscreen></iframe>'
+              rows={6}
+              className="font-mono text-xs"
+              placeholder={'<!DOCTYPE html>\n<html>\n  <head>...</head>\n  <body>...</body>\n</html>'}
             />
             <p className="text-xs text-muted-foreground mt-1">
-              الصق كود iframe كاملاً من Wordwall أو أي موقع ألعاب يدعم التضمين.
+              الصق كود HTML كاملاً للعبة. سيتم عرضه داخل إطار آمن (sandbox).
             </p>
           </div>
-          {previewSrc && (
+          {previewHtml && (
             <div>
               <Label className="flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> معاينة مباشرة</Label>
               <div className="aspect-video bg-muted rounded-xl overflow-hidden border-2 border-primary/20">
-                <iframe src={previewSrc} title="معاينة" className="w-full h-full" style={{ border: 0 }} />
+                <iframe srcDoc={previewHtml} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
               </div>
             </div>
           )}
