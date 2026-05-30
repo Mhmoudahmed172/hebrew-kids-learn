@@ -1993,6 +1993,52 @@ const GamesSection = () => {
 
 const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: any) => {
   const previewHtml = isLikelyHtml(form.url) ? form.url : "";
+  const isUrl = /^https?:\/\//i.test((form.url || "").trim());
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFiles = async (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    const arr = Array.from(files);
+    // اعثر على ملف HTML (index.html مفضّل)
+    const htmlFiles = arr.filter((f) => /\.html?$/i.test(f.name));
+    if (htmlFiles.length === 0) {
+      toast({ title: "لا يوجد ملف HTML", description: "يجب أن تتضمن الملفات ملف .html واحدًا على الأقل", variant: "destructive" });
+      return;
+    }
+    const entry = htmlFiles.find((f) => /^|\/index\.html?$/i.test((f as any).webkitRelativePath || f.name)) || htmlFiles[0];
+    const folder = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    setUploading(true); setProgress(0);
+    try {
+      let done = 0;
+      for (const f of arr) {
+        const relPath = (f as any).webkitRelativePath || f.name;
+        // إذا تم اختيار مجلد، أزل اسم المجلد الجذري
+        const clean = relPath.includes("/") ? relPath.split("/").slice(1).join("/") || relPath : relPath;
+        const path = `${folder}/${clean}`;
+        const { error } = await supabase.storage.from("games").upload(path, f, {
+          cacheControl: "3600", upsert: true, contentType: f.type || undefined,
+        });
+        if (error) throw error;
+        done++; setProgress(Math.round((done / arr.length) * 100));
+      }
+      const entryRel = (entry as any).webkitRelativePath || entry.name;
+      const entryClean = entryRel.includes("/") ? entryRel.split("/").slice(1).join("/") || entryRel : entryRel;
+      const { data: pub } = supabase.storage.from("games").getPublicUrl(`${folder}/${entryClean}`);
+      setForm({ ...form, url: pub.publicUrl });
+      toast({ title: "تم الرفع", description: `${arr.length} ملف(ات)` });
+    } catch (e: any) {
+      toast({ title: "فشل الرفع", description: e.message, variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      if (folderInputRef.current) folderInputRef.current.value = "";
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent dir="rtl" className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -2016,28 +2062,72 @@ const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: a
               </SelectContent>
             </Select>
           </div>
+
+          {/* رفع ملفات اللعبة */}
           <div>
-            <Label>كود HTML للعبة *</Label>
-            <Textarea
-              value={form.url}
-              onChange={(e) => setForm({ ...form, url: e.target.value })}
-              dir="ltr"
-              rows={6}
-              className="font-mono text-xs"
-              placeholder={'<!DOCTYPE html>\n<html>\n  <head>...</head>\n  <body>...</body>\n</html>'}
-            />
-            <p className="text-xs text-muted-foreground mt-1">
-              الصق كود HTML كاملاً للعبة. سيتم عرضه داخل إطار آمن (sandbox).
-            </p>
+            <Label className="flex items-center gap-2"><Upload className="w-4 h-4" /> ملفات اللعبة *</Label>
+            <div className="mt-2 border-2 border-dashed border-primary/30 rounded-2xl p-6 bg-primary-soft/30 text-center">
+              <p className="text-sm text-muted-foreground mb-3">
+                ارفع ملف <code className="bg-background px-1 rounded">index.html</code> مع ملفاته (CSS، صور، JS).<br/>
+                سيتم حفظها معًا وربطها تلقائياً.
+              </p>
+              <div className="flex gap-2 justify-center flex-wrap">
+                <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => fileInputRef.current?.click()}>
+                  <Upload className="w-4 h-4" /> اختر ملفات
+                </Button>
+                <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => folderInputRef.current?.click()}>
+                  <FolderOpen className="w-4 h-4" /> اختر مجلداً
+                </Button>
+              </div>
+              <input ref={fileInputRef} type="file" multiple accept=".html,.htm,.css,.js,.png,.jpg,.jpeg,.gif,.svg,.webp,.mp3,.wav,.ogg,.json,.woff,.woff2,.ttf"
+                className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+              <input ref={folderInputRef} type="file" {...({ webkitdirectory: "", directory: "" } as any)}
+                className="hidden" onChange={(e) => handleFiles(e.target.files)} />
+              {uploading && (
+                <div className="mt-3">
+                  <Progress value={progress} className="h-2" />
+                  <p className="text-xs text-muted-foreground mt-1">جاري الرفع... {progress}%</p>
+                </div>
+              )}
+              {!uploading && isUrl && (
+                <div className="mt-3 inline-flex items-center gap-2 bg-mint-soft text-mint-foreground px-3 py-1.5 rounded-full text-xs font-bold">
+                  <CheckCircle2 className="w-4 h-4" /> تم ربط اللعبة
+                </div>
+              )}
+            </div>
           </div>
-          {previewHtml && (
+
+          {/* معاينة */}
+          {(isUrl || previewHtml) && (
             <div>
               <Label className="flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> معاينة مباشرة</Label>
               <div className="aspect-video bg-muted rounded-xl overflow-hidden border-2 border-primary/20">
-                <iframe srcDoc={previewHtml} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
+                {isUrl ? (
+                  <iframe src={form.url} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
+                ) : (
+                  <iframe srcDoc={previewHtml} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
+                )}
               </div>
             </div>
           )}
+
+          {/* خيار متقدم: لصق رابط/كود يدوياً */}
+          <button type="button" onClick={() => setShowAdvanced((s) => !s)} className="text-xs text-primary hover:underline">
+            {showAdvanced ? "إخفاء" : "متقدم: لصق رابط أو كود HTML يدوياً"}
+          </button>
+          {showAdvanced && (
+            <div>
+              <Textarea
+                value={form.url}
+                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                dir="ltr"
+                rows={4}
+                className="font-mono text-xs"
+                placeholder="https://example.com/game.html  أو  <iframe src='...'></iframe>  أو  <html>...</html>"
+              />
+            </div>
+          )}
+
           <div>
             <Label>الوصف (اختياري)</Label>
             <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
@@ -2054,8 +2144,8 @@ const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: a
           </div>
         </div>
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
-          <Button variant="hero" onClick={onSave}>{editing ? "حفظ التعديلات" : "إضافة"}</Button>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading}>إلغاء</Button>
+          <Button variant="hero" onClick={onSave} disabled={uploading}>{editing ? "حفظ التعديلات" : "إضافة"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
