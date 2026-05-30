@@ -1827,8 +1827,9 @@ const GamesSection = () => {
   const save = async () => {
     if (!form.title.trim()) { toast({ title: "اسم اللعبة مطلوب", variant: "destructive" }); return; }
     if (!form.level_id) { toast({ title: "اختر المستوى", variant: "destructive" }); return; }
-    if (!form.url.trim()) { toast({ title: "كود HTML مطلوب", variant: "destructive" }); return; }
-    if (!isLikelyHtml(form.url)) { toast({ title: "كود HTML غير صحيح", description: "الصق كود HTML كاملاً", variant: "destructive" }); return; }
+    if (!form.url.trim()) { toast({ title: "ارفع ملفات اللعبة", variant: "destructive" }); return; }
+    const isUrl = /^https?:\/\//i.test(form.url.trim());
+    if (!isUrl && !isLikelyHtml(form.url)) { toast({ title: "محتوى اللعبة غير صحيح", description: "ارفع الملفات أو الصق كود HTML/رابط صحيح", variant: "destructive" }); return; }
     const payload = { title: form.title.trim(), url: form.url.trim(), description: form.description.trim(), level_id: form.level_id, published: form.published };
     const { error } = editing
       ? await supabase.from("games").update(payload).eq("id", editing.id)
