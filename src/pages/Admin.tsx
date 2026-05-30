@@ -1794,19 +1794,9 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
 
 
 // ============== GAMES (dedicated) ==============
-const extractIframeSrc = (input: string): string => {
-  if (!input) return "";
-  const m = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
-  if (m) return m[1];
-  try {
-    const u = new URL(input);
-    if (u.hostname.includes("wordwall.net")) {
-      const r = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
-      if (r) return `https://wordwall.net/embed/${r[1]}?themeId=1&templateId=3&fontStackId=0`;
-    }
-    return input;
-  } catch { return ""; }
-};
+// نقبل كود HTML كاملاً (سواء كان <iframe> أو HTML عادي). يُعرض داخل إطار آمن عبر srcDoc.
+const isLikelyHtml = (s: string) => /<\s*[a-zA-Z][^>]*>/.test(s || "");
+
 
 const GamesSection = () => {
   const perm = useSectionPerm("games");
