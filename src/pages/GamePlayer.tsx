@@ -100,7 +100,11 @@ const GamePlayer = () => {
 
   const prev = idx > 0 ? games[idx - 1] : null;
   const next = idx < games.length - 1 ? games[idx + 1] : null;
-  const embedSrc = toEmbedUrl(current.url || "");
+  const raw = current.url || "";
+  // إن كان HTML كاملاً (يحتوي على <html> أو وسوم body/script أو iframe كامل) نستخدم srcDoc.
+  // غير ذلك نعتبره رابطاً (توافق رجعي).
+  const useSrcDoc = isHtml(raw) && !/^https?:\/\//i.test(raw.trim());
+  const legacySrc = useSrcDoc ? "" : legacyEmbedUrl(raw);
   const allowed = !permsLoading && canPlay("game", current.id, level.id);
 
   return (
@@ -113,21 +117,22 @@ const GamePlayer = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="relative rounded-3xl overflow-hidden bg-muted shadow-medium" style={{ aspectRatio: "4 / 3" }}>
+            <div className="relative rounded-3xl overflow-hidden bg-muted shadow-medium border-4 border-primary/10" style={{ aspectRatio: "4 / 3" }}>
               {!allowed ? (
                 <LockedContent
                   title="اللعبة مقفلة"
                   message="لا تملك صلاحية تشغيل هذه اللعبة."
                   contextLabel={current.title}
                 />
-              ) : embedSrc ? (
+              ) : (useSrcDoc || legacySrc) ? (
                 <>
                   <iframe
                     key={current.id}
-                    src={embedSrc}
+                    {...(useSrcDoc ? { srcDoc: raw } : { src: legacySrc })}
                     title={current.title}
                     onLoad={() => setIframeLoading(false)}
-                    className="w-full h-full block"
+                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
+                    className="w-full h-full block bg-white"
                     style={{ border: 0 }}
                     allow="fullscreen; autoplay; encrypted-media"
                     allowFullScreen
