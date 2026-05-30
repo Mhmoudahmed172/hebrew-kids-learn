@@ -331,7 +331,7 @@ const Admin = () => {
           {active === "content" && <LevelsSection />}
           {active === "quizzes" && <QuizzesSection />}
           {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
-          {active === "games" && <SimpleSection table="games" titleLabel="الألعاب" hasDescription />}
+          {active === "games" && <GamesSection />}
           {active === "testimonials" && <TestimonialsSection />}
           {active === "faqs" && <FaqsSection />}
         </SectionPermsContext.Provider>
@@ -1793,7 +1793,285 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
 };
 
 
-// ============== TESTIMONIALS ==============
+// ============== GAMES (dedicated) ==============
+const extractIframeSrc = (input: string): string => {
+  if (!input) return "";
+  const m = input.match(/<iframe[^>]*\ssrc=["']([^"']+)["']/i);
+  if (m) return m[1];
+  try {
+    const u = new URL(input);
+    if (u.hostname.includes("wordwall.net")) {
+      const r = u.pathname.match(/\/(?:resource|play|embed)\/(\d+)/);
+      if (r) return `https://wordwall.net/embed/${r[1]}?themeId=1&templateId=3&fontStackId=0`;
+    }
+    return input;
+  } catch { return ""; }
+};
+
+const GamesSection = () => {
+  const perm = useSectionPerm("games");
+  const [items, setItems] = useState<any[]>([]);
+  const [levels, setLevels] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const [form, setForm] = useState({ title: "", url: "", description: "", level_id: "", published: true });
+  const [query, setQuery] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+  const [preview, setPreview] = useState<any | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase.from("games").select("*, levels(title)").order("created_at", { ascending: false });
+    setItems(data || []);
+  };
+  useEffect(() => {
+    load();
+    supabase.from("levels").select("id, title").order("sort_order").then(({ data }) => setLevels(data || []));
+  }, []);
+
+  useEffect(() => {
+    if (editing) setForm({ title: editing.title, url: editing.url || "", description: editing.description || "", level_id: editing.level_id || "", published: editing.published });
+    else setForm({ title: "", url: "", description: "", level_id: selectedLevel && selectedLevel.id !== "_unassigned" ? selectedLevel.id : "", published: true });
+  }, [editing, open]);
+
+  const save = async () => {
+    if (!form.title.trim()) { toast({ title: "اسم اللعبة مطلوب", variant: "destructive" }); return; }
+    if (!form.level_id) { toast({ title: "اختر المستوى", variant: "destructive" }); return; }
+    if (!form.url.trim()) { toast({ title: "كود التضمين مطلوب", variant: "destructive" }); return; }
+    if (!extractIframeSrc(form.url)) { toast({ title: "كود التضمين غير صحيح", description: "تأكد من لصق كود <iframe> كاملاً", variant: "destructive" }); return; }
+    const payload = { title: form.title.trim(), url: form.url.trim(), description: form.description.trim(), level_id: form.level_id, published: form.published };
+    const { error } = editing
+      ? await supabase.from("games").update(payload).eq("id", editing.id)
+      : await supabase.from("games").insert(payload);
+    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    toast({ title: editing ? "تم تحديث اللعبة" : "تمت إضافة اللعبة" });
+    setOpen(false); setEditing(null); load();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("حذف هذه اللعبة؟")) return;
+    await supabase.from("games").delete().eq("id", id);
+    toast({ title: "تم الحذف" }); load();
+  };
+
+  const togglePublish = async (g: any) => {
+    await supabase.from("games").update({ published: !g.published }).eq("id", g.id);
+    load();
+  };
+
+  const selectLevel = (lv: any) => { setSelectedLevel(lv); setLastSelectedId(lv.id); };
+
+  // --- شاشة اختيار المستوى ---
+  if (!selectedLevel) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-pink-soft text-pink flex items-center justify-center">
+              <Gamepad2 className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="font-display text-3xl">الألعاب</h1>
+              <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة ألعابه</p>
+            </div>
+          </div>
+          {perm.can_add && (
+            <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus /> إضافة لعبة
+            </Button>
+          )}
+        </div>
+        <LevelsGrid levels={levels} items={items} unitLabel="لعبة" onSelect={selectLevel} highlightId={lastSelectedId} />
+        <GameDialog
+          open={open} setOpen={setOpen} editing={editing} form={form} setForm={setForm}
+          levels={levels} onSave={save}
+        />
+      </div>
+    );
+  }
+
+  // --- شاشة ألعاب المستوى ---
+  const levelItems = items.filter((it) => (selectedLevel.id === "_unassigned" ? !it.level_id : it.level_id === selectedLevel.id));
+  const filtered = applyFilters(levelItems, query, ["title", "description"], {});
+
+  return (
+    <div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} • الألعاب`}
+        sectionLabel="الألعاب"
+        onBack={() => { setSelectedLevel(null); setQuery(""); }}
+        action={perm.can_add ? (
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+            <Plus /> إضافة لعبة
+          </Button>
+        ) : null}
+      />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث باسم اللعبة..."
+        values={{}}
+        onValueChange={() => {}}
+        filters={[]}
+      />
+
+      {filtered.length === 0 ? (
+        <Card className="p-12 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-pink-soft text-pink mx-auto flex items-center justify-center mb-4">
+            <Gamepad2 className="w-8 h-8" />
+          </div>
+          <p className="font-bold text-lg mb-2">{query ? "لا توجد نتائج مطابقة" : "لا توجد ألعاب في هذا المستوى"}</p>
+          <p className="text-sm text-muted-foreground mb-6">{query ? "جرّب كلمات بحث أخرى" : "أضف أول لعبة بلصق كود iframe من Wordwall أو غيره"}</p>
+          {!query && perm.can_add && (
+            <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus /> إضافة لعبة
+            </Button>
+          )}
+        </Card>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((g: any) => {
+            const src = extractIframeSrc(g.url || "");
+            return (
+              <Card key={g.id} className="overflow-hidden group hover:shadow-medium transition-bounce">
+                <div className="relative aspect-video bg-muted overflow-hidden">
+                  {src ? (
+                    <iframe src={src} title={g.title} className="w-full h-full pointer-events-none" style={{ border: 0 }} />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-muted-foreground">
+                      <Gamepad2 className="w-10 h-10" />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setPreview(g)}
+                    className="absolute inset-0 bg-black/0 group-hover:bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-bounce"
+                  >
+                    <span className="bg-primary text-primary-foreground px-4 py-2 rounded-full font-bold flex items-center gap-2">
+                      <PlayCircle className="w-5 h-5" /> معاينة
+                    </span>
+                  </button>
+                  {!g.published && (
+                    <Badge variant="secondary" className="absolute top-2 right-2">مخفية</Badge>
+                  )}
+                </div>
+                <div className="p-4">
+                  <h3 className="font-bold truncate mb-1">{g.title}</h3>
+                  {g.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{g.description}</p>}
+                  <div className="flex items-center justify-between gap-1 pt-2 border-t">
+                    <Button size="sm" variant="ghost" onClick={() => togglePublish(g)}>
+                      {g.published ? "إخفاء" : "نشر"}
+                    </Button>
+                    <div className="flex items-center gap-1">
+                      {perm.can_edit && (
+                        <Button size="icon" variant="ghost" onClick={() => { setEditing(g); setOpen(true); }}>
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {perm.can_delete && (
+                        <Button size="icon" variant="ghost" onClick={() => remove(g.id)}>
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
+      )}
+
+      <GameDialog
+        open={open} setOpen={setOpen} editing={editing} form={form} setForm={setForm}
+        levels={levels} onSave={save}
+      />
+
+      {/* معاينة كاملة */}
+      <Dialog open={!!preview} onOpenChange={(o) => !o && setPreview(null)}>
+        <DialogContent dir="rtl" className="max-w-4xl">
+          <DialogHeader><DialogTitle>{preview?.title}</DialogTitle></DialogHeader>
+          {preview && (
+            <div className="aspect-video bg-muted rounded-xl overflow-hidden">
+              <iframe src={extractIframeSrc(preview.url || "")} title={preview.title} className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: any) => {
+  const previewSrc = extractIframeSrc(form.url);
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent dir="rtl" className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <Gamepad2 className="w-5 h-5 text-pink" />
+            {editing ? "تعديل اللعبة" : "إضافة لعبة جديدة"}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>اسم اللعبة *</Label>
+            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="مثال: مطابقة الحروف" />
+          </div>
+          <div>
+            <Label>المستوى *</Label>
+            <Select value={form.level_id} onValueChange={(v) => setForm({ ...form, level_id: v })}>
+              <SelectTrigger><SelectValue placeholder="اختر المستوى" /></SelectTrigger>
+              <SelectContent>
+                {levels.map((l: any) => <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>كود التضمين (iframe) *</Label>
+            <Textarea
+              value={form.url}
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
+              dir="ltr"
+              rows={4}
+              placeholder='<iframe src="https://wordwall.net/ar/embed/..." width="500" height="380" frameborder="0" allowfullscreen></iframe>'
+            />
+            <p className="text-xs text-muted-foreground mt-1">
+              الصق كود iframe كاملاً من Wordwall أو أي موقع ألعاب يدعم التضمين.
+            </p>
+          </div>
+          {previewSrc && (
+            <div>
+              <Label className="flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> معاينة مباشرة</Label>
+              <div className="aspect-video bg-muted rounded-xl overflow-hidden border-2 border-primary/20">
+                <iframe src={previewSrc} title="معاينة" className="w-full h-full" style={{ border: 0 }} />
+              </div>
+            </div>
+          )}
+          <div>
+            <Label>الوصف (اختياري)</Label>
+            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              id="game-published"
+              type="checkbox"
+              checked={form.published}
+              onChange={(e) => setForm({ ...form, published: e.target.checked })}
+              className="w-4 h-4"
+            />
+            <Label htmlFor="game-published" className="cursor-pointer">منشورة (تظهر للمستخدمين)</Label>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>إلغاء</Button>
+          <Button variant="hero" onClick={onSave}>{editing ? "حفظ التعديلات" : "إضافة"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+
 const TestimonialsSection = () => {
   const perm = useSectionPerm("testimonials");
   const [items, setItems] = useState<any[]>([]);
