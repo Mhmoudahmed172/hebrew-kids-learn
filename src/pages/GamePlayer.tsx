@@ -145,7 +145,7 @@ const GamePlayer = () => {
                   )}
                 </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/70">لا يوجد كود تضمين للعبة</div>
+                <div className="w-full h-full flex items-center justify-center text-white/70">لا يوجد كود للعبة</div>
               )}
             </div>
             <div className="mt-4">
