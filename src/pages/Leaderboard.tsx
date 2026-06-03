@@ -13,21 +13,17 @@ const Leaderboard = () => {
 
   useEffect(() => {
     (async () => {
-      const { data: pts } = await supabase
-        .from("user_points")
-        .select("user_id,total_points,current_level")
-        .order("total_points", { ascending: false })
-        .limit(50);
-      const ids = (pts || []).map((r: any) => r.user_id);
-      let names: Record<string, string> = {};
-      if (ids.length) {
-        const { data: profs } = await supabase.from("profiles").select("id,full_name").in("id", ids);
-        (profs || []).forEach((p: any) => { names[p.id] = p.full_name || "متعلم"; });
-      }
-      setRows((pts || []).map((r: any) => ({ ...r, name: names[r.user_id] || "متعلم" })));
+      const { data } = await (supabase as any).rpc("get_leaderboard", { p_limit: 50 });
+      setRows((data || []).map((r: any) => ({
+        user_id: r.is_me ? user?.id : `rank-${r.rank}`,
+        name: r.display_name,
+        total_points: r.total_points,
+        current_level: r.current_level,
+        is_me: r.is_me,
+      })));
       setLoading(false);
     })();
-  }, []);
+  }, [user?.id]);
 
   const medal = (i: number) => i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
 
