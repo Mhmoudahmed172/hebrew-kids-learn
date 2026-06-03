@@ -48,7 +48,7 @@ const Leaderboard = () => {
         ) : (
           <div className="space-y-2">
             {rows.map((r, i) => {
-              const isMe = r.user_id === user?.id;
+              const isMe = r.is_me;
               return (
                 <div key={r.user_id} className={`flex items-center gap-4 p-4 rounded-2xl border-2 transition-all ${
                   isMe ? "border-primary bg-primary-soft" : i < 3 ? "border-secondary/40 bg-secondary/10" : "border-border/60 bg-card"
