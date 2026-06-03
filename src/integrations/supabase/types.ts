@@ -642,6 +642,16 @@ export type Database = {
     Functions: {
       create_kid_invite_code: { Args: never; Returns: string }
       get_kid_today_minutes: { Args: { p_kid_id: string }; Returns: number }
+      get_leaderboard: {
+        Args: { p_limit?: number }
+        Returns: {
+          current_level: number
+          display_name: string
+          is_me: boolean
+          rank: number
+          total_points: number
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
