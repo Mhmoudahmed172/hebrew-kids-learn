@@ -15,8 +15,13 @@ const Footer = () => {
               نجعل تعلم العبرية مغامرة ممتعة لكل طفل، بأسلوب آمن واحترافي.
             </p>
             <div className="flex gap-3">
-              {[Facebook, Instagram, Twitter, Youtube].map((Icon, i) => (
-                <a key={i} href="#" className="w-10 h-10 rounded-full bg-background/10 hover:bg-primary flex items-center justify-center transition-smooth">
+              {[
+                { Icon: Facebook, label: "Facebook" },
+                { Icon: Instagram, label: "Instagram" },
+                { Icon: Twitter, label: "Twitter" },
+                { Icon: Youtube, label: "YouTube" },
+              ].map(({ Icon, label }) => (
+                <a key={label} href="#" aria-label={label} className="w-11 h-11 rounded-full bg-background/10 hover:bg-primary flex items-center justify-center transition-smooth">
                   <Icon className="w-4 h-4" />
                 </a>
               ))}

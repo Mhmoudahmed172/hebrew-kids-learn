@@ -28,10 +28,10 @@ const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button variant="hero" size="xl">
+              <Button variant="hero" size="xl" className="w-full sm:w-auto min-h-12">
                 <Sparkles /> ابدأ الآن مجانًا
               </Button>
-              <Button variant="outline" size="xl">
+              <Button variant="outline" size="xl" className="w-full sm:w-auto min-h-12">
                 <PlayCircle /> شاهد كيف تعمل
               </Button>
             </div>
