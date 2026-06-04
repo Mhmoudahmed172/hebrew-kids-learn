@@ -1,3 +1,4 @@
+import PageLoader from "@/components/PageLoader";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { ArrowRight, CheckCircle2, XCircle, Trophy } from "lucide-react";
@@ -37,7 +38,7 @@ const Quiz = () => {
     })();
   }, [id]);
 
-  if (loading || permsLoading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  if (loading || permsLoading) return <PageLoader />;
   if (!quiz) return <div className="min-h-screen flex items-center justify-center">الاختبار غير موجود</div>;
 
   if (!canPlay("quiz", quiz.id, quiz.level_id)) {

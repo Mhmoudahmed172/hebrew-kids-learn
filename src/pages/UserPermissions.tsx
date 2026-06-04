@@ -1,3 +1,4 @@
+import PageLoader from "@/components/PageLoader";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
@@ -164,7 +165,7 @@ export default function UserPermissions() {
   };
 
   if (loading || authLoading) {
-    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">جاري التحميل...</div>;
+    return <PageLoader />;
   }
 
   return (

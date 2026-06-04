@@ -1,3 +1,4 @@
+import PageLoader from "@/components/PageLoader";
 import { lazy, Suspense } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
@@ -32,8 +33,8 @@ const queryClient = new QueryClient({
 });
 
 const PageFallback = () => (
-  <div dir="rtl" className="min-h-screen flex items-center justify-center text-muted-foreground">
-    جاري التحميل...
+  <div dir="rtl">
+    <PageLoader />
   </div>
 );
 
