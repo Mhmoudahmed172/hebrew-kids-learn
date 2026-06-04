@@ -2,12 +2,12 @@ import { BookOpen, Video, Trophy, Users, Brain, Gamepad2 } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 
 const features = [
-  { icon: Video, title: "فيديوهات تعليمية ممتعة", desc: "محتوى مرئي عالي الجودة بأسلوب يحبّه الأطفال ويفهمونه بسهولة.", color: "primary", bg: "bg-primary-soft" },
-  { icon: Gamepad2, title: "ألعاب وأنشطة تفاعلية", desc: "تعلّم باللعب — تمارين وألغاز تُثبّت المعلومة دون ملل.", color: "pink", bg: "bg-pink-soft" },
-  { icon: Trophy, title: "نجوم وشارات تحفيزية", desc: "نظام مكافآت يجعل طفلك متحمّساً للعودة كل يوم.", color: "accent", bg: "bg-accent-soft" },
-  { icon: Brain, title: "بطاقات حفظ ذكية", desc: "طريقة مُجرَّبة لتذكّر الكلمات والحروف العبرية بسرعة.", color: "secondary", bg: "bg-secondary-soft" },
-  { icon: BookOpen, title: "منهج متدرّج آمن", desc: "من أول حرف إلى أول محادثة — خطوة بخطوة بإشراف تربوي.", color: "mint", bg: "bg-mint-soft" },
-  { icon: Users, title: "تقارير واضحة للأهل", desc: "اعرف تقدّم طفلك لحظة بلحظة، بدون تعقيد.", color: "primary", bg: "bg-primary-soft" },
+  { icon: Video, title: "فيديوهات قصصية تأسر الطفل", desc: "حلقات قصيرة بأسلوب كرتوني يُحبّه الأطفال ويُرسّخ اللغة في ذاكرتهم.", color: "primary", bg: "bg-primary-soft" },
+  { icon: Gamepad2, title: "ألعاب تفاعلية تُثبّت المعلومة", desc: "تمارين وألغاز ممتعة تُحوّل كل درس إلى مغامرة لا يريد الطفل أن تنتهي.", color: "pink", bg: "bg-pink-soft" },
+  { icon: Trophy, title: "نجوم وشارات تشعل الحماس", desc: "نظام مكافآت ذكي يدفع طفلك للعودة كل يوم بشغف لإنجاز المزيد.", color: "accent", bg: "bg-accent-soft" },
+  { icon: Brain, title: "بطاقات حفظ ذكية", desc: "طريقة مُجرَّبة علمياً لحفظ الكلمات والحروف العبرية بسرعة وثبات.", color: "secondary", bg: "bg-secondary-soft" },
+  { icon: BookOpen, title: "منهج متدرّج بإشراف تربوي", desc: "من أول حرف إلى أول محادثة كاملة — خطوة بخطوة، بأمان وثقة.", color: "mint", bg: "bg-mint-soft" },
+  { icon: Users, title: "تقارير أسبوعية للأهل", desc: "تابعي تقدّم طفلك بوضوح كل أسبوع — بدون تعقيد، بدون قلق.", color: "primary", bg: "bg-primary-soft" },
 ];
 
 const Features = () => {
