@@ -107,21 +107,6 @@ const AboutUs = () => {
           </div>
         </div>
 
-        {/* Values */}
-        <div className="grid md:grid-cols-3 gap-6">
-          {values.map((val, i) => (
-            <div
-              key={i}
-              className="bg-card-gradient border border-border/50 rounded-3xl p-8 text-center card-lift shadow-soft"
-            >
-              <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center mx-auto mb-5">
-                <val.icon className="w-7 h-7 text-white" />
-              </div>
-              <h4 className="font-display text-xl font-bold mb-3">{val.title}</h4>
-              <p className="text-muted-foreground leading-relaxed text-sm">{val.desc}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </section>
   );
