@@ -25,6 +25,7 @@ const Index = () => {
       <FAQ />
       <FinalCTA />
       <Footer />
+      <ScrollToTop />
     </main>
   );
 };
