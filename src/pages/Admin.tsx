@@ -31,7 +31,7 @@ import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 import {
   ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid,
   Tooltip as RTooltip, Cell, PieChart, Pie, Legend, AreaChart, Area,

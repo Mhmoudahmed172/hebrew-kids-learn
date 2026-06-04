@@ -1,5 +1,5 @@
 import { UserPlus, Sparkles, TrendingUp } from "lucide-react";
-import parentChild from "@/assets/parent-child.png";
+import parentChild from "@/assets/parent-child.webp";
 import { useReveal } from "@/hooks/useReveal";
 
 const steps = [
