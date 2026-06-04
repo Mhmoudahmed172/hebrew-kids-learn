@@ -14,27 +14,31 @@ const Hero = () => {
           <div className="text-center lg:text-right space-y-7 animate-pop-in">
             <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full border border-primary/10 shadow-soft">
               <ShieldCheck className="w-4 h-4 text-mint" />
-              <span className="text-sm font-bold text-foreground/80">منصة آمنة ومعتمدة لتعليم العبرية للأطفال</span>
+              <span className="text-sm font-bold text-foreground/80">موثوق من +12,000 عائلة عربية</span>
             </div>
 
             <h1 className="font-display sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] text-6xl text-right border-0">
-              طفلك يتعلم العبرية{" "}
-              <span className="text-gradient-fun">بثقة ومتعة</span>{" "}
-              من أول درس
+              طفلك يتحدث العبرية{" "}
+              <span className="text-gradient-fun">بثقة</span>{" "}
+              من أول شهر
             </h1>
 
             <p className="text-lg lg:text-xl text-muted-foreground max-w-xl mx-auto lg:mx-0 leading-relaxed">
-              منهج متدرّج، فيديوهات مشوّقة، وألعاب تفاعلية مصمّمة للأطفال من 5 إلى 10 سنوات — في بيئة آمنة بدون إعلانات، مع تقارير واضحة لك كأب أو أم.
+              منهج تفاعلي مدروس للأطفال من 4 إلى 16 سنة — فيديوهات مشوّقة، ألعاب ذكية، وتقارير أسبوعية تطمئنك على تقدّم طفلك خطوة بخطوة.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button variant="hero" size="xl" className="w-full sm:w-auto min-h-12">
-                <Sparkles /> ابدأ الآن مجانًا
+                <Sparkles /> ابدئي مجاناً 14 يوم
               </Button>
               <Button variant="outline" size="xl" className="w-full sm:w-auto min-h-12">
-                <PlayCircle /> شاهد كيف تعمل
+                <PlayCircle /> شاهدي عرض الدقيقة
               </Button>
             </div>
+
+            <p className="text-xs text-muted-foreground text-center lg:text-right">
+              🔒 بدون بطاقة ائتمان · إلغاء فوري في أي وقت
+            </p>
 
             {/* Trust indicators */}
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-6 pt-2">
@@ -50,7 +54,7 @@ const Hero = () => {
                   <div className="flex items-center gap-1">
                     {[1,2,3,4,5].map(i => <Star key={i} className="w-3.5 h-3.5 fill-accent text-accent" />)}
                   </div>
-                  <p className="text-xs text-muted-foreground font-medium">+10,000 عائلة تثق بنا</p>
+                  <p className="text-xs text-muted-foreground font-medium">+12,000 عائلة تثق بنا</p>
                 </div>
               </div>
               <div className="hidden sm:flex items-center gap-2 text-xs text-muted-foreground">

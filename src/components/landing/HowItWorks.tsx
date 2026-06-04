@@ -3,9 +3,9 @@ import parentChild from "@/assets/parent-child.webp";
 import { useReveal } from "@/hooks/useReveal";
 
 const steps = [
-  { n: "1", icon: UserPlus, title: "أنشئ حساب طفلك", desc: "تسجيل آمن في أقل من دقيقة، واختر المستوى المناسب لعمر طفلك." },
-  { n: "2", icon: Sparkles, title: "ابدأوا الرحلة معًا", desc: "دروس قصيرة يومية، فيديوهات تفاعلية، وألعاب تجعل التعلّم متعة لا تنتهي." },
-  { n: "3", icon: TrendingUp, title: "تابع تقدّمه بثقة", desc: "تقارير أسبوعية واضحة، شارات إنجاز، وتحفيز مستمر يلمسه طفلك." },
+  { n: "1", icon: UserPlus, title: "سجّلي حساب طفلك", desc: "تسجيل آمن في أقل من دقيقة، واختاري المستوى المناسب لعمره." },
+  { n: "2", icon: Sparkles, title: "15 دقيقة يومياً فقط", desc: "درس قصير ممتع كل يوم — فيديوهات وألعاب تجعل التعلّم عادة محبّبة." },
+  { n: "3", icon: TrendingUp, title: "تقرير أسبوعي لكِ", desc: "اطّلعي على تقدّم طفلك وإنجازاته أسبوعياً بوضوح كامل وثقة." },
 ];
 
 const HowItWorks = () => {
