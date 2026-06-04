@@ -1,4 +1,4 @@
-import { BookOpen, Users, Star, Heart, Target, Globe } from "lucide-react";
+import { BookOpen, Users, Star, Heart, Target, Globe, ShieldCheck } from "lucide-react";
 
 const stats = [
   { icon: Users, value: "+10,000", label: "طفل يتعلم معنا" },
@@ -25,9 +25,6 @@ const values = [
   },
 ];
 
-// Need to import ShieldCheck for values - let me add it properly
-import { ShieldCheck } from "lucide-react";
-
 const AboutUs = () => {
   return (
     <section className="py-20 lg:py-28 bg-background relative overflow-hidden" id="about">
@@ -43,4 +40,91 @@ const AboutUs = () => {
             من نحن
           </span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl mb-5">
-            قصتنا بدأت من{
+            قصتنا بدأت من <span className="text-gradient-fun">حلم بسيط</span>
+          </h2>
+          <p className="text-muted-foreground text-lg leading-relaxed">
+            حلمنا نسوي تعلم العبرية متاح وممتع لكل طفل عربي. مش بس دروس — رحلة كاملة من الاكتشاف والإنجاز.
+          </p>
+        </div>
+
+        {/* Stats row */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-16">
+          {stats.map((stat, i) => (
+            <div
+              key={i}
+              className="bg-card-gradient border border-border/50 rounded-3xl p-6 text-center card-lift shadow-soft"
+            >
+              <div className="w-12 h-12 rounded-2xl bg-primary-gradient flex items-center justify-center mx-auto mb-4">
+                <stat.icon className="w-6 h-6 text-white" />
+              </div>
+              <p className="font-display text-3xl font-extrabold text-gradient mb-1">{stat.value}</p>
+              <p className="text-sm text-muted-foreground font-medium">{stat.label}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Story text */}
+        <div className="bg-card-gradient border border-border/50 rounded-3xl p-8 lg:p-12 shadow-medium mb-16">
+          <div className="grid lg:grid-cols-2 gap-10 items-center">
+            <div className="space-y-4">
+              <h3 className="font-display text-2xl lg:text-3xl">
+                منصة <span className="text-gradient-fun">عبري ببساطة</span> — أكثر من مجرد دروس
+              </h3>
+              <p className="text-muted-foreground leading-relaxed">
+                انطلقنا عام 2024 بهدف واحد: نساعد الأطفال العرب يتعلموا العبرية بأسلوب طبيعي وممتع. 
+                مش من خلال الحفظ الميكانيكي، بل من خلال فيديوهات قصصية، ألعاب ذكية، واختبارات تحفيزية.
+              </p>
+              <p className="text-muted-foreground leading-relaxed">
+                كل درس بناه فريق من المتخصصين باللغة العبرية وعلوم التربية والتعلم الإلكتروني. 
+                والنتيجة؟ أطفال يستنّون درسهم بفضول، وأهل مطمئنين على جودة المحتوى.
+              </p>
+            </div>
+            <div className="relative">
+              <div className="absolute inset-0 bg-primary rounded-3xl blur-3xl opacity-10 scale-90" />
+              <div className="grid grid-cols-2 gap-4 relative">
+                <div className="bg-primary-soft rounded-2xl p-5 border border-primary/10">
+                  <BookOpen className="w-8 h-8 text-primary mb-3" />
+                  <p className="font-display font-bold text-lg">5 مستويات</p>
+                  <p className="text-sm text-muted-foreground">متدرجة من الحروف للمحادثة</p>
+                </div>
+                <div className="bg-secondary-soft rounded-2xl p-5 border border-secondary/10">
+                  <Star className="w-8 h-8 text-secondary mb-3" />
+                  <p className="font-display font-bold text-lg">نظام نقاط</p>
+                  <p className="text-sm text-muted-foreground">يحفز الطفل يكمل رحلته</p>
+                </div>
+                <div className="bg-mint-soft rounded-2xl p-5 border border-mint/10">
+                  <Users className="w-8 h-8 text-mint mb-3" />
+                  <p className="font-display font-bold text-lg">مجتمع حي</p>
+                  <p className="text-sm text-muted-foreground">لوحة المتصدرين والتحديات</p>
+                </div>
+                <div className="bg-pink-soft rounded-2xl p-5 border border-pink/10">
+                  <Heart className="w-8 h-8 text-pink mb-3" />
+                  <p className="font-display font-bold text-lg">بدون إعلانات</p>
+                  <p className="text-sm text-muted-foreground">بيئة آمنة ونظيفة للطفل</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Values */}
+        <div className="grid md:grid-cols-3 gap-6">
+          {values.map((val, i) => (
+            <div
+              key={i}
+              className="bg-card-gradient border border-border/50 rounded-3xl p-8 text-center card-lift shadow-soft"
+            >
+              <div className="w-14 h-14 rounded-2xl bg-primary-gradient flex items-center justify-center mx-auto mb-5">
+                <val.icon className="w-7 h-7 text-white" />
+              </div>
+              <h4 className="font-display text-xl font-bold mb-3">{val.title}</h4>
+              <p className="text-muted-foreground leading-relaxed text-sm">{val.desc}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default AboutUs;
