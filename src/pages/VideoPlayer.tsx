@@ -119,8 +119,25 @@ const VideoPlayer = () => {
                   className="w-full h-full bg-black pointer-events-auto"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                  جاري تحميل الفيديو...
+                <div className="w-full h-full flex flex-col items-center justify-center gap-5 bg-gradient-to-br from-primary/5 via-background to-accent/10">
+                  <div className="relative">
+                    <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl animate-pulse" />
+                    <div className="relative w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-2xl animate-bounce">
+                      <svg className="w-9 h-9 text-white mr-1" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="font-display text-lg bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent font-bold">
+                      جاري تحضير الفيديو لك
+                    </p>
+                    <div className="flex gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "0ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-accent animate-bounce" style={{ animationDelay: "150ms" }} />
+                      <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: "300ms" }} />
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
