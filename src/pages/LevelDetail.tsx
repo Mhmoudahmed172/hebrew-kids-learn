@@ -56,7 +56,24 @@ const LevelDetail = () => {
     })();
   }, [slug]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/10">
+      <div className="relative">
+        <div className="w-20 h-20 rounded-full bg-primary/20 animate-ping absolute inset-0" />
+        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center relative">
+          <Play className="w-8 h-8 text-primary-foreground mr-1" />
+        </div>
+      </div>
+      <h2 className="font-display text-xl mt-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        جاري تحضير المحتوى...
+      </h2>
+      <div className="flex gap-1 mt-3">
+        <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+        <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+        <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+      </div>
+    </div>
+  );
 
   if (!level) return (
     <main dir="rtl" className="min-h-screen flex items-center justify-center">

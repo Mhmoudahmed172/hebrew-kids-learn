@@ -138,9 +138,17 @@ const GamePlayer = () => {
                     allowFullScreen
                   />
                   {iframeLoading && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/80 backdrop-blur-sm text-white">
-                      <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                      <p className="text-sm font-bold">جاري تحميل اللعبة...</p>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 backdrop-blur-sm text-white">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-full bg-primary/30 animate-ping absolute inset-0" />
+                        <Gamepad2 className="w-10 h-10 text-primary relative" />
+                      </div>
+                      <p className="text-base font-bold">جاري تحميل اللعبة...</p>
+                      <div className="flex gap-1">
+                        <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                        <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                        <span className="w-2 h-2 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+                      </div>
                     </div>
                   )}
                 </>
