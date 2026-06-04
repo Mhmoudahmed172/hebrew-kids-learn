@@ -148,7 +148,7 @@ const LevelDetail = () => {
                       {!allowed && <LockBadge />}
                       <div className="relative aspect-video bg-muted rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
                         {v.thumbnail_url ? (
-                          <img src={v.thumbnail_url} alt={v.title} className="w-full h-full object-cover" />
+                          <img src={v.thumbnail_url} alt={v.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         ) : previewUrls[v.id] ? (
                           <video
                             src={`${previewUrls[v.id]}#t=0.1`}
