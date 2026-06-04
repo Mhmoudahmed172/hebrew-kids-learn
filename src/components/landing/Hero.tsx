@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, PlayCircle, Star, Trophy, Zap, ShieldCheck } from "lucide-react";
-import heroCharacters from "@/assets/hero-characters.png";
+import heroCharacters from "@/assets/hero-characters.webp";
 
 const Hero = () => {
   return (
@@ -71,8 +71,12 @@ const Hero = () => {
                   alt="معلمة وأطفال يتعلمون العبرية بمتعة"
                   width={1400}
                   height={800}
+                  loading="eager"
+                  fetchPriority="high"
+                  decoding="async"
                   className="w-full h-auto relative z-10"
                 />
+
               </div>
 
               <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-3/4 h-6 bg-primary/20 blur-2xl rounded-full" />

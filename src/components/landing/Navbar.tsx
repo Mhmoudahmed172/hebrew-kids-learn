@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { useUserPoints } from "@/hooks/useUserPoints";
-import logo from "@/assets/logo.png";
+import logo from "@/assets/logo.webp";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);

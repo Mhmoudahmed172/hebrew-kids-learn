@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Gift } from "lucide-react";
-import kidsLearning from "@/assets/kids-learning.png";
+import kidsLearning from "@/assets/kids-learning.webp";
 
 const FinalCTA = () => {
   return (
