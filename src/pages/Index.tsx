@@ -9,6 +9,7 @@ import Testimonials from "@/components/landing/Testimonials";
 import FinalCTA from "@/components/landing/FinalCTA";
 import FAQ from "@/components/landing/FAQ";
 import Footer from "@/components/landing/Footer";
+import ScrollToTop from "@/components/landing/ScrollToTop";
 
 const Index = () => {
   return (
@@ -24,6 +25,7 @@ const Index = () => {
       <FAQ />
       <FinalCTA />
       <Footer />
+      <ScrollToTop />
     </main>
   );
 };
