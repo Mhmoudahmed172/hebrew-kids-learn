@@ -1,3 +1,4 @@
+import PageLoader from "@/components/PageLoader";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Trophy, Medal, ArrowRight, Crown } from "lucide-react";
