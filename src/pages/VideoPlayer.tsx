@@ -69,7 +69,7 @@ const VideoPlayer = () => {
     getSignedVideoUrl(v.video_url).then(setSignedUrl);
   }, [videoId, videos, user, permsLoading, level, canPlay]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  if (loading) return <PageLoader />;
   if (!level) return <div className="min-h-screen flex items-center justify-center">المستوى غير موجود</div>;
 
   const idx = videos.findIndex((v) => v.id === videoId);

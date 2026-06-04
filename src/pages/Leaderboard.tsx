@@ -42,7 +42,7 @@ const Leaderboard = () => {
         </div>
 
         {loading ? (
-          <p className="text-center py-20 text-muted-foreground">جاري التحميل...</p>
+          <div className="py-12"><PageLoader /></div>
         ) : rows.length === 0 ? (
           <p className="text-center py-20 text-muted-foreground">لا يوجد متعلمون بعد. كن أول من يجمع النقاط!</p>
         ) : (

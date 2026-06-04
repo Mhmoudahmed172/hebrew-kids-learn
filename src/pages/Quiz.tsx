@@ -37,7 +37,7 @@ const Quiz = () => {
     })();
   }, [id]);
 
-  if (loading || permsLoading) return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  if (loading || permsLoading) return <PageLoader />;
   if (!quiz) return <div className="min-h-screen flex items-center justify-center">الاختبار غير موجود</div>;
 
   if (!canPlay("quiz", quiz.id, quiz.level_id)) {

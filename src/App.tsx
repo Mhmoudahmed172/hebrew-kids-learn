@@ -32,8 +32,8 @@ const queryClient = new QueryClient({
 });
 
 const PageFallback = () => (
-  <div dir="rtl" className="min-h-screen flex items-center justify-center text-muted-foreground">
-    جاري التحميل...
+  <div dir="rtl">
+    <PageLoader />
   </div>
 );
 
