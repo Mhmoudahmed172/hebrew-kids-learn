@@ -13,20 +13,28 @@ import ScrollToTop from "@/components/landing/ScrollToTop";
 
 const Index = () => {
   return (
-    <main className="min-h-screen bg-background">
+    <>
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:right-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-lg focus:shadow-medium"
+      >
+        تخطّي إلى المحتوى الرئيسي
+      </a>
       <Navbar />
-      <Hero />
-      <AboutUs />
-      <Features />
-      <HowItWorks />
-      <Levels />
-      <Pricing />
-      <Testimonials />
-      <FAQ />
-      <FinalCTA />
+      <main id="main-content" className="min-h-screen bg-background">
+        <Hero />
+        <AboutUs />
+        <Features />
+        <HowItWorks />
+        <Levels />
+        <Pricing />
+        <Testimonials />
+        <FAQ />
+        <FinalCTA />
+      </main>
       <Footer />
       <ScrollToTop />
-    </main>
+    </>
   );
 };
 
