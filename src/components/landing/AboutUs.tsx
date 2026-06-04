@@ -1,10 +1,10 @@
 import { BookOpen, Users, Star, Heart, Target, Globe, ShieldCheck } from "lucide-react";
 
 const stats = [
-  { icon: Users, value: "+10,000", label: "طفل يتعلم معنا" },
-  { icon: BookOpen, value: "+200", label: "درس تفاعلي" },
-  { icon: Star, value: "+50", label: "لعبة تعليمية" },
-  { icon: Heart, value: "99%", label: "رضا الأهل" },
+  { icon: Users, value: "+12,000", label: "طفل يتعلم معنا" },
+  { icon: BookOpen, value: "+350", label: "درس تفاعلي" },
+  { icon: Star, value: "+25", label: "معلم معتمد" },
+  { icon: Heart, value: "98%", label: "رضا الأهل" },
 ];
 
 const values = [
@@ -40,10 +40,10 @@ const AboutUs = () => {
             من نحن
           </span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl mb-5">
-            قصتنا بدأت من <span className="text-gradient-fun">حلم بسيط</span>
+            بدأت القصة من <span className="text-gradient-fun">أمٍّ وابنها</span>
           </h2>
           <p className="text-muted-foreground text-lg leading-relaxed">
-            حلمنا نسوي تعلم العبرية متاح وممتع لكل طفل عربي. مش بس دروس — رحلة كاملة من الاكتشاف والإنجاز.
+            حين عجزت سارة عن إيجاد طريقة ممتعة تُعلّم بها ابنها العبرية، قرّرت أن تصنعها بنفسها — فولدت منصة "عبري ببساطة" لتكون الرحلة التي تمنّتها لكل طفل عربي.
           </p>
         </div>
 

@@ -17,22 +17,25 @@ const FinalCTA = () => {
             <div className="text-white text-center lg:text-right space-y-6">
               <div className="inline-flex items-center gap-2 bg-white/20 backdrop-blur px-4 py-2 rounded-full">
                 <Gift className="w-4 h-4" />
-                <span className="text-sm font-bold">هدية لك: 7 أيام مجانية بالكامل</span>
+                <span className="text-sm font-bold">هديتك: 14 يوم مجاناً بالكامل</span>
               </div>
               <h2 className="font-display text-4xl lg:text-6xl text-white leading-tight">
-                امنح طفلك بداية قوية مع العبرية اليوم
+                لا تُضيعي العام الدراسي — ابدئي اليوم
               </h2>
               <p className="text-lg text-white/90 max-w-lg mx-auto lg:mx-0">
-                انضم لأكثر من 10,000 عائلة تثق بنا. بدون بطاقة ائتمان، وبإمكانك الإلغاء بضغطة واحدة.
+                انضمّي إلى +12,000 عائلة عربية اختارت أن يبدأ أطفالها رحلة العبرية بثقة ومتعة.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
                 <Button variant="sun" size="xl">
-                  <Sparkles /> ابدأ الآن مجانًا
+                  <Sparkles /> 🎁 ابدئي الآن مجاناً
                 </Button>
                 <Button size="xl" className="bg-white text-primary hover:bg-white/90">
-                  تواصل معنا
+                  تواصلي عبر واتساب
                 </Button>
               </div>
+              <p className="text-sm text-white/80 pt-1">
+                ✅ بدون بطاقة ائتمان · إلغاء فوري · دعم على واتساب
+              </p>
             </div>
 
             <div className="relative hidden lg:block">
