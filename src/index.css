@@ -207,7 +207,7 @@
   100% { transform: translateX(50%); }
 }
 .animate-marquee-rtl {
-  animation: marquee-rtl 40s linear infinite;
+  animation: marquee-rtl 25s linear infinite;
   will-change: transform;
 }
 .marquee-mask {
