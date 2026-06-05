@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, PlayCircle, Star, Trophy, Zap, ShieldCheck } from "lucide-react";
-import heroCharacters from "@/assets/hero-characters.webp";
+const heroCharacters = "/hero-characters.webp";
 
 const Hero = () => {
   return (
