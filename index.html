@@ -51,6 +51,84 @@
     <link rel="alternate icon" href="/favicon.png" type="image/png" />
     <link rel="apple-touch-icon" href="/favicon.png" />
 
+    <style>
+      :root {
+        --critical-background: hsl(270 25% 99%);
+        --critical-foreground: hsl(265 45% 14%);
+        --critical-primary: hsl(270 60% 45%);
+        --critical-primary-soft: hsl(270 70% 96%);
+        --critical-accent: hsl(22 92% 52%);
+        --critical-muted: hsl(265 15% 42%);
+        --critical-border: hsl(270 25% 90% / 0.4);
+      }
+      html { direction: rtl; }
+      body {
+        margin: 0;
+        background: var(--critical-background);
+        color: var(--critical-foreground);
+        font-family: Tajawal, system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      .static-shell { min-height: 100vh; background: var(--critical-background); }
+      .static-nav {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        height: 80px;
+        border-bottom: 1px solid var(--critical-border);
+        background: hsl(270 25% 99% / 0.7);
+        backdrop-filter: blur(24px);
+      }
+      .static-container { width: min(100% - 2rem, 1280px); margin-inline: auto; }
+      .static-nav-inner { height: 80px; display: flex; align-items: center; justify-content: space-between; }
+      .static-brand { display: flex; align-items: center; gap: 0.5rem; color: inherit; text-decoration: none; font-weight: 900; font-size: 1.25rem; }
+      .static-brand img { width: 44px; height: 44px; border-radius: 9999px; object-fit: cover; box-shadow: 0 0 0 2px hsl(22 92% 52% / 0.4); }
+      .static-brand span, .static-gradient {
+        background: linear-gradient(135deg, hsl(263 70% 32%), hsl(270 60% 50%));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .static-links { display: none; align-items: center; gap: 2rem; }
+      .static-links a { color: hsl(265 45% 14% / 0.8); text-decoration: none; font-size: 0.875rem; font-weight: 500; }
+      .static-actions { display: none; align-items: center; gap: 0.75rem; }
+      .static-login { color: var(--critical-foreground); text-decoration: none; font-weight: 700; font-size: 0.875rem; padding: 0.5rem 1rem; }
+      .static-cta { color: white; text-decoration: none; font-weight: 800; font-size: 0.875rem; padding: 0.75rem 1.25rem; border-radius: 9999px; background: linear-gradient(135deg, hsl(270 60% 45%), hsl(22 92% 52%)); box-shadow: 0 10px 40px -10px hsl(270 60% 45% / 0.22); }
+      .static-menu { width: 40px; height: 40px; border: 0; background: transparent; color: var(--critical-foreground); font: inherit; font-size: 1.75rem; line-height: 1; }
+      .static-hero { position: relative; overflow: hidden; padding: 3rem 0 6rem; background: linear-gradient(180deg, var(--critical-primary-soft) 0%, var(--critical-background) 100%); }
+      .static-blob { position: absolute; width: 520px; height: 520px; top: 5rem; left: -8rem; border-radius: 9999px; background: var(--critical-primary); opacity: 0.3; filter: blur(60px); pointer-events: none; }
+      .static-hero-grid { position: relative; display: grid; gap: 3rem; align-items: center; }
+      .static-hero-copy { text-align: center; display: flex; flex-direction: column; gap: 1.75rem; }
+      .static-pill { align-self: center; display: inline-flex; align-items: center; gap: 0.5rem; border: 1px solid hsl(270 60% 45% / 0.1); border-radius: 9999px; background: hsl(0 0% 100% / 0.8); padding: 0.5rem 1rem; box-shadow: 0 4px 20px -4px hsl(265 50% 25% / 0.12); color: hsl(265 45% 14% / 0.8); font-size: 0.875rem; font-weight: 800; }
+      .static-hero h1 { margin: 0; font-family: Cairo, Tajawal, sans-serif; font-size: 3.75rem; line-height: 1.15; font-weight: 900; letter-spacing: 0; text-align: right; }
+      .static-hero p { margin: 0 auto; max-width: 36rem; color: var(--critical-muted); font-size: 1.125rem; line-height: 1.625; }
+      .static-buttons { display: flex; flex-direction: column; gap: 1rem; justify-content: center; }
+      .static-button-primary, .static-button-secondary { min-height: 3rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 9999px; padding: 0.875rem 1.5rem; text-decoration: none; font-weight: 900; }
+      .static-button-primary { color: white; background: linear-gradient(135deg, hsl(270 60% 45%) 0%, hsl(285 65% 52%) 45%, hsl(22 92% 55%) 100%); box-shadow: 0 20px 60px -20px hsl(22 92% 50% / 0.3); }
+      .static-button-secondary { color: var(--critical-primary); background: white; border: 1px solid hsl(270 25% 90%); }
+      .static-note { font-size: 0.75rem; color: var(--critical-muted); text-align: center; }
+      .static-hero-art { position: relative; filter: drop-shadow(0 25px 35px hsl(270 60% 45% / 0.3)); }
+      .static-hero-art::before { content: ""; position: absolute; inset: 0; border-radius: 9999px; background: var(--critical-primary); opacity: 0.15; filter: blur(64px); transform: scale(0.9); }
+      .static-hero-art img { position: relative; z-index: 1; display: block; width: 100%; height: auto; }
+      @media (min-width: 640px) {
+        .static-buttons { flex-direction: row; }
+        .static-button-primary, .static-button-secondary { width: auto; }
+      }
+      @media (min-width: 1024px) {
+        .static-links, .static-actions { display: flex; }
+        .static-menu { display: none; }
+        .static-hero { padding: 5rem 0 8rem; }
+        .static-hero-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4rem; }
+        .static-hero-copy { text-align: right; }
+        .static-pill { align-self: flex-start; }
+        .static-hero h1 { font-size: 3.75rem; }
+        .static-hero p { margin-inline: 0; font-size: 1.25rem; }
+        .static-buttons { justify-content: flex-start; }
+        .static-note { text-align: right; }
+      }
+      @media (min-width: 1280px) { .static-hero h1 { font-size: 4.5rem; } }
+    </style>
+
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
@@ -84,7 +162,48 @@
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div class="static-shell" aria-hidden="true">
+        <header class="static-nav">
+          <div class="static-container static-nav-inner">
+            <a class="static-brand" href="/">
+              <img src="/favicon.webp" width="44" height="44" alt="" />
+              <span>عبري ببساطة</span>
+            </a>
+            <nav class="static-links" aria-label="روابط الموقع">
+              <a href="/#features">المنصة</a>
+              <a href="/#how">كيف تعمل</a>
+              <a href="/#levels">المستويات</a>
+              <a href="/#pricing">الأسعار</a>
+              <a href="/#faq">الأسئلة</a>
+            </nav>
+            <div class="static-actions">
+              <a class="static-login" href="/login">تسجيل الدخول</a>
+              <a class="static-cta" href="/signup">ابدأ الآن مجانًا</a>
+            </div>
+            <button class="static-menu" type="button" aria-label="القائمة">☰</button>
+          </div>
+        </header>
+        <main class="static-hero">
+          <div class="static-blob"></div>
+          <div class="static-container static-hero-grid">
+            <section class="static-hero-copy">
+              <div class="static-pill">موثوق من +12,000 عائلة عربية</div>
+              <h1>طفلك يتحدث العبرية <span class="static-gradient">بثقة</span> من أول شهر</h1>
+              <p>منهج تفاعلي مدروس للأطفال من 4 إلى 16 سنة — فيديوهات مشوّقة، ألعاب ذكية، وتقارير أسبوعية تطمئنك على تقدّم طفلك خطوة بخطوة.</p>
+              <div class="static-buttons">
+                <a class="static-button-primary" href="/signup">ابدئي مجاناً 14 يوم</a>
+                <a class="static-button-secondary" href="#features">شاهدي عرض الدقيقة</a>
+              </div>
+              <div class="static-note">🔒 بدون بطاقة ائتمان · إلغاء فوري في أي وقت</div>
+            </section>
+            <div class="static-hero-art">
+              <img src="/hero-characters.webp" fetchpriority="high" decoding="async" width="1200" height="670" alt="Hebrew learning characters" />
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
