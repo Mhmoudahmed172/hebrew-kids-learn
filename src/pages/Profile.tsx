@@ -35,7 +35,16 @@ const Profile = () => {
       setAllBadges(badges || []);
       setEarnedIds(new Set((earned || []).map((b: any) => b.badge_id)));
       const s = { videos: 0, quizzes: 0, songs: 0, games: 0 };
-      (progress || []).forEach((r: any) => { s[`${r.content_type}s` as keyof typeof s]++; });
+      const statKeyByType: Record<string, keyof typeof s> = {
+        video: "videos",
+        quiz: "quizzes",
+        song: "songs",
+        game: "games",
+      };
+      (progress || []).forEach((r: any) => {
+        const key = statKeyByType[r.content_type];
+        if (key) s[key]++;
+      });
       setStats(s);
     })();
   }, [user]);
