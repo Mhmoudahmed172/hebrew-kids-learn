@@ -110,6 +110,7 @@ const Quiz = () => {
       setCurrent(current + 1);
       setSelected(null);
       setRevealed(false);
+      setRevealedCorrect(null);
     }
   };
 
