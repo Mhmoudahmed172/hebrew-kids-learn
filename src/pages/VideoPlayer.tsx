@@ -60,8 +60,7 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // بث الفيديو بسرعة المتصفح الأصلية (Range requests) مع إخفاء الرابط الحقيقي
-  // عبر Service Worker يعترض /__video/{token} ويبدّله بالرابط الموقّع داخلياً
+  // بث الفيديو عبر رابط موقّع قصير العمر (سرعة أصلية للمتصفح)
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
@@ -76,56 +75,16 @@ const VideoPlayer = () => {
     }
 
     let cancelled = false;
-    let token: string | null = null;
-    let objectUrl: string | null = null;
-
     (async () => {
-      const realUrl = await getSignedVideoUrl(v.video_url, 60 * 60 * 2);
-      if (!realUrl || cancelled) return;
-
-      // حاول تسجيل Service Worker لبث سريع مع رابط مخفي
-      if ("serviceWorker" in navigator) {
-        try {
-          const reg =
-            (await navigator.serviceWorker.getRegistration("/video-sw.js")) ||
-            (await navigator.serviceWorker.register("/video-sw.js", { scope: "/" }));
-          await navigator.serviceWorker.ready;
-          const sw = reg.active || navigator.serviceWorker.controller;
-          if (sw) {
-            token = crypto.randomUUID();
-            const ch = new MessageChannel();
-            await new Promise<void>((resolve) => {
-              ch.port1.onmessage = () => resolve();
-              sw.postMessage({ type: "REGISTER", token, url: realUrl }, [ch.port2]);
-              setTimeout(resolve, 300); // أمان
-            });
-            if (cancelled) return;
-            setSignedUrl(`/__video/${token}`);
-            return;
-          }
-        } catch {
-          // ينزل للـ fallback
-        }
-      }
-
-      // Fallback: blob كامل (يخفي الرابط لكن أبطأ)
-      try {
-        const res = await fetch(realUrl);
-        const blob = await res.blob();
-        if (cancelled) return;
-        objectUrl = URL.createObjectURL(blob);
-        setSignedUrl(objectUrl);
-      } catch {}
+      const url = await getSignedVideoUrl(v.video_url, 60 * 60 * 2);
+      if (!cancelled && url) setSignedUrl(url);
     })();
 
     return () => {
       cancelled = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-      if (token && navigator.serviceWorker?.controller) {
-        navigator.serviceWorker.controller.postMessage({ type: "UNREGISTER", token });
-      }
     };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
+
 
 
 
