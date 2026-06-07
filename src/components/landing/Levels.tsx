@@ -71,8 +71,8 @@ const Levels = () => {
           ))}
         </div>
 
-        {/* Desktop adventure map — force LTR so DOM order = visual order */}
-        <div className="hidden md:block" dir="ltr">
+        {/* Desktop adventure map — RTL right-to-left */}
+        <div className="hidden md:block" dir="rtl">
           {rows.map((row, rowIdx) => {
             const reverse = rowIdx % 2 === 1;
             const ordered = reverse ? [...row].reverse() : row;
@@ -94,7 +94,7 @@ const Levels = () => {
                   <RowConnector
                     cols={row.length}
                     lastIsStaggered={lastIsStaggered}
-                    endOnRight={!reverse}
+                    endOnRight={reverse}
                   />
                 )}
 
@@ -110,7 +110,6 @@ const Levels = () => {
                       <div
                         key={lvl.id}
                         style={{ marginTop: i % 2 === 0 ? 0 : STAGGER_PX }}
-                        dir="rtl"
                       >
                         <LevelCard lvl={lvl} index={originalIdx} compact />
                       </div>
@@ -131,7 +130,7 @@ const RowPath = ({ count }: { count: number }) => {
   if (count < 1) return null;
   const W = 1000;
   const pts = Array.from({ length: count }, (_, i) => ({
-    x: ((i + 0.5) / count) * W,
+    x: ((count - i - 0.5) / count) * W,
     y: i % 2 === 0 ? PIN_Y_TOP : PIN_Y_BOTTOM,
   }));
 
