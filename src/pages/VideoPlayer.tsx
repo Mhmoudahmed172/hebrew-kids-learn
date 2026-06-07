@@ -143,17 +143,27 @@ const VideoPlayer = () => {
                   contextLabel={current.title}
                 />
               ) : signedUrl ? (
-                <video
-                  key={current.id}
-                  src={signedUrl}
-                  controls
-                  autoPlay
-                  controlsList="nodownload noremoteplayback noplaybackrate"
-                  disablePictureInPicture
-                  onContextMenu={(e) => e.preventDefault()}
-                  className="w-full h-full bg-black pointer-events-auto"
-                />
-              ) : (
+                <>
+                  <video
+                    key={current.id}
+                    src={signedUrl}
+                    controls
+                    autoPlay
+                    controlsList="nodownload noremoteplayback noplaybackrate"
+                    disablePictureInPicture
+                    onContextMenu={(e) => e.preventDefault()}
+                    className="w-full h-full bg-black pointer-events-auto"
+                  />
+                  {/* علامة مائية: تردع المشاركة لأن اسم المشاهد يظهر في أي تسجيل شاشة */}
+                  <div className="absolute inset-0 pointer-events-none select-none z-10">
+                    <div className="absolute top-3 left-3 text-[11px] font-bold text-white/70 bg-black/30 px-2 py-0.5 rounded">
+                      {user?.email}
+                    </div>
+                    <div className="absolute bottom-3 right-3 text-[11px] font-bold text-white/70 bg-black/30 px-2 py-0.5 rounded">
+                      عبري ببساطة • {user?.email}
+                    </div>
+                  </div>
+                </>
                 <div className="w-full h-full flex flex-col items-center justify-center gap-5 bg-gradient-to-br from-primary/5 via-background to-accent/10">
                   <div className="relative">
                     <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl animate-pulse" />
