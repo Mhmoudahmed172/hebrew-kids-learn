@@ -60,14 +60,48 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // اجلب رابطاً موقّتاً للفيديو الحالي
+  // بث الفيديو عبر Edge Function آمنة (لا يظهر رابط التخزين أبداً)
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
     if (!canPlay("video", videoId, level.id)) return;
     const v = videos.find((x) => x.id === videoId);
     if (!v?.video_url) return;
-    getSignedVideoUrl(v.video_url).then(setSignedUrl);
+
+    // فيديوهات خارجية (يوتيوب…) لا تمرّ بالدالة
+    if (v.video_url.startsWith("http") && !v.video_url.includes("/object/")) {
+      setSignedUrl(v.video_url);
+      return;
+    }
+
+    let revoke: string | null = null;
+    let aborted = false;
+    (async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const token = session?.access_token;
+        if (!token) return;
+        const base = (import.meta.env.VITE_SUPABASE_URL as string).replace(/\/$/, "");
+        const res = await fetch(`${base}/functions/v1/stream-video?id=${videoId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok || !res.body) {
+          toast.error("تعذّر تشغيل الفيديو");
+          return;
+        }
+        const blob = await res.blob();
+        if (aborted) return;
+        const url = URL.createObjectURL(blob);
+        revoke = url;
+        setSignedUrl(url);
+      } catch {
+        toast.error("تعذّر تشغيل الفيديو");
+      }
+    })();
+    return () => {
+      aborted = true;
+      if (revoke) URL.revokeObjectURL(revoke);
+    };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
 
   if (loading) return <PageLoader />;
