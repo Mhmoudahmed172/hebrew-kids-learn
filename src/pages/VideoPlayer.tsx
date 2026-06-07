@@ -114,7 +114,7 @@ const VideoPlayer = () => {
                   };
                   sourceBuffer.addEventListener("updateend", onUpdate);
                   sourceBuffer.addEventListener("error", onError);
-                  sourceBuffer.appendBuffer(chunk);
+                  sourceBuffer.appendBuffer(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength) as ArrayBuffer);
                 });
 
               while (!cancelled) {
