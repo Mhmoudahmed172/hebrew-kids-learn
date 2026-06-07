@@ -60,7 +60,7 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // بث الفيديو عبر Edge Function آمنة (Range streaming — تشغيل فوري بدون تنزيل كامل)
+  // Signed URL قصير العمر (30s) مع تجديد كل 25s — لا يُخزَّن ولا يُسجَّل
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
@@ -68,22 +68,20 @@ const VideoPlayer = () => {
     const v = videos.find((x) => x.id === videoId);
     if (!v?.video_url) return;
 
-    // فيديوهات خارجية (يوتيوب…) لا تمرّ بالدالة
+    // فيديوهات خارجية (يوتيوب…) تُمرَّر كما هي
     if (v.video_url.startsWith("http") && !v.video_url.includes("/object/")) {
       setSignedUrl(v.video_url);
       return;
     }
 
-    let aborted = false;
-    (async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
-      if (!token || aborted) return;
-      const base = (import.meta.env.VITE_SUPABASE_URL as string).replace(/\/$/, "");
-      // الـ token يُمرَّر كـ query param لأن عنصر <video> لا يقبل headers
-      setSignedUrl(`${base}/functions/v1/stream-video?id=${videoId}&token=${encodeURIComponent(token)}`);
-    })();
-    return () => { aborted = true; };
+    let cancelled = false;
+    const fetchSigned = async () => {
+      const url = await getSignedVideoUrl(v.video_url, 30);
+      if (!cancelled && url) setSignedUrl(url);
+    };
+    fetchSigned();
+    const interval = setInterval(fetchSigned, 25000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
 
 
