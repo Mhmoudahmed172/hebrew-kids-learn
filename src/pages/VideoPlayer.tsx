@@ -60,7 +60,7 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // جلب الفيديو كـ Blob وتشغيله عبر blob: URL حتى لا يظهر الرابط الأصلي في DOM/DevTools
+  // استخدام Signed URL مباشرة للبث (streaming) — أسرع بكثير من تنزيل الفيديو كاملاً كـ Blob
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
@@ -75,23 +75,14 @@ const VideoPlayer = () => {
     }
 
     let cancelled = false;
-    let blobUrl: string | null = null;
     (async () => {
-      const url = await getSignedVideoUrl(v.video_url, 30);
+      // صلاحية طويلة كافية لتشغيل الفيديو دون انقطاع
+      const url = await getSignedVideoUrl(v.video_url, 60 * 60 * 2);
       if (!url || cancelled) return;
-      try {
-        const res = await fetch(url);
-        const blob = await res.blob();
-        if (cancelled) return;
-        blobUrl = URL.createObjectURL(blob);
-        setSignedUrl(blobUrl);
-      } catch {
-        /* ignore */
-      }
+      setSignedUrl(url);
     })();
     return () => {
       cancelled = true;
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
 
