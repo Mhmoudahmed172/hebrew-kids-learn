@@ -60,7 +60,7 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // Signed URL قصير العمر (30s) مع تجديد كل 25s — لا يُخزَّن ولا يُسجَّل
+  // جلب الفيديو كـ Blob وتشغيله عبر blob: URL حتى لا يظهر الرابط الأصلي في DOM/DevTools
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
@@ -75,14 +75,26 @@ const VideoPlayer = () => {
     }
 
     let cancelled = false;
-    const fetchSigned = async () => {
+    let blobUrl: string | null = null;
+    (async () => {
       const url = await getSignedVideoUrl(v.video_url, 30);
-      if (!cancelled && url) setSignedUrl(url);
+      if (!url || cancelled) return;
+      try {
+        const res = await fetch(url);
+        const blob = await res.blob();
+        if (cancelled) return;
+        blobUrl = URL.createObjectURL(blob);
+        setSignedUrl(blobUrl);
+      } catch {
+        /* ignore */
+      }
+    })();
+    return () => {
+      cancelled = true;
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
     };
-    fetchSigned();
-    const interval = setInterval(fetchSigned, 25000);
-    return () => { cancelled = true; clearInterval(interval); };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
+
 
 
   if (loading) return <PageLoader />;
