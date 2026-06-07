@@ -60,8 +60,8 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // بث الفيديو عبر MediaSource مع إخفاء الرابط الأصلي خلف blob: URL
-  // الـ src الظاهر في DOM يكون blob: فقط (مثل ما هو مطلوب)، والبث يحدث تدريجياً (سريع)
+  // بث الفيديو بسرعة المتصفح الأصلية (Range requests) مع إخفاء الرابط الحقيقي
+  // عبر Service Worker يعترض /__video/{token} ويبدّله بالرابط الموقّع داخلياً
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
@@ -76,75 +76,39 @@ const VideoPlayer = () => {
     }
 
     let cancelled = false;
+    let token: string | null = null;
     let objectUrl: string | null = null;
-    let abortController: AbortController | null = null;
 
     (async () => {
       const realUrl = await getSignedVideoUrl(v.video_url, 60 * 60 * 2);
       if (!realUrl || cancelled) return;
 
-      // إذا كان MediaSource مدعوم → بث تدريجي مع إخفاء الرابط
-      const mime = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
-      if (typeof MediaSource !== "undefined" && MediaSource.isTypeSupported(mime)) {
+      // حاول تسجيل Service Worker لبث سريع مع رابط مخفي
+      if ("serviceWorker" in navigator) {
         try {
-          const mediaSource = new MediaSource();
-          objectUrl = URL.createObjectURL(mediaSource);
-          setSignedUrl(objectUrl);
-
-          mediaSource.addEventListener("sourceopen", async () => {
+          const reg =
+            (await navigator.serviceWorker.getRegistration("/video-sw.js")) ||
+            (await navigator.serviceWorker.register("/video-sw.js", { scope: "/" }));
+          await navigator.serviceWorker.ready;
+          const sw = reg.active || navigator.serviceWorker.controller;
+          if (sw) {
+            token = crypto.randomUUID();
+            const ch = new MessageChannel();
+            await new Promise<void>((resolve) => {
+              ch.port1.onmessage = () => resolve();
+              sw.postMessage({ type: "REGISTER", token, url: realUrl }, [ch.port2]);
+              setTimeout(resolve, 300); // أمان
+            });
             if (cancelled) return;
-            try {
-              const sourceBuffer = mediaSource.addSourceBuffer(mime);
-              abortController = new AbortController();
-              const res = await fetch(realUrl, { signal: abortController.signal });
-              if (!res.ok || !res.body) throw new Error("fetch failed");
-              const reader = res.body.getReader();
-
-              const appendChunk = (chunk: Uint8Array) =>
-                new Promise<void>((resolve, reject) => {
-                  const onUpdate = () => {
-                    sourceBuffer.removeEventListener("updateend", onUpdate);
-                    sourceBuffer.removeEventListener("error", onError);
-                    resolve();
-                  };
-                  const onError = () => {
-                    sourceBuffer.removeEventListener("updateend", onUpdate);
-                    sourceBuffer.removeEventListener("error", onError);
-                    reject(new Error("sb error"));
-                  };
-                  sourceBuffer.addEventListener("updateend", onUpdate);
-                  sourceBuffer.addEventListener("error", onError);
-                  sourceBuffer.appendBuffer(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength) as ArrayBuffer);
-                });
-
-              while (!cancelled) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                if (value) await appendChunk(value);
-              }
-              if (!cancelled && mediaSource.readyState === "open") {
-                mediaSource.endOfStream();
-              }
-            } catch (err) {
-              // fallback: استخدم blob كامل
-              if (cancelled) return;
-              try {
-                const res = await fetch(realUrl);
-                const blob = await res.blob();
-                if (cancelled) return;
-                if (objectUrl) URL.revokeObjectURL(objectUrl);
-                objectUrl = URL.createObjectURL(blob);
-                setSignedUrl(objectUrl);
-              } catch {}
-            }
-          });
-          return;
+            setSignedUrl(`/__video/${token}`);
+            return;
+          }
         } catch {
-          // ينزل للـ fallback أدناه
+          // ينزل للـ fallback
         }
       }
 
-      // Fallback: تنزيل كامل ثم blob URL
+      // Fallback: blob كامل (يخفي الرابط لكن أبطأ)
       try {
         const res = await fetch(realUrl);
         const blob = await res.blob();
@@ -156,8 +120,10 @@ const VideoPlayer = () => {
 
     return () => {
       cancelled = true;
-      if (abortController) abortController.abort();
       if (objectUrl) URL.revokeObjectURL(objectUrl);
+      if (token && navigator.serviceWorker?.controller) {
+        navigator.serviceWorker.controller.postMessage({ type: "UNREGISTER", token });
+      }
     };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
 
