@@ -131,7 +131,7 @@ const GamePlayer = () => {
                     {...(useSrcDoc ? { srcDoc: raw } : { src: legacySrc })}
                     title={current.title}
                     onLoad={() => setIframeLoading(false)}
-                    sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-modals"
+                    sandbox="allow-scripts allow-popups allow-forms allow-modals"
                     className="w-full h-full block bg-white"
                     style={{ border: 0 }}
                     allow="fullscreen; autoplay; encrypted-media"

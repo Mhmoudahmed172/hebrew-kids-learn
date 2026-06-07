@@ -640,6 +640,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_quiz_answer: {
+        Args: { p_answer: number; p_question_id: string }
+        Returns: {
+          correct: boolean
+          correct_index: number
+        }[]
+      }
       create_kid_invite_code: { Args: never; Returns: string }
       get_kid_today_minutes: { Args: { p_kid_id: string }; Returns: number }
       get_leaderboard: {
@@ -650,6 +657,16 @@ export type Database = {
           is_me: boolean
           rank: number
           total_points: number
+        }[]
+      }
+      get_quiz_questions: {
+        Args: { p_quiz_id: string }
+        Returns: {
+          id: string
+          options: Json
+          question: string
+          quiz_id: string
+          sort_order: number
         }[]
       }
       has_role: {
