@@ -60,7 +60,8 @@ const VideoPlayer = () => {
     })();
   }, [slug]);
 
-  // استخدام Signed URL مباشرة للبث (streaming) — أسرع بكثير من تنزيل الفيديو كاملاً كـ Blob
+  // بث الفيديو عبر MediaSource مع إخفاء الرابط الأصلي خلف blob: URL
+  // الـ src الظاهر في DOM يكون blob: فقط (مثل ما هو مطلوب)، والبث يحدث تدريجياً (سريع)
   useEffect(() => {
     setSignedUrl(null);
     if (!videoId || !user || permsLoading || !level) return;
@@ -75,14 +76,88 @@ const VideoPlayer = () => {
     }
 
     let cancelled = false;
+    let objectUrl: string | null = null;
+    let abortController: AbortController | null = null;
+
     (async () => {
-      // صلاحية طويلة كافية لتشغيل الفيديو دون انقطاع
-      const url = await getSignedVideoUrl(v.video_url, 60 * 60 * 2);
-      if (!url || cancelled) return;
-      setSignedUrl(url);
+      const realUrl = await getSignedVideoUrl(v.video_url, 60 * 60 * 2);
+      if (!realUrl || cancelled) return;
+
+      // إذا كان MediaSource مدعوم → بث تدريجي مع إخفاء الرابط
+      const mime = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+      if (typeof MediaSource !== "undefined" && MediaSource.isTypeSupported(mime)) {
+        try {
+          const mediaSource = new MediaSource();
+          objectUrl = URL.createObjectURL(mediaSource);
+          setSignedUrl(objectUrl);
+
+          mediaSource.addEventListener("sourceopen", async () => {
+            if (cancelled) return;
+            try {
+              const sourceBuffer = mediaSource.addSourceBuffer(mime);
+              abortController = new AbortController();
+              const res = await fetch(realUrl, { signal: abortController.signal });
+              if (!res.ok || !res.body) throw new Error("fetch failed");
+              const reader = res.body.getReader();
+
+              const appendChunk = (chunk: Uint8Array) =>
+                new Promise<void>((resolve, reject) => {
+                  const onUpdate = () => {
+                    sourceBuffer.removeEventListener("updateend", onUpdate);
+                    sourceBuffer.removeEventListener("error", onError);
+                    resolve();
+                  };
+                  const onError = () => {
+                    sourceBuffer.removeEventListener("updateend", onUpdate);
+                    sourceBuffer.removeEventListener("error", onError);
+                    reject(new Error("sb error"));
+                  };
+                  sourceBuffer.addEventListener("updateend", onUpdate);
+                  sourceBuffer.addEventListener("error", onError);
+                  sourceBuffer.appendBuffer(chunk.buffer.slice(chunk.byteOffset, chunk.byteOffset + chunk.byteLength) as ArrayBuffer);
+                });
+
+              while (!cancelled) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                if (value) await appendChunk(value);
+              }
+              if (!cancelled && mediaSource.readyState === "open") {
+                mediaSource.endOfStream();
+              }
+            } catch (err) {
+              // fallback: استخدم blob كامل
+              if (cancelled) return;
+              try {
+                const res = await fetch(realUrl);
+                const blob = await res.blob();
+                if (cancelled) return;
+                if (objectUrl) URL.revokeObjectURL(objectUrl);
+                objectUrl = URL.createObjectURL(blob);
+                setSignedUrl(objectUrl);
+              } catch {}
+            }
+          });
+          return;
+        } catch {
+          // ينزل للـ fallback أدناه
+        }
+      }
+
+      // Fallback: تنزيل كامل ثم blob URL
+      try {
+        const res = await fetch(realUrl);
+        const blob = await res.blob();
+        if (cancelled) return;
+        objectUrl = URL.createObjectURL(blob);
+        setSignedUrl(objectUrl);
+      } catch {}
     })();
+
     return () => {
       cancelled = true;
+      if (abortController) abortController.abort();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
   }, [videoId, videos, user, permsLoading, level, canPlay]);
 
