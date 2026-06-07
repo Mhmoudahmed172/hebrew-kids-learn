@@ -24,6 +24,7 @@ const Quiz = () => {
   const [current, setCurrent] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
+  const [revealedCorrect, setRevealedCorrect] = useState<number | null>(null);
   const [score, setScore] = useState(0);
   const [done, setDone] = useState(false);
 
@@ -31,7 +32,8 @@ const Quiz = () => {
     (async () => {
       if (!id) return;
       const { data: q } = await supabase.from("quizzes").select("*").eq("id", id).maybeSingle();
-      const { data: qs } = await supabase.from("quiz_questions").select("*").eq("quiz_id", id).order("sort_order");
+      // Use secure RPC — does NOT return correct_index
+      const { data: qs } = await supabase.rpc("get_quiz_questions", { p_quiz_id: id });
       setQuiz(q);
       setQuestions(qs || []);
       setLoading(false);
@@ -65,10 +67,17 @@ const Quiz = () => {
   const q = questions[current];
   const total = questions.length;
 
-  const submit = () => {
-    if (selected === null) return;
+  const submit = async () => {
+    if (selected === null || !q) return;
+    const { data, error } = await supabase.rpc("check_quiz_answer", {
+      p_question_id: q.id,
+      p_answer: selected,
+    });
+    if (error) { toast.error("تعذر التحقق من الإجابة"); return; }
+    const row: any = Array.isArray(data) ? data[0] : data;
     setRevealed(true);
-    if (selected === q.correct_index) setScore((s) => s + 1);
+    setRevealedCorrect(row?.correct_index ?? null);
+    if (row?.correct) setScore((s) => s + 1);
   };
 
   const next = async () => {
