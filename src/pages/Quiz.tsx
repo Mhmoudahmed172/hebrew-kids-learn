@@ -142,7 +142,7 @@ const Quiz = () => {
             <h2 className="font-display text-2xl mb-6">{q.question}</h2>
             <div className="space-y-3">
               {(q.options as string[]).map((opt, i) => {
-                const isCorrect = i === q.correct_index;
+                const isCorrect = revealedCorrect !== null && i === revealedCorrect;
                 const isSelected = i === selected;
                 return (
                   <button
