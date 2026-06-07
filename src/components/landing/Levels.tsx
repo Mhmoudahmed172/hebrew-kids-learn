@@ -130,7 +130,7 @@ const RowPath = ({ count }: { count: number }) => {
   if (count < 1) return null;
   const W = 1000;
   const pts = Array.from({ length: count }, (_, i) => ({
-    x: ((i + 0.5) / count) * W,
+    x: ((count - i - 0.5) / count) * W,
     y: i % 2 === 0 ? PIN_Y_TOP : PIN_Y_BOTTOM,
   }));
 
