@@ -164,6 +164,7 @@ const VideoPlayer = () => {
                     </div>
                   </div>
                 </>
+              ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-5 bg-gradient-to-br from-primary/5 via-background to-accent/10">
                   <div className="relative">
                     <div className="absolute inset-0 rounded-full bg-primary/30 blur-2xl animate-pulse" />
