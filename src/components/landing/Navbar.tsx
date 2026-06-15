@@ -30,7 +30,7 @@ const Navbar = () => {
         </Link>
         <nav className="hidden lg:flex items-center gap-8">
           {links.map(l => (
-            <a key={l.href} href={l.href} className="text-sm font-medium text-foreground/80 hover:text-primary transition-smooth">
+            <a key={l.href} href={l.href} className="text-sm font-medium text-foreground hover:text-primary transition-smooth">
               {l.label}
             </a>
           ))}

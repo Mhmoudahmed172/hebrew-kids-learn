@@ -65,7 +65,7 @@ const Testimonials = () => {
                 ))}
               </div>
 
-              <p className="text-foreground/90 leading-relaxed mb-5 relative z-10 text-sm line-clamp-4">
+              <p className="text-foreground leading-relaxed mb-5 relative z-10 text-sm line-clamp-4">
                 "{t.text}"
               </p>
 

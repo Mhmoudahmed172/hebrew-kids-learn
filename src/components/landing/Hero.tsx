@@ -14,7 +14,7 @@ const Hero = () => {
           <div className="text-center lg:text-right space-y-7 animate-pop-in">
             <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur px-4 py-2 rounded-full border border-primary/10 shadow-soft">
               <ShieldCheck className="w-4 h-4 text-mint" />
-              <span className="text-sm font-bold text-foreground/80">موثوق من +12,000 عائلة عربية</span>
+              <span className="text-sm font-bold text-foreground">موثوق من +12,000 عائلة عربية</span>
             </div>
 
             <h1 className="font-display sm:text-5xl lg:text-6xl xl:text-7xl leading-[1.15] text-6xl text-right border-0">
