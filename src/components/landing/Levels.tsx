@@ -53,7 +53,7 @@ const Levels = () => {
 
       <div className="container max-w-6xl relative">
         <div className="max-w-3xl mx-auto mb-14 text-center reveal is-visible">
-          <span className="inline-flex items-center gap-1.5 bg-primary-soft text-slate-700 px-4 py-1.5 rounded-full text-sm font-bold mb-4">
+          <span className="inline-flex items-center gap-1.5 bg-primary-soft text-foreground px-4 py-1.5 rounded-full text-sm font-bold mb-4">
             <MapPin className="w-4 h-4" /> خريطة المغامرة
           </span>
           <h2 className="font-display text-4xl lg:text-5xl mb-4">

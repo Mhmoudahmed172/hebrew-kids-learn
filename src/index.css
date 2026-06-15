@@ -8,13 +8,13 @@
   :root {
     /* Soft neutral off-white background — lets purple/orange pop */
     --background: 270 25% 99%;
-    --foreground: 265 45% 14%;
+    --foreground: 0 0% 4%;
 
     --card: 0 0% 100%;
-    --card-foreground: 265 45% 14%;
+    --card-foreground: 0 0% 4%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 265 45% 14%;
+    --popover-foreground: 0 0% 4%;
 
     /* PRIMARY — Royal Purple (logo) */
     --primary: 270 60% 45%;
@@ -57,7 +57,7 @@
     --teal-soft: 210 90% 95%;
 
     --muted: 270 20% 96%;
-    --muted-foreground: 265 15% 42%;
+    --muted-foreground: 0 0% 12%;
 
     --destructive: 0 75% 55%;
     --destructive-foreground: 0 0% 100%;
