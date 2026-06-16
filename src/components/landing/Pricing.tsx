@@ -1,19 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Check, Crown, Sparkles, ShieldCheck } from "lucide-react";
+import { Check, Crown, Sparkles, ShieldCheck, GraduationCap, Users, School } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 
 const plans = [
   {
-    name: "المجاني",
-    price: "0",
-    period: "للأبد",
-    desc: "جرّب المنصة بدون أي التزام",
-    features: ["3 دروس مجانية", "ألعاب تجريبية", "تتبّع أساسي للتقدم", "حساب طفل واحد"],
-    cta: "ابدأ مجانًا",
+    name: "اشتراك فردي / طالب",
+    price: "29",
+    period: "ر.س / شهرياً",
+    desc: "للطالب الواحد يريد يتعلم بوتيرته",
+    features: ["كل الدروس والمستويات", "فيديوهات بجودة عالية", "تقارير تقدم شهريّة", "حساب طفل واحد", "شهادات إنجاز", "دعم فني"],
+    cta: "اشترك الآن",
     variant: "outline" as const,
   },
   {
-    name: "العائلي",
+    name: "اشتراك عائلي",
     price: "49",
     period: "ر.س / شهرياً",
     desc: "الخيار الأمثل للعائلات",
@@ -23,12 +23,12 @@ const plans = [
     popular: true,
   },
   {
-    name: "السنوي",
-    price: "399",
-    period: "ر.س / سنوياً",
-    desc: "وفّر 35% — أفضل قيمة للعائلات",
-    features: ["كل مزايا الباقة العائلية", "حتى 5 حسابات أطفال", "محتوى حصري شهرياً", "جلسات حية مع معلّمين", "أولوية في الدعم"],
-    cta: "اختر السنوي",
+    name: "اشتراك معلم / مؤسسة",
+    price: "99",
+    period: "ر.س / شهرياً",
+    desc: "للمعلمين والمدارس والمراكز التعليمية",
+    features: ["كل مزايا الباقة العائلية", "حتى 10 حسابات أطفال", "محتوى حصري شهرياً", "جلسات حية مع معلّمين", "أولوية في الدعم", "لوحة تحكم للمعلم"],
+    cta: "تواصل معنا",
     variant: "fun" as const,
   },
 ];
@@ -51,7 +51,7 @@ const Pricing = () => {
           <h2 className="font-display text-4xl lg:text-5xl mb-4">
             باقات مرنة <span className="text-gradient">تناسب كل عائلة</span>
           </h2>
-          <p className="text-lg text-muted-foreground">
+          <p className="text-lg text-foreground">
             ابدأ مجانًا، وارقِ متى ما شئت. تستطيع الإلغاء بضغطة واحدة في أي وقت.
           </p>
         </div>
@@ -77,11 +77,11 @@ const Pricing = () => {
 
               <div className="text-center mb-6">
                 <h3 className="font-display text-2xl mb-2">{p.name}</h3>
-                <p className="text-sm text-muted-foreground mb-4">{p.desc}</p>
+                <p className="text-sm text-foreground mb-4">{p.desc}</p>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="font-display text-5xl text-gradient">{p.price}</span>
                 </div>
-                <p className="text-sm text-muted-foreground mt-1">{p.period}</p>
+                <p className="text-sm text-foreground mt-1">{p.period}</p>
               </div>
 
               <ul className="space-y-3 mb-8">
@@ -103,7 +103,7 @@ const Pricing = () => {
           ))}
         </div>
 
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm text-foreground">
           <span className="inline-flex items-center gap-2"><ShieldCheck className="w-4 h-4 text-mint" /> دفع آمن ومشفّر</span>
           <span className="inline-flex items-center gap-2"><Check className="w-4 h-4 text-mint" /> إلغاء فوري في أي وقت</span>
           <span className="inline-flex items-center gap-2"><Check className="w-4 h-4 text-mint" /> ضمان استرجاع خلال 14 يوم</span>
