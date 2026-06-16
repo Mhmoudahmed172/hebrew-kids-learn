@@ -238,6 +238,78 @@ export const levels: Level[] = [
       { title: "الاختبار الشامل", duration: "25 سؤال" },
     ], 0),
   },
+  {
+    n: 6,
+    slug: "master-and-create",
+    title: "أتقن وأبدع",
+    subtitle: "أتقن اللغة العبرية وأبدع باستخدامها",
+    icon: "ו",
+    color: "from-mint to-primary",
+    unlocked: false,
+    stars: 0,
+    totalLessons: 24,
+    progress: 0,
+    points: 0,
+    badges: [
+      { name: "متقن اللغة", emoji: "🏆", earned: false },
+      { name: "مبدع العبرية", emoji: "💡", earned: false },
+      { name: "خبير التعبير", emoji: "🎤", earned: false },
+      { name: "ملك العبرية", emoji: "👑", earned: false },
+    ],
+    videos: makeLessons("video", [
+      { title: "التعبير الكتابي المتقدم", duration: "7:00" },
+      { title: "النحو العبري العميق", duration: "8:30" },
+      { title: "أدب الأطفال بالعبرية", duration: "9:00" },
+    ], 0),
+    games: makeLessons("game", [
+      { title: "ألغاز اللغة العبرية", duration: "لعبة" },
+      { title: "بناء قصتك الخاصة", duration: "لعبة" },
+    ], 0),
+    songs: makeLessons("song", [
+      { title: "أغنية الإبداع", duration: "3:30" },
+      { title: "أنشودة التفوق", duration: "3:00" },
+    ], 0),
+    quizzes: makeLessons("quiz", [
+      { title: "اختبار الإتقان", duration: "20 سؤال" },
+      { title: "الاختبار النهائي للمستوى", duration: "30 سؤال" },
+    ], 0),
+  },
+  {
+    n: 7,
+    slug: "hebrew-star",
+    title: "نجم العبرية",
+    subtitle: "كن نجم اللغة العبرية وتحدث بطلاقة",
+    icon: "ז",
+    color: "from-primary to-pink",
+    unlocked: false,
+    stars: 0,
+    totalLessons: 26,
+    progress: 0,
+    points: 0,
+    badges: [
+      { name: "نجم العبرية", emoji: "🌟", earned: false },
+      { name: "متحدث بطلاقة", emoji: "🗣️", earned: false },
+      { name: "سفير اللغة", emoji: "🌍", earned: false },
+      { name: "أسطورة العبرية", emoji: "👑", earned: false },
+    ],
+    videos: makeLessons("video", [
+      { title: "محادثات متقدمة بالعبرية", duration: "8:00" },
+      { title: "العبرية في الحياة اليومية", duration: "9:30" },
+      { title: "الأدب والشعر العبري", duration: "10:00" },
+    ], 0),
+    games: makeLessons("game", [
+      { title: "محاكاة الحياة اليومية", duration: "لعبة" },
+      { title: "مسابقة نجم العبرية", duration: "لعبة" },
+    ], 0),
+    songs: makeLessons("song", [
+      { title: "أغنية النجم", duration: "4:00" },
+      { title: "أنشودة الطلاقة", duration: "3:30" },
+    ], 0),
+    quizzes: makeLessons("quiz", [
+      { title: "اختبار الطلاقة", duration: "25 سؤال" },
+      { title: "الاختبار النهائي الكبير", duration: "40 سؤال" },
+    ], 0),
+  },
 ];
 
 export const getLevelBySlug = (slug: string) => levels.find((l) => l.slug === slug);
