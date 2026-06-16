@@ -22,7 +22,7 @@ const AboutUs = () => {
             من نحن؟
           </span>
           <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl mb-5">
-             <span className="text-gradient-fun">بدأت القصة من سؤال بسيط: </span>
+             <span className="text-gradient-fun">بدأت القصة من سؤال بسيط؟ </span>
           </h2>
           <p className="text-foreground text-lg leading-relaxed">
              لماذا يجد الكثير من الأطفال تعلّم اللغة العبرية صعبًا، رغم قدرتهم على التعلّم والنجاح؟ ومن هنا وُلدت فكرة إنشاء منصة تجعل التعلّم أقرب إلى عالم الطفل، وأكثر متعة وسهولة وفاعلية.
