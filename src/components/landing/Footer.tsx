@@ -28,20 +28,9 @@ const Footer = () => {
           </div>
 
           {[
-            { title: "الأساسي", links: [
-              { label: "الرئيسية", href: "#hero" },
-              { label: "من نحن", href: "#about" },
-              { label: "مميزاتنا", href: "#features" },
-            ]},
-            { title: "للآباء", links: [
-              { label: "كيف تعمل", href: "#how" },
-              { label: "خريطة المغامرة", href: "#levels" },
-              { label: "الباقات", href: "#pricing" },
-            ]},
-            { title: "المجتمع", links: [
-              { label: "آراء العائلات", href: "#testimonials" },
-              { label: "الأسئلة الشائعة", href: "#faq" },
-            ]},
+            { title: "المنصة", links: ["المميزات", "الأسعار", "المستويات", "كيف تعمل"] },
+            { title: "الدعم", links: ["مركز المساعدة", "تواصل معنا", "الأسئلة الشائعة", "البريد"] },
+            { title: "الشركة", links: ["من نحن", "المدونة", "الشروط", "الخصوصية"] },
           ].map((col) => (
             <div key={col.title}>
               <h4 className="font-display text-lg mb-4">{col.title}</h4>
