@@ -1,9 +1,29 @@
 import { Facebook, Instagram, Twitter, Youtube } from "lucide-react";
 import logo from "@/assets/logo.webp";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
+  const sections = [
+    { title: "المنصة", links: [
+      { label: "الرئيسية", href: "/#home" },
+      { label: "من نحن", href: "/#about" },
+      { label: "مميزاتنا", href: "/#features" },
+    ]},
+    { title: "التعلم", links: [
+      { label: "للأهل", href: "/#how" },
+      { label: "خريطة المغامرة", href: "/#levels" },
+      { label: "الباقات", href: "/#pricing" },
+    ]},
+    { title: "المجتمع", links: [
+      { label: "آراء العائلات", href: "/#testimonials" },
+      { label: "الأسئلة الشائعة", href: "/#faq" },
+      { label: "المتصدرون", href: "/leaderboard" },
+    ]},
+  ];
+
   return (
     <footer className="bg-foreground text-background py-16">
+      <div className="container">
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
@@ -27,16 +47,18 @@ const Footer = () => {
             </div>
           </div>
 
-          {[
-            { title: "المنصة", links: ["المميزات", "الأسعار", "المستويات", "كيف تعمل"] },
-            { title: "الدعم", links: ["مركز المساعدة", "تواصل معنا", "الأسئلة الشائعة", "البريد"] },
-            { title: "الشركة", links: ["من نحن", "المدونة", "الشروط", "الخصوصية"] },
-          ].map((col) => (
+          {sections.map((col) => (
             <div key={col.title}>
               <h4 className="font-display text-lg mb-4">{col.title}</h4>
               <ul className="space-y-2">
                 {col.links.map((l) => (
-                  <li key={l.href}><a href={l.href} className="text-background/70 hover:text-primary text-sm transition-smooth">{l.label}</a></li>
+                  <li key={l.label}>
+                    {l.href.startsWith("/") ? (
+                      <Link to={l.href} className="text-background/70 hover:text-primary text-sm transition-smooth">{l.label}</Link>
+                    ) : (
+                      <a href={l.href} className="text-background/70 hover:text-primary text-sm transition-smooth">{l.label}</a>
+                    )}
+                  </li>
                 ))}
               </ul>
             </div>

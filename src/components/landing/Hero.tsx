@@ -4,7 +4,7 @@ const heroCharacters = "/hero-characters.webp";
 
 const Hero = () => {
   return (
-    <section id="hero" className="relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-32" style={{ background: 'linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--background)) 100%)' }}>
+    <section id="home" className="relative overflow-hidden pt-12 pb-24 lg:pt-20 lg:pb-32" style={{ background: 'linear-gradient(180deg, hsl(var(--primary-soft)) 0%, hsl(var(--background)) 100%)' }}>
       {/* Single soft purple blob behind the image for subtle depth */}
       <div className="blob bg-primary w-[520px] h-[520px] top-20 -left-32 opacity-30" />
 

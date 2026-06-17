@@ -12,7 +12,7 @@ const Navbar = () => {
   const { points } = useUserPoints();
   const navigate = useNavigate();
   const links = [
-    { label: "الرئيسية", href: "/#hero" },
+    { label: "الرئيسية", href: "/#home" },
     { label: "من نحن", href: "/#about" },
     { label: "مميزاتنا", href: "/#features" },
     { label: "للأهل", href: "/#how" },
