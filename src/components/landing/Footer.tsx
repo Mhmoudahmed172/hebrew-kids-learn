@@ -4,8 +4,7 @@ import logo from "@/assets/logo.webp";
 const Footer = () => {
   return (
     <footer className="bg-foreground text-background py-16">
-      <div className="container">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
               <img src={logo} alt="عبري ببساطة" width={44} height={44} className="w-11 h-11 rounded-full ring-2 ring-accent/40 object-cover bg-white" />
@@ -29,15 +28,26 @@ const Footer = () => {
           </div>
 
           {[
-            { title: "المنصة", links: ["المميزات", "الأسعار", "المستويات", "كيف تعمل"] },
-            { title: "الدعم", links: ["مركز المساعدة", "تواصل معنا", "الأسئلة الشائعة", "البريد"] },
-            { title: "الشركة", links: ["من نحن", "المدونة", "الشروط", "الخصوصية"] },
+            { title: "الأساسي", links: [
+              { label: "الرئيسية", href: "#hero" },
+              { label: "من نحن", href: "#about" },
+              { label: "مميزاتنا", href: "#features" },
+            ]},
+            { title: "للآباء", links: [
+              { label: "كيف تعمل", href: "#how" },
+              { label: "خريطة المغامرة", href: "#levels" },
+              { label: "الباقات", href: "#pricing" },
+            ]},
+            { title: "المجتمع", links: [
+              { label: "آراء العائلات", href: "#testimonials" },
+              { label: "الأسئلة الشائعة", href: "#faq" },
+            ]},
           ].map((col) => (
             <div key={col.title}>
               <h4 className="font-display text-lg mb-4">{col.title}</h4>
               <ul className="space-y-2">
                 {col.links.map((l) => (
-                  <li key={l}><a href="#" className="text-background/70 hover:text-primary text-sm transition-smooth">{l}</a></li>
+                  <li key={l.href}><a href={l.href} className="text-background/70 hover:text-primary text-sm transition-smooth">{l.label}</a></li>
                 ))}
               </ul>
             </div>

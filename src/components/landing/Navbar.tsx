@@ -12,11 +12,14 @@ const Navbar = () => {
   const { points } = useUserPoints();
   const navigate = useNavigate();
   const links = [
-    { label: "​الرئيسية", href: "/#features" },
-    { label: "كيف تعمل", href: "/#how" },
-    { label: "المستويات", href: "/#levels" },
-    { label: "الأسعار", href: "/#pricing" },
-    { label: "الأسئلة", href: "/#faq" },
+    { label: "الرئيسية", href: "/#hero" },
+    { label: "من نحن", href: "/#about" },
+    { label: "مميزاتنا", href: "/#features" },
+    { label: "للأهل", href: "/#how" },
+    { label: "خريطة المغامرة", href: "/#levels" },
+    { label: "الباقات", href: "/#pricing" },
+    { label: "آراء العائلات", href: "/#testimonials" },
+    { label: "الأسئلة الشائعة", href: "/#faq" },
   ];
 
   const handleLogout = async () => { await signOut(); navigate("/"); };

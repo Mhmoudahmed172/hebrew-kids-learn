@@ -1,4 +1,3 @@
-import React from "react";
 import { BookOpen, Video, Trophy, Users, Brain, Gamepad2 } from "lucide-react";
 import { useReveal } from "@/hooks/useReveal";
 
