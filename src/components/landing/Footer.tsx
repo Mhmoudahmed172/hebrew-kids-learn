@@ -5,18 +5,18 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   const sections = [
     { title: "المنصة", links: [
-      { label: "الرئيسية", href: "/#home" },
-      { label: "من نحن", href: "/#about" },
-      { label: "مميزاتنا", href: "/#features" },
+      { label: "الرئيسية", href: "#home" },
+      { label: "من نحن", href: "#about" },
+      { label: "مميزاتنا", href: "#features" },
     ]},
     { title: "التعلم", links: [
-      { label: "للأهل", href: "/#how" },
-      { label: "خريطة المغامرة", href: "/#levels" },
+      { label: "للأهل", href: "#how" },
+      { label: "خريطة المغامرة", href: "#levels" },
       { label: "الباقات", href: "/#pricing" },
     ]},
     { title: "المجتمع", links: [
-      { label: "آراء العائلات", href: "/#testimonials" },
-      { label: "الأسئلة الشائعة", href: "/#faq" },
+      { label: "آراء العائلات", href: "#testimonials" },
+      { label: "الأسئلة الشائعة", href: "#faq" },
       { label: "المتصدرون", href: "/leaderboard" },
     ]},
   ];
