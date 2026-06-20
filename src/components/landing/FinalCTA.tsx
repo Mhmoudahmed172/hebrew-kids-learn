@@ -29,12 +29,10 @@ const FinalCTA = () => {
                 <Button variant="sun" size="xl">
                   <Sparkles /> 🎁 ابدئي الآن مجاناً
                 </Button>
-                <Button size="xl" className="bg-white text-primary hover:bg-white/90">
-                  تواصلي عبر واتساب
-                </Button>
+
               </div>
               <p className="text-sm text-white/80 pt-1">
-                ✅ بدون بطاقة ائتمان · إلغاء فوري · دعم على واتساب
+                 بدون بطاقة ائتمان · إلغاء فوري    
               </p>
             </div>
 
