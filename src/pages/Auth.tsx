@@ -76,6 +76,43 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
           document.cookie = `sb-refresh-token=${refresh_token}; path=/; max-age=${expires_in}; SameSite=Lax`;
         }
 
+        // Seed default permissions: only Level 1 open, rest locked
+        if (data?.user) {
+          const newUserId = data.user.id;
+          const [{ data: lvs }, { data: vids }, { data: sngs }, { data: gms }, { data: qzs }] = await Promise.all([
+            supabase.from("levels").select("id").order("sort_order"),
+            supabase.from("videos").select("id,level_id"),
+            supabase.from("songs").select("id,level_id"),
+            supabase.from("games").select("id,level_id"),
+            supabase.from("quizzes").select("id,level_id"),
+          ]);
+          const allLevels = lvs || [];
+          const firstLevelId = allLevels[0]?.id;
+          const permRows: any[] = [];
+          allLevels.forEach((lv: any, idx: number) => {
+            const open = idx === 0;
+            permRows.push({ user_id: newUserId, section: `level:${lv.id}`, can_view: open, can_edit: false, can_delete: false, can_add: false });
+            if (open) {
+              (vids || []).filter((v: any) => v.level_id === lv.id).forEach((v: any) =>
+                permRows.push({ user_id: newUserId, section: `video:${v.id}`, can_view: true, can_edit: false, can_delete: false, can_add: false })
+              );
+              (sngs || []).filter((s: any) => s.level_id === lv.id).forEach((s: any) =>
+                permRows.push({ user_id: newUserId, section: `song:${s.id}`, can_view: true, can_edit: false, can_delete: false, can_add: false })
+              );
+              (gms || []).filter((g: any) => g.level_id === lv.id).forEach((g: any) =>
+                permRows.push({ user_id: newUserId, section: `game:${g.id}`, can_view: true, can_edit: false, can_delete: false, can_add: false })
+              );
+              (qzs || []).filter((q: any) => q.level_id === lv.id).forEach((q: any) =>
+                permRows.push({ user_id: newUserId, section: `quiz:${q.id}`, can_view: true, can_edit: false, can_delete: false, can_add: false })
+              );
+            }
+          });
+          if (permRows.length > 0) {
+            await supabase.from("user_permissions").upsert(permRows, { onConflict: "user_id,section" });
+          }
+          void firstLevelId; // suppress unused warning
+        }
+
         toast({ title: "تم إنشاء الحساب! 🌟", description: "أهلاً بك في عبري ببساطة." });
         navigate("/");
       } else {
