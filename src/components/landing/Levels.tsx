@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { useReveal } from "@/hooks/useReveal";
+import { useAuth } from "@/hooks/useAuth";
 
 const themes = [
   { iconBg: "bg-mint", iconText: "text-mint-foreground", nameText: "text-mint", dot: "bg-mint", btn: "bg-mint text-mint-foreground hover:bg-mint/90", hebrew: "א", locked: false, youAreHere: false },
@@ -22,6 +23,7 @@ const ROW_GAP = 96; // vertical space between rows for connector
 
 const Levels = () => {
   const [levels, setLevels] = useState<any[]>([]);
+  const { isAdmin } = useAuth();
 
   useEffect(() => {
     supabase.from("levels").select("*").eq("published", true).order("sort_order")
@@ -67,7 +69,7 @@ const Levels = () => {
         {/* Mobile */}
         <div className="md:hidden space-y-5">
           {levels.map((lvl, i) => (
-            <LevelCard key={lvl.id} lvl={lvl} index={i} />
+            <LevelCard key={lvl.id} lvl={lvl} index={i} isAdmin={isAdmin} />
           ))}
         </div>
 
@@ -111,7 +113,7 @@ const Levels = () => {
                         key={lvl.id}
                         style={{ marginTop: i % 2 === 0 ? 0 : STAGGER_PX }}
                       >
-                        <LevelCard lvl={lvl} index={originalIdx} compact />
+                        <LevelCard lvl={lvl} index={originalIdx} compact isAdmin={isAdmin} />
                       </div>
                     );
                   })}
@@ -223,9 +225,10 @@ const RowConnector = ({
 };
 
 /* -------- Compact level card -------- */
-const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; compact?: boolean }) => {
+const LevelCard = ({ lvl, index, compact = false, isAdmin = false }: { lvl: any; index: number; compact?: boolean; isAdmin?: boolean }) => {
   const t = themes[index % themes.length];
-  const stars = Math.max(0, Math.min(3, Number(lvl.stars ?? (t.locked ? 0 : 3 - Math.floor(index / 2)))));
+  const isLocked = t.locked && !isAdmin;
+  const stars = Math.max(0, Math.min(3, Number(lvl.stars ?? (isLocked ? 0 : 3 - Math.floor(index / 2)))));
   const lessonCount = lvl.lessons_count ?? lvl.total_lessons ?? 12;
   const { ref, visible } = useReveal<HTMLDivElement>();
 
@@ -243,11 +246,11 @@ const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; c
       </div>
 
       <article
-        className={`group bg-card rounded-2xl ${compact ? "p-3" : "p-4"} pt-6 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${t.locked ? "opacity-90" : ""}`}
+        className={`group bg-card rounded-2xl ${compact ? "p-3" : "p-4"} pt-6 border border-border/60 shadow-soft hover:shadow-medium hover:-translate-y-1 transition-bounce ${isLocked ? "opacity-90" : ""}`}
       >
         <div className="flex items-center justify-between gap-2 mb-2">
           <div className={`w-8 h-8 rounded-lg ${t.iconBg} ${t.iconText} flex items-center justify-center shadow-soft`}>
-            {t.locked ? <Lock className="w-3.5 h-3.5" /> : <BookOpen className="w-3.5 h-3.5" />}
+            {isLocked ? <Lock className="w-3.5 h-3.5" /> : <BookOpen className="w-3.5 h-3.5" />}
           </div>
           <div className="px-2 py-0.5 rounded-md bg-muted/70 border border-border/50">
             <span className="font-display text-sm font-extrabold text-foreground">{t.hebrew}</span>
@@ -272,7 +275,7 @@ const LevelCard = ({ lvl, index, compact = false }: { lvl: any; index: number; c
           </div>
         </div>
 
-        {t.locked ? (
+        {isLocked ? (
           <Button disabled size="sm" className={`w-full h-8 text-xs ${t.btn}`}>
             <Lock className="w-3 h-3" /> مقفل
           </Button>
