@@ -15,6 +15,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
   const [showPwd, setShowPwd] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", password: "", age: "" });
+  const [errors, setErrors] = useState<{ email?: string; password?: string; name?: string }>({});
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -32,18 +33,34 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.email || !form.password || (mode === "signup" && !form.name)) {
+    const newErrors: { email?: string; password?: string; name?: string } = {};
+    if (!form.email) {
+      newErrors.email = "البريد الإلكتروني مطلوب";
+    }
+    if (!form.password) {
+      newErrors.password = "كلمة المرور مطلوبة";
+    }
+    if (mode === "signup" && !form.name) {
+      newErrors.name = "الاسم الكامل مطلوب";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       toast({ title: "حقول ناقصة", description: "يرجى تعبئة جميع الحقول.", variant: "destructive" });
       return;
     }
+
     if (form.password.length < 6) {
+      setErrors({ password: "كلمة المرور قصيرة (6 أحرف على الأقل)" });
       toast({ title: "كلمة المرور قصيرة", description: "6 أحرف على الأقل.", variant: "destructive" });
       return;
     }
+
+    setErrors({});
     setSubmitting(true);
     try {
       if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email: form.email,
           password: form.password,
           options: {
@@ -52,14 +69,28 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
           },
         });
         if (error) throw error;
+
+        if (data?.session) {
+          const { access_token, refresh_token, expires_in } = data.session;
+          document.cookie = `sb-access-token=${access_token}; path=/; max-age=${expires_in}; SameSite=Lax`;
+          document.cookie = `sb-refresh-token=${refresh_token}; path=/; max-age=${expires_in}; SameSite=Lax`;
+        }
+
         toast({ title: "تم إنشاء الحساب! 🌟", description: "أهلاً بك في عبري ببساطة." });
         navigate("/");
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data, error } = await supabase.auth.signInWithPassword({
           email: form.email,
           password: form.password,
         });
         if (error) throw error;
+
+        if (data?.session) {
+          const { access_token, refresh_token, expires_in } = data.session;
+          document.cookie = `sb-access-token=${access_token}; path=/; max-age=${expires_in}; SameSite=Lax`;
+          document.cookie = `sb-refresh-token=${refresh_token}; path=/; max-age=${expires_in}; SameSite=Lax`;
+        }
+
         toast({ title: "أهلاً بعودتك! 🎉" });
         navigate("/");
       }
@@ -125,8 +156,16 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
                   <div className="relative">
                     <User className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input id="name" placeholder="أدخل اسمك" value={form.name}
-                      onChange={(e) => setForm({ ...form, name: e.target.value })} className="pr-10 h-12 rounded-xl" />
+                      onChange={(e) => {
+                        setForm({ ...form, name: e.target.value });
+                        if (errors.name) setErrors({ ...errors, name: undefined });
+                      }} className="pr-10 h-12 rounded-xl" />
                   </div>
+                  {errors.name && (
+                    <p role="alert" className="text-destructive text-xs mt-1 font-bold">
+                      {errors.name}
+                    </p>
+                  )}
                 </div>
 
                 <div>
@@ -142,8 +181,16 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
               <div className="relative">
                 <Mail className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input id="email" type="email" placeholder="example@email.com" value={form.email}
-                  onChange={(e) => setForm({ ...form, email: e.target.value })} className="pr-10 h-12 rounded-xl" dir="ltr" />
+                  onChange={(e) => {
+                    setForm({ ...form, email: e.target.value });
+                    if (errors.email) setErrors({ ...errors, email: undefined });
+                  }} className="pr-10 h-12 rounded-xl" dir="ltr" />
               </div>
+              {errors.email && (
+                <p role="alert" className="text-destructive text-xs mt-1 font-bold">
+                  {errors.email}
+                </p>
+              )}
             </div>
 
             <div>
@@ -151,12 +198,20 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
               <div className="relative">
                 <Lock className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input id="password" type={showPwd ? "text" : "password"} placeholder="••••••••" value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })} className="pr-10 pl-10 h-12 rounded-xl" dir="ltr" />
+                  onChange={(e) => {
+                    setForm({ ...form, password: e.target.value });
+                    if (errors.password) setErrors({ ...errors, password: undefined });
+                  }} className="pr-10 pl-10 h-12 rounded-xl" dir="ltr" />
                 <button type="button" onClick={() => setShowPwd(!showPwd)}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPwd ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+              {errors.password && (
+                <p role="alert" className="text-destructive text-xs mt-1 font-bold">
+                  {errors.password}
+                </p>
+              )}
             </div>
 
             {mode === "login" && (

@@ -33,8 +33,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           supabase.from("user_roles").select("role").eq("user_id", s.user.id)
             .then(({ data }) => setRoles((data ?? []).map((r: any) => r.role)));
         }, 0);
+        if (s.access_token) {
+          document.cookie = `sb-access-token=${s.access_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
+        }
+        if (s.refresh_token) {
+          document.cookie = `sb-refresh-token=${s.refresh_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
+        }
       } else {
         setRoles([]);
+        document.cookie = "sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
     });
     supabase.auth.getSession().then(({ data: { session: s } }) => {
@@ -43,6 +51,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (s?.user) {
         supabase.from("user_roles").select("role").eq("user_id", s.user.id)
           .then(({ data }) => setRoles((data ?? []).map((r: any) => r.role)));
+        if (s.access_token) {
+          document.cookie = `sb-access-token=${s.access_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
+        }
+        if (s.refresh_token) {
+          document.cookie = `sb-refresh-token=${s.refresh_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
+        }
+      } else {
+        document.cookie = "sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+        document.cookie = "sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
       setLoading(false);
     });
