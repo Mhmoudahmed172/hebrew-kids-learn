@@ -32,9 +32,10 @@ const Levels = () => {
       .then(({ data }) => setLevels(data || []));
   }, []);
 
+  const visibleLevels = !user && !isAdmin ? levels.slice(0, 1) : levels;
   const rows: any[][] = [];
-  for (let i = 0; i < levels.length; i += PER_ROW) {
-    rows.push(levels.slice(i, i + PER_ROW));
+  for (let i = 0; i < visibleLevels.length; i += PER_ROW) {
+    rows.push(visibleLevels.slice(i, i + PER_ROW));
   }
 
   return (
@@ -70,7 +71,7 @@ const Levels = () => {
 
         {/* Mobile */}
         <div className="md:hidden space-y-5">
-          {levels.map((lvl, i) => (
+          {visibleLevels.map((lvl, i) => (
             <LevelCard key={lvl.id} lvl={lvl} index={i} isAdmin={isAdmin} isLoggedIn={!!user} canView={permsLoading ? null : canView} />
           ))}
         </div>
@@ -241,13 +242,12 @@ const LevelCard = ({
 
   // Lock logic:
   // - Admin: always unlocked
-  // - Logged-in kid with permissions loaded: use live DB permissions
-  // - Logged-in kid with permissions still loading (canView === null): show theme default
-  // - Guest (not logged in): show static theme lock as marketing preview
+  // - Permissions loaded: use live DB permissions for everyone
+  // - Permissions loading: show theme default until resolved
   let isLocked: boolean;
   if (isAdmin) {
     isLocked = false;
-  } else if (isLoggedIn && canView !== null) {
+  } else if (canView !== null) {
     isLocked = !canView(`level:${lvl.id}`);
   } else {
     isLocked = t.locked;
