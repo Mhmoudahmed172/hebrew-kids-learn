@@ -76,7 +76,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
           document.cookie = `sb-refresh-token=${refresh_token}; path=/; max-age=${expires_in}; SameSite=Lax`;
         }
 
-        // Seed default permissions: only Level 1 open, rest locked
+        // Seed default permissions: all levels locked by default, only the first level opened.
         if (data?.user) {
           const newUserId = data.user.id;
           const [{ data: lvs }, { data: vids }, { data: sngs }, { data: gms }, { data: qzs }] = await Promise.all([
@@ -87,7 +87,6 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
             supabase.from("quizzes").select("id,level_id"),
           ]);
           const allLevels = lvs || [];
-          const firstLevelId = allLevels[0]?.id;
           const permRows: any[] = [];
           allLevels.forEach((lv: any, idx: number) => {
             const open = idx === 0;
@@ -110,7 +109,6 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
           if (permRows.length > 0) {
             await supabase.from("user_permissions").upsert(permRows, { onConflict: "user_id,section" });
           }
-          void firstLevelId; // suppress unused warning
         }
 
         toast({ title: "تم إنشاء الحساب! 🌟", description: "أهلاً بك في عبري ببساطة." });

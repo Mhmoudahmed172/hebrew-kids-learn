@@ -31,7 +31,7 @@ export const usePermissions = () => {
   /** Whether a single section key (e.g. "level:<id>", "video:<id>") is viewable. */
   const canView = useCallback((key: string): boolean => {
     if (isAdmin) return true;
-    if (!hasAny) return true; // no admin config → unrestricted
+    if (!hasAny) return false; // no permissions configured → default deny
     return perms[key]?.can_view === true;
   }, [isAdmin, hasAny, perms]);
 
@@ -42,7 +42,7 @@ export const usePermissions = () => {
    */
   const canPlay = useCallback((kind: "video" | "song" | "quiz" | "game", contentId: string, levelId?: string | null): boolean => {
     if (isAdmin) return true;
-    if (!hasAny) return true;
+    if (!hasAny) return false;
     if (levelId && !canView(`level:${levelId}`)) return false;
     return canView(`${kind}:${contentId}`);
   }, [isAdmin, hasAny, canView]);
