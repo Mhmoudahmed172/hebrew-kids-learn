@@ -8,7 +8,6 @@ export const usePermissions = () => {
   const { user, isAdmin, loading: authLoading } = useAuth();
   const [perms, setPerms] = useState<Record<string, Perm>>({});
   const [hasAny, setHasAny] = useState(false);
-  const [publicFirstLevelId, setPublicFirstLevelId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,19 +15,7 @@ export const usePermissions = () => {
     if (!user) {
       setPerms({});
       setHasAny(false);
-      setLoading(true);
-      (async () => {
-        const { data } = await supabase
-          .from("levels")
-          .select("id")
-          .eq("published", true)
-          .order("sort_order")
-          .limit(1)
-          .maybeSingle();
-        setPublicFirstLevelId(data?.id ?? null);
-        setHasAny(true);
-        setLoading(false);
-      })();
+      setLoading(false);
       return;
     }
     (async () => {
@@ -49,12 +36,10 @@ export const usePermissions = () => {
   /** Whether a single section key (e.g. "level:<id>", "video:<id>") is viewable. */
   const canView = useCallback((key: string): boolean => {
     if (isAdmin) return true;
-    if (!user) {
-      return key === `level:${publicFirstLevelId}`;
-    }
+    if (!user) return false;
     if (!hasAny) return false; // no permissions configured → default deny
     return perms[key]?.can_view === true;
-  }, [isAdmin, hasAny, perms, publicFirstLevelId, user]);
+  }, [isAdmin, hasAny, perms, user]);
 
   /**
    * Whether a content item can be played:
@@ -63,11 +48,11 @@ export const usePermissions = () => {
    */
   const canPlay = useCallback((kind: "video" | "song" | "quiz" | "game", contentId: string, levelId?: string | null): boolean => {
     if (isAdmin) return true;
-    if (!user && levelId && publicFirstLevelId && levelId === publicFirstLevelId) return true;
+    if (!user) return false;
     if (!hasAny) return false;
     if (levelId && !canView(`level:${levelId}`)) return false;
     return canView(`${kind}:${contentId}`);
-  }, [isAdmin, hasAny, canView, publicFirstLevelId, user]);
+  }, [isAdmin, hasAny, canView, user]);
 
   return { perms, hasAny, loading: loading || authLoading, isAdmin, canView, canPlay };
 };
