@@ -261,11 +261,6 @@ const LevelCard = ({
       <div className="flex justify-center -mb-4 relative z-10">
         <div className={`relative w-10 h-10 rounded-full ${t.dot} flex items-center justify-center shadow-medium ring-4 ring-background`}>
           <span className="font-display text-sm text-white font-extrabold">{index + 1}</span>
-          {t.youAreHere && (
-            <span className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-primary text-primary-foreground text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-soft flex items-center gap-1">
-              <Sparkles className="w-2.5 h-2.5" /> أنت هنا
-            </span>
-          )}
         </div>
       </div>
 
