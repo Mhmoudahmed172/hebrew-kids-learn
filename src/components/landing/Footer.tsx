@@ -12,7 +12,7 @@ const Footer = () => {
     { title: "التعلم", links: [
       { label: "للأهل", href: "#how" },
       { label: "خريطة المغامرة", href: "#levels" },
-      { label: "الباقات", href: "/#pricing" },
+      { label: "الباقات", href: "#pricing" },
     ]},
     { title: "المجتمع", links: [
       { label: "آراء العائلات", href: "#testimonials" },
