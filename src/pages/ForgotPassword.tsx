@@ -1,3 +1,4 @@
+import { translateError } from "@/lib/errorMessages";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, ArrowRight, Sparkles, ArrowLeft } from "lucide-react";
@@ -28,7 +29,7 @@ const ForgotPassword = () => {
       setSent(true);
       toast({ title: "تم إرسال الرابط! 📧", description: "افحص بريدك الإلكتروني." });
     } catch (err: any) {
-      toast({ title: "خطأ", description: err.message, variant: "destructive" });
+      toast({ title: "خطأ", description: translateError(err), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }
