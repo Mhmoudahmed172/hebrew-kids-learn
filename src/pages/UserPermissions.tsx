@@ -1,3 +1,4 @@
+import { translateError } from "@/lib/errorMessages";
 import PageLoader from "@/components/PageLoader";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -158,7 +159,7 @@ export default function UserPermissions() {
       .upsert(rows, { onConflict: "user_id,section" });
     setSaving(false);
     if (error) {
-      toast({ title: "❌ فشل الحفظ", description: error.message, variant: "destructive" });
+      toast({ title: "❌ فشل الحفظ", description: translateError(error), variant: "destructive" });
       return;
     }
     toast({ title: "✅ تم حفظ الصلاحيات بنجاح" });
