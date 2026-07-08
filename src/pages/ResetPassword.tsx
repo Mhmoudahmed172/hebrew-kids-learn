@@ -1,3 +1,4 @@
+import { translateError } from "@/lib/errorMessages";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock, Eye, EyeOff, Sparkles, ArrowRight } from "lucide-react";
@@ -45,7 +46,7 @@ const ResetPassword = () => {
       toast({ title: "تم تحديث كلمة المرور! ✨" });
       navigate("/");
     } catch (err: any) {
-      toast({ title: "خطأ", description: err.message, variant: "destructive" });
+      toast({ title: "خطأ", description: translateError(err), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

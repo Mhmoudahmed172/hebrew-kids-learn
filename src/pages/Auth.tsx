@@ -1,3 +1,4 @@
+import { translateError } from "@/lib/errorMessages";
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Sparkles, Mail, Lock, User, ArrowRight, Eye, EyeOff } from "lucide-react";
@@ -130,12 +131,7 @@ const Auth = ({ mode: initialMode }: { mode: Mode }) => {
         navigate("/");
       }
     } catch (err: any) {
-      const msg = err?.message?.includes("already registered")
-        ? "هذا البريد مسجّل مسبقاً."
-        : err?.message?.includes("Invalid login")
-        ? "البريد أو كلمة المرور غير صحيحة."
-        : err?.message || "حدث خطأ.";
-      toast({ title: "خطأ", description: msg, variant: "destructive" });
+      toast({ title: "خطأ", description: translateError(err), variant: "destructive" });
     } finally {
       setSubmitting(false);
     }

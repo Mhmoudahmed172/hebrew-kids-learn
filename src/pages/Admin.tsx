@@ -1,3 +1,4 @@
+import { translateError } from "@/lib/errorMessages";
 import PageLoader from "@/components/PageLoader";
 import { useState, useEffect, useRef, createContext, useContext } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
@@ -797,7 +798,7 @@ const VideoDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
       toast({ title: editing ? "تم التحديث" : "تم رفع الفيديو 🎉" });
       onSaved(); onClose();
     } catch (err: any) {
-      toast({ title: "خطأ", description: err.message, variant: "destructive" });
+      toast({ title: "خطأ", description: translateError(err), variant: "destructive" });
     } finally {
       setUploading(false);
     }
@@ -950,7 +951,7 @@ const UsersSection = () => {
       .from("profiles")
       .update({ status: status as any, status_updated_at: new Date().toISOString() })
       .eq("id", userId);
-    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
     toast({ title: "تم تحديث الحالة" });
     load();
   };
@@ -1301,7 +1302,7 @@ const LevelsSection = () => {
     const { error } = editing
       ? await supabase.from("levels").update(form).eq("id", editing.id)
       : await supabase.from("levels").insert(form);
-    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
     toast({ title: editing ? "تم التحديث" : "تمت الإضافة" });
     setOpen(false); load();
   };
@@ -1537,7 +1538,7 @@ const QuizDialog = ({ open, onClose, editing, levels, onSaved }: any) => {
       await supabase.from("quiz_questions").delete().eq("quiz_id", editing.id);
     } else {
       const { data, error } = await supabase.from("quizzes").insert({ ...form, level_id: form.level_id || null }).select().single();
-      if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+      if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
       quizId = data.id;
     }
     await supabase.from("quiz_questions").insert(
@@ -1637,7 +1638,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
     const { error } = editing
       ? await (supabase.from(table) as any).update(payload).eq("id", editing.id)
       : await (supabase.from(table) as any).insert(payload);
-    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
     toast({ title: "تم الحفظ" });
     setOpen(false); load();
   };
@@ -1835,7 +1836,7 @@ const GamesSection = () => {
     const { error } = editing
       ? await supabase.from("games").update(payload).eq("id", editing.id)
       : await supabase.from("games").insert(payload);
-    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
     toast({ title: editing ? "تم تحديث اللعبة" : "تمت إضافة اللعبة" });
     setOpen(false); setEditing(null); load();
   };
@@ -2181,7 +2182,7 @@ const TestimonialsSection = () => {
     const { error } = editing
       ? await supabase.from("testimonials").update(payload).eq("id", editing.id)
       : await supabase.from("testimonials").insert(payload);
-    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
     toast({ title: "تم الحفظ" });
     setOpen(false); load();
   };
@@ -2289,7 +2290,7 @@ const FaqsSection = () => {
     const { error } = editing
       ? await supabase.from("faqs").update(payload).eq("id", editing.id)
       : await supabase.from("faqs").insert(payload);
-    if (error) { toast({ title: "خطأ", description: error.message, variant: "destructive" }); return; }
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
     toast({ title: "تم الحفظ" });
     setOpen(false); load();
   };
