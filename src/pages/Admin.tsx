@@ -278,7 +278,7 @@ const Admin = () => {
       <aside className="sticky top-0 right-0 h-screen w-72 bg-card border-l border-border/60 hidden lg:block">
         <div className="p-6 border-b border-border/60">
           <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-lg">
-            <img src={logo} alt="عبري ببساطة" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
+            <img src={logo} alt="عبري ببساطة" loading="lazy" decoding="async" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
             <div>
               <div className="text-gradient">لوحة الإدارة</div>
               <div className="text-xs font-normal text-muted-foreground">عبري ببساطة</div>
