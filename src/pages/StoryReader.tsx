@@ -40,11 +40,12 @@ const StoryReader = () => {
   useEffect(() => {
     setFileUrl(null);
     (async () => {
-      if (current?.content_kind === "pdf" && current?.file_url) {
+      const kind = current?.file_type ?? current?.content_kind;
+      if (kind === "pdf" && current?.file_url && current.file_url !== "inline") {
         setFileUrl(await getSignedStoryUrl(current.file_url));
       }
     })();
-  }, [current?.id, current?.file_url, current?.content_kind]);
+  }, [current?.id, current?.file_url, current?.file_type, current?.content_kind]);
 
   if (loading) {
     return (
@@ -83,7 +84,7 @@ const StoryReader = () => {
   const prev = idx > 0 ? stories[idx - 1] : null;
   const next = idx < stories.length - 1 ? stories[idx + 1] : null;
   const allowed = !permsLoading && canView(`level:${level.id}`);
-  const isHtml = current.content_kind === "html";
+  const isHtml = (current.file_type ?? current.content_kind) === "html";
 
   return (
     <main dir="rtl" className="min-h-screen bg-background">
@@ -102,10 +103,10 @@ const StoryReader = () => {
                   message="لا تملك صلاحية قراءة قصص هذا المستوى."
                   contextLabel={current.title}
                 />
-              ) : isHtml && current.html_code ? (
+              ) : isHtml && (current.content_html ?? current.html_code) ? (
                 <iframe
                   key={current.id}
-                  srcDoc={current.html_code}
+                  srcDoc={current.content_html ?? current.html_code}
                   title={current.title}
                   sandbox="allow-scripts allow-popups allow-forms allow-modals"
                   className="w-full h-full block bg-white"
