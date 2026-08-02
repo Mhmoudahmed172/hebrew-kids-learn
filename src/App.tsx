@@ -52,6 +52,7 @@ const App = () => (
               <Route path="/level/:slug" element={<LevelDetail />} />
               <Route path="/level/:slug/video/:videoId" element={<VideoPlayer />} />
               <Route path="/level/:slug/game/:gameId" element={<GamePlayer />} />
+              <Route path="/level/:slug/story/:storyId" element={<StoryReader />} />
               <Route path="/quiz/:id" element={<Quiz />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/users/:userId/permissions" element={<UserPermissions />} />
