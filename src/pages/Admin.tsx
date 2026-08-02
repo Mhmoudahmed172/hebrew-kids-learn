@@ -39,7 +39,7 @@ import {
   Tooltip as RTooltip, Cell, PieChart, Pie, Legend, AreaChart, Area,
 } from "recharts";
 
-type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games" | "testimonials" | "faqs";
+type Section = "overview" | "videos" | "users" | "content" | "quizzes" | "songs" | "games" | "stories" | "testimonials" | "faqs";
 
 const nav: { id: Section; label: string; icon: any }[] = [
   { id: "overview", label: "نظرة عامة", icon: LayoutDashboard },
@@ -49,6 +49,7 @@ const nav: { id: Section; label: string; icon: any }[] = [
   { id: "quizzes", label: "الاختبارات", icon: ClipboardCheck },
   { id: "songs", label: "الأغاني", icon: Music },
   { id: "games", label: "الألعاب", icon: Gamepad2 },
+  { id: "stories", label: "القصص والروايات", icon: BookOpen },
   { id: "testimonials", label: "آراء العملاء", icon: MessageSquare },
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle },
 ];
