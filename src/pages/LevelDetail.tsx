@@ -31,16 +31,19 @@ const LevelDetail = () => {
       const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
       setLevel(lv);
       if (lv) {
-        const [v, s, g, q] = await Promise.all([
+        const [v, s, g, q, st] = await Promise.all([
           supabase.from("videos").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("songs").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("games").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("quizzes").select("*, quiz_questions(count)").eq("level_id", lv.id).eq("published", true),
+          supabase.from("stories").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
         ]);
         setVideos(v.data || []);
         setSongs(s.data || []);
         setGames(g.data || []);
         setQuizzes(q.data || []);
+        setStories(st.data || []);
+
 
         // اجلب روابط معاينة موقّتة لكل فيديو (للغلاف فقط)
         const vids = v.data || [];
