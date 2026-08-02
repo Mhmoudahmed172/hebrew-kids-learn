@@ -199,7 +199,8 @@ const SectionPermsContext = createContext<SectionPermsMap>(null);
 export const useSectionPerm = (section: Section): SectionPerm => {
   const map = useContext(SectionPermsContext);
   if (!map) return FULL_PERM;
-  return map[section] || { can_view: false, can_edit: false, can_delete: false, can_add: false };
+  // أقسام بدون صف صلاحيات صريح = وصول كامل (مثل سلوك التنقل)
+  return map[section] ?? FULL_PERM;
 };
 
 const Admin = () => {
@@ -2186,9 +2187,17 @@ const StoriesSection = () => {
   }, []);
 
   useEffect(() => {
-    if (editing) setForm({ ...empty, ...editing });
-    else setForm({ ...empty, level_id: selectedLevel && selectedLevel.id !== "_unassigned" ? selectedLevel.id : "" });
-  }, [editing, open]);
+    if (editing) {
+      setForm({
+        ...empty,
+        ...editing,
+        content_kind: editing.file_type ?? editing.content_kind ?? "pdf",
+        html_code: editing.content_html ?? editing.html_code ?? "",
+      });
+    } else {
+      setForm({ ...empty, level_id: selectedLevel && selectedLevel.id !== "_unassigned" ? selectedLevel.id : "" });
+    }
+  }, [editing, open, selectedLevel]);
 
   const save = async () => {
     if (!form.title.trim()) { toast({ title: "اسم القصة مطلوب", variant: "destructive" }); return; }
@@ -2197,10 +2206,10 @@ const StoriesSection = () => {
     if (form.content_kind === "html" && !form.html_code.trim()) { toast({ title: "ارفع ملف HTML أو الصق الكود", variant: "destructive" }); return; }
     const payload = {
       title: form.title.trim(),
-      description: (form.description || "").trim(),
-      content_kind: form.content_kind,
-      file_url: form.content_kind === "pdf" ? form.file_url : null,
-      html_code: form.content_kind === "html" ? form.html_code : null,
+      description: (form.description || "").trim() || null,
+      file_type: form.content_kind,
+      file_url: form.content_kind === "pdf" ? form.file_url : "inline",
+      content_html: form.content_kind === "html" ? form.html_code : null,
       cover_url: (form.cover_url || "").trim() || null,
       level_id: form.level_id,
       sort_order: Number(form.sort_order) || 0,
@@ -2300,7 +2309,7 @@ const StoriesSection = () => {
                 ) : (
                   <BookOpen className="w-10 h-10 text-primary" />
                 )}
-                <Badge className="absolute top-2 left-2">{s.content_kind === "html" ? "HTML" : "PDF"}</Badge>
+                <Badge className="absolute top-2 left-2">{(s.file_type ?? s.content_kind) === "html" ? "HTML" : "PDF"}</Badge>
                 {!s.published && <Badge variant="secondary" className="absolute top-2 right-2">مخفية</Badge>}
               </div>
               <div className="p-4">

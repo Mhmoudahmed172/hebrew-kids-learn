@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, FileText, Download, ExternalLink, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { getSignedStoryUrl } from "@/lib/storyUrl";
 
 export type StoryItem = {
   id: string;
@@ -24,16 +25,27 @@ interface StoryViewerModalProps {
 export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open, onClose }) => {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [fontSize, setFontSize] = useState<number>(18); // for HTML mode
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    setPdfUrl(null);
+    if (!story || !open) return;
+    const kind = story.file_type?.toLowerCase();
+    if (kind !== "pdf" || !story.file_url || story.file_url === "inline") return;
+    getSignedStoryUrl(story.file_url).then(setPdfUrl);
+  }, [story?.id, story?.file_url, story?.file_type, open]);
 
   if (!story) return null;
 
   const isPdf = story.file_type?.toLowerCase() === "pdf";
   const isHtml = story.file_type?.toLowerCase() === "html";
+  const viewUrl = pdfUrl || (isPdf && /^https?:\/\//i.test(story.file_url) ? story.file_url : null);
 
   const handleDownload = () => {
-    if (!story.file_url) return;
+    const url = viewUrl || story.file_url;
+    if (!url || url === "inline") return;
     const a = document.createElement("a");
-    a.href = story.file_url;
+    a.href = url;
     a.download = `${story.title}.${isPdf ? "pdf" : "html"}`;
     a.target = "_blank";
     a.rel = "noopener noreferrer";
@@ -129,7 +141,7 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
               type="button"
               variant="outline"
               size="icon"
-              onClick={() => window.open(story.file_url, "_blank")}
+              onClick={() => viewUrl && window.open(viewUrl, "_blank")}
               className="rounded-full w-8 h-8"
               title="فتح في نافذة جديدة"
             >
@@ -152,11 +164,18 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
         {/* Viewer Content Body */}
         <div className="flex-1 w-full h-full min-h-0 bg-muted/20 relative overflow-hidden flex flex-col">
           {isPdf ? (
-            <iframe
-              src={`${story.file_url}#toolbar=1`}
-              className="w-full h-full border-0 rounded-b-3xl"
-              title={story.title}
-            />
+            viewUrl ? (
+              <iframe
+                src={`${viewUrl}#toolbar=1`}
+                className="w-full h-full border-0 rounded-b-3xl"
+                title={story.title}
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                <FileText className="w-16 h-16 text-muted-foreground/50 mb-3 animate-pulse" />
+                <p className="font-display text-lg">جاري تحضير القصة...</p>
+              </div>
+            )
           ) : isHtml ? (
             story.content_html ? (
               <div
