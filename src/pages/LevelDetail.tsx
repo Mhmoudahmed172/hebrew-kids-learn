@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, Lock } from "lucide-react";
+import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, Lock, BookOpen, FileText } from "lucide-react";
 import LockedContent from "@/components/LockedContent";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -21,6 +21,7 @@ const LevelDetail = () => {
   const [songs, setSongs] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [stories, setStories] = useState<any[]>([]);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
@@ -30,16 +31,19 @@ const LevelDetail = () => {
       const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
       setLevel(lv);
       if (lv) {
-        const [v, s, g, q] = await Promise.all([
+        const [v, s, g, q, st] = await Promise.all([
           supabase.from("videos").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("songs").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("games").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("quizzes").select("*, quiz_questions(count)").eq("level_id", lv.id).eq("published", true),
+          supabase.from("stories").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
         ]);
         setVideos(v.data || []);
         setSongs(s.data || []);
         setGames(g.data || []);
         setQuizzes(q.data || []);
+        setStories(st.data || []);
+
 
         // اجلب روابط معاينة موقّتة لكل فيديو (للغلاف فقط)
         const vids = v.data || [];
@@ -125,10 +129,11 @@ const LevelDetail = () => {
         </div>
 
         <Tabs defaultValue="videos" className="w-full" dir="rtl">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto mb-8 h-auto">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full max-w-3xl mx-auto mb-8 h-auto gap-1">
             <TabsTrigger value="videos" className="gap-2 py-3"><VideoIcon className="w-4 h-4" /> فيديوهات ({videos.length})</TabsTrigger>
             <TabsTrigger value="songs" className="gap-2 py-3"><Music className="w-4 h-4" /> أغاني ({songs.length})</TabsTrigger>
             <TabsTrigger value="games" className="gap-2 py-3"><Gamepad2 className="w-4 h-4" /> ألعاب ({games.length})</TabsTrigger>
+            <TabsTrigger value="stories" className="gap-2 py-3"><BookOpen className="w-4 h-4" /> قصص ({stories.length})</TabsTrigger>
             <TabsTrigger value="quizzes" className="gap-2 py-3"><ClipboardCheck className="w-4 h-4" /> اختبارات ({quizzes.length})</TabsTrigger>
           </TabsList>
 
@@ -225,6 +230,40 @@ const LevelDetail = () => {
                       </div>
                       <h3 className="font-display text-lg mb-1 flex items-center gap-2">{g.title} {allowed && <Play className="w-4 h-4" />}</h3>
                       {g.description && <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>}
+                    </Link>
+                  );
+                })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="stories">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {stories.length === 0 ? <p className="col-span-full text-center text-muted-foreground py-20">لا توجد قصص أو روايات بعد.</p> :
+                stories.map((s) => {
+                  const allowed = !levelLocked;
+                  return (
+                    <Link
+                      key={s.id}
+                      to={`/level/${slug}/story/${s.id}`}
+                      onClick={(e) => blockIfLocked(e, allowed)}
+                      className={allowed ? cardBase : lockedCard}
+                      aria-disabled={!allowed}
+                    >
+                      {!allowed && <LockBadge />}
+                      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+                        {s.cover_url ? (
+                          <img src={s.cover_url} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                        ) : (
+                          <BookOpen className="w-16 h-16 text-primary-foreground" />
+                        )}
+                      </div>
+                      <h3 className="font-display text-lg mb-1 flex items-center gap-2">
+                        {s.title}
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+                          <FileText className="w-3 h-3" /> {s.content_kind === "html" ? "تفاعلية" : "PDF"}
+                        </span>
+                      </h3>
+                      {s.description && <p className="text-sm text-muted-foreground line-clamp-2">{s.description}</p>}
                     </Link>
                   );
                 })}

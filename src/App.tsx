@@ -10,6 +10,7 @@ import Index from "./pages/Index.tsx";
 
 const LevelDetail = lazy(() => import("./pages/LevelDetail.tsx"));
 const GamePlayer = lazy(() => import("./pages/GamePlayer.tsx"));
+const StoryReader = lazy(() => import("./pages/StoryReader.tsx"));
 const VideoPlayer = lazy(() => import("./pages/VideoPlayer.tsx"));
 const Quiz = lazy(() => import("./pages/Quiz.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
@@ -51,6 +52,7 @@ const App = () => (
               <Route path="/level/:slug" element={<LevelDetail />} />
               <Route path="/level/:slug/video/:videoId" element={<VideoPlayer />} />
               <Route path="/level/:slug/game/:gameId" element={<GamePlayer />} />
+              <Route path="/level/:slug/story/:storyId" element={<StoryReader />} />
               <Route path="/quiz/:id" element={<Quiz />} />
               <Route path="/admin" element={<Admin />} />
               <Route path="/admin/users/:userId/permissions" element={<UserPermissions />} />
