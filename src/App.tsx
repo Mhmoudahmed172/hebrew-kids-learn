@@ -10,6 +10,7 @@ import Index from "./pages/Index.tsx";
 
 const LevelDetail = lazy(() => import("./pages/LevelDetail.tsx"));
 const GamePlayer = lazy(() => import("./pages/GamePlayer.tsx"));
+const StoryReader = lazy(() => import("./pages/StoryReader.tsx"));
 const VideoPlayer = lazy(() => import("./pages/VideoPlayer.tsx"));
 const Quiz = lazy(() => import("./pages/Quiz.tsx"));
 const Admin = lazy(() => import("./pages/Admin.tsx"));
