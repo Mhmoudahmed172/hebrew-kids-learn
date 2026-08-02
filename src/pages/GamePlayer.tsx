@@ -145,27 +145,43 @@ const GamePlayer = () => {
         </Link>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2">
-            <div className="relative rounded-3xl overflow-hidden bg-muted shadow-medium border-4 border-primary/10" style={{ aspectRatio: "4 / 3" }}>
+          <div className="lg:col-span-2 min-w-0">
+            <div
+              ref={stageRef}
+              className="relative w-full rounded-2xl sm:rounded-3xl overflow-hidden bg-muted shadow-medium border-2 sm:border-4 border-primary/10"
+              style={{ height: GAME_BASE_HEIGHT * scale }}
+            >
               {!allowed ? (
-                <LockedContent
-                  title="اللعبة مقفلة"
-                  message="لا تملك صلاحية تشغيل هذه اللعبة."
-                  contextLabel={current.title}
-                />
+                <div className="absolute inset-0">
+                  <LockedContent
+                    title="اللعبة مقفلة"
+                    message="لا تملك صلاحية تشغيل هذه اللعبة."
+                    contextLabel={current.title}
+                  />
+                </div>
               ) : (useSrcDoc || legacySrc) ? (
                 <>
-                  <iframe
-                    key={current.id}
-                    {...(useSrcDoc ? { srcDoc: raw } : { src: legacySrc })}
-                    title={current.title}
-                    onLoad={() => setIframeLoading(false)}
-                    sandbox="allow-scripts allow-popups allow-forms allow-modals"
-                    className="w-full h-full block bg-white"
-                    style={{ border: 0 }}
-                    allow="fullscreen; autoplay; encrypted-media"
-                    allowFullScreen
-                  />
+                  <div
+                    ref={frameWrapRef}
+                    className="absolute top-0 left-0 origin-top-left"
+                    style={{
+                      width: GAME_BASE_WIDTH,
+                      height: GAME_BASE_HEIGHT,
+                      transform: `scale(${scale})`,
+                    }}
+                  >
+                    <iframe
+                      key={current.id}
+                      {...(useSrcDoc ? { srcDoc: raw } : { src: legacySrc })}
+                      title={current.title}
+                      onLoad={() => setIframeLoading(false)}
+                      sandbox="allow-scripts allow-popups allow-forms allow-modals"
+                      className="block bg-white"
+                      style={{ border: 0, width: GAME_BASE_WIDTH, height: GAME_BASE_HEIGHT }}
+                      allow="fullscreen; autoplay; encrypted-media"
+                      allowFullScreen
+                    />
+                  </div>
                   {iframeLoading && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-black/80 backdrop-blur-sm text-white">
                       <div className="relative">
@@ -182,13 +198,21 @@ const GamePlayer = () => {
                   )}
                 </>
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-white/70">لا يوجد كود للعبة</div>
+                <div className="w-full h-full flex items-center justify-center text-muted-foreground">لا يوجد كود للعبة</div>
               )}
             </div>
+            {allowed && (useSrcDoc || legacySrc) && (
+              <div className="mt-3 lg:hidden">
+                <Button variant="outline" size="sm" onClick={goFullscreen} className="w-full">
+                  <Maximize2 className="w-4 h-4" /> تشغيل بملء الشاشة
+                </Button>
+              </div>
+            )}
             <div className="mt-4">
               <h1 className="font-display text-2xl lg:text-3xl mb-2">{current.title}</h1>
               {current.description && <p className="text-muted-foreground">{current.description}</p>}
             </div>
+
 
             <div className="flex justify-between mt-6 gap-3">
               <Button variant="outline" disabled={!prev} onClick={() => prev && navigate(`/level/${slug}/game/${prev.id}`)}>
