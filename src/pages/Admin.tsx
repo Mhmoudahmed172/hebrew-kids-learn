@@ -7,6 +7,7 @@ import {
   Upload, Plus, Pencil, Trash2, ArrowRight, LogOut, Crown, X, CheckCircle2,
   MessageSquare, HelpCircle, KeyRound, Mail, Search, Shield, UserPlus,
   MoreHorizontal, AlertTriangle, UserCog, ChevronLeft, PlayCircle, FolderOpen,
+  BookOpen,
 } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
