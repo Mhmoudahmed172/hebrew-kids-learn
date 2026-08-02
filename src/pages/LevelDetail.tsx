@@ -21,6 +21,7 @@ const LevelDetail = () => {
   const [songs, setSongs] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [stories, setStories] = useState<any[]>([]);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
