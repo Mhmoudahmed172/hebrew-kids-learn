@@ -280,7 +280,7 @@ const Admin = () => {
       <aside className="sticky top-0 right-0 h-screen w-72 bg-card border-l border-border/60 hidden lg:block">
         <div className="p-6 border-b border-border/60">
           <Link to="/" className="flex items-center gap-3 font-display font-extrabold text-lg">
-            <img src={logo} alt="عبري ببساطة" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
+            <img src={logo} alt="عبري ببساطة" loading="lazy" decoding="async" className="w-10 h-10 rounded-full ring-2 ring-accent/40 object-cover" />
             <div>
               <div className="text-gradient">لوحة الإدارة</div>
               <div className="text-xs font-normal text-muted-foreground">عبري ببساطة</div>
@@ -2614,6 +2614,333 @@ const StoriesSection = () => {
   );
 };
 
+
+// ============== القصص والروايات ==============
+const StoriesSection = () => {
+  const perm = useSectionPerm("stories");
+  const [items, setItems] = useState<any[]>([]);
+  const [levels, setLevels] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [editing, setEditing] = useState<any>(null);
+  const empty = { title: "", description: "", content_kind: "pdf", file_url: "", html_code: "", cover_url: "", level_id: "", sort_order: 0, published: true };
+  const [form, setForm] = useState<any>(empty);
+  const [query, setQuery] = useState("");
+  const [selectedLevel, setSelectedLevel] = useState<any | null>(null);
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+
+  const load = async () => {
+    const { data } = await supabase.from("stories").select("*, levels(title)").order("sort_order");
+    setItems(data || []);
+  };
+  useEffect(() => {
+    load();
+    supabase.from("levels").select("id, title").order("sort_order").then(({ data }) => setLevels(data || []));
+  }, []);
+
+  useEffect(() => {
+    if (editing) setForm({ ...empty, ...editing });
+    else setForm({ ...empty, level_id: selectedLevel && selectedLevel.id !== "_unassigned" ? selectedLevel.id : "" });
+  }, [editing, open]);
+
+  const save = async () => {
+    if (!form.title.trim()) { toast({ title: "اسم القصة مطلوب", variant: "destructive" }); return; }
+    if (!form.level_id) { toast({ title: "اختر المستوى", variant: "destructive" }); return; }
+    if (form.content_kind === "pdf" && !form.file_url) { toast({ title: "ارفع ملف PDF", variant: "destructive" }); return; }
+    if (form.content_kind === "html" && !form.html_code.trim()) { toast({ title: "ارفع ملف HTML أو الصق الكود", variant: "destructive" }); return; }
+    const payload = {
+      title: form.title.trim(),
+      description: (form.description || "").trim(),
+      content_kind: form.content_kind,
+      file_url: form.content_kind === "pdf" ? form.file_url : null,
+      html_code: form.content_kind === "html" ? form.html_code : null,
+      cover_url: (form.cover_url || "").trim() || null,
+      level_id: form.level_id,
+      sort_order: Number(form.sort_order) || 0,
+      published: form.published,
+    };
+    const { error } = editing
+      ? await supabase.from("stories").update(payload).eq("id", editing.id)
+      : await supabase.from("stories").insert(payload);
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
+    toast({ title: editing ? "تم تحديث القصة" : "تمت إضافة القصة" });
+    setOpen(false); setEditing(null); load();
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("حذف هذه القصة؟")) return;
+    const { error } = await supabase.from("stories").delete().eq("id", id);
+    if (error) { toast({ title: "خطأ", description: translateError(error), variant: "destructive" }); return; }
+    toast({ title: "تم الحذف" }); load();
+  };
+
+  const togglePublish = async (s: any) => {
+    await supabase.from("stories").update({ published: !s.published }).eq("id", s.id);
+    load();
+  };
+
+  const selectLevel = (lv: any) => { setSelectedLevel(lv); setLastSelectedId(lv.id); };
+
+  if (!selectedLevel) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 rounded-2xl bg-accent-soft text-accent flex items-center justify-center">
+              <BookOpen className="w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="font-display text-3xl">القصص والروايات</h1>
+              <p className="text-sm text-muted-foreground mt-1">اختر مستوى لإدارة قصصه</p>
+            </div>
+          </div>
+          {perm.can_add && (
+            <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus /> إضافة قصة
+            </Button>
+          )}
+        </div>
+        <LevelsGrid levels={levels} items={items} unitLabel="قصة" onSelect={selectLevel} highlightId={lastSelectedId} />
+        <StoryDialog open={open} setOpen={setOpen} editing={editing} form={form} setForm={setForm} levels={levels} onSave={save} />
+      </div>
+    );
+  }
+
+  const levelItems = items.filter((it) => (selectedLevel.id === "_unassigned" ? !it.level_id : it.level_id === selectedLevel.id));
+  const filtered = applyFilters(levelItems, query, ["title", "description"], {});
+
+  return (
+    <div>
+      <LevelBackHeader
+        levelTitle={`${selectedLevel.title} • القصص والروايات`}
+        sectionLabel="القصص والروايات"
+        onBack={() => { setSelectedLevel(null); setQuery(""); }}
+        action={perm.can_add ? (
+          <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+            <Plus /> إضافة قصة
+          </Button>
+        ) : null}
+      />
+      <FilterBar
+        query={query}
+        onQueryChange={setQuery}
+        searchPlaceholder="ابحث باسم القصة..."
+        values={{}}
+        onValueChange={() => {}}
+        filters={[]}
+      />
+
+      {filtered.length === 0 ? (
+        <Card className="p-12 text-center">
+          <div className="w-16 h-16 rounded-2xl bg-accent-soft text-accent mx-auto flex items-center justify-center mb-4">
+            <BookOpen className="w-8 h-8" />
+          </div>
+          <p className="font-bold text-lg mb-2">{query ? "لا توجد نتائج مطابقة" : "لا توجد قصص في هذا المستوى"}</p>
+          <p className="text-sm text-muted-foreground mb-6">{query ? "جرّب كلمات بحث أخرى" : "أضف أول قصة برفع ملف PDF أو ملف HTML"}</p>
+          {!query && perm.can_add && (
+            <Button variant="hero" onClick={() => { setEditing(null); setOpen(true); }}>
+              <Plus /> إضافة قصة
+            </Button>
+          )}
+        </Card>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((s: any) => (
+            <Card key={s.id} className="overflow-hidden">
+              <div className="relative aspect-[4/3] bg-gradient-to-br from-accent/30 to-primary/20 flex items-center justify-center">
+                {s.cover_url ? (
+                  <img src={s.cover_url} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                ) : (
+                  <BookOpen className="w-10 h-10 text-primary" />
+                )}
+                <Badge className="absolute top-2 left-2">{s.content_kind === "html" ? "HTML" : "PDF"}</Badge>
+                {!s.published && <Badge variant="secondary" className="absolute top-2 right-2">مخفية</Badge>}
+              </div>
+              <div className="p-4">
+                <h3 className="font-bold truncate mb-1">{s.title}</h3>
+                {s.description && <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{s.description}</p>}
+                <div className="flex items-center justify-between gap-1 pt-2 border-t">
+                  <Button size="sm" variant="ghost" onClick={() => togglePublish(s)}>
+                    {s.published ? "إخفاء" : "نشر"}
+                  </Button>
+                  <div className="flex items-center gap-1">
+                    {perm.can_edit && (
+                      <Button size="icon" variant="ghost" onClick={() => { setEditing(s); setOpen(true); }}>
+                        <Pencil className="w-4 h-4" />
+                      </Button>
+                    )}
+                    {perm.can_delete && (
+                      <Button size="icon" variant="ghost" onClick={() => remove(s.id)}>
+                        <Trash2 className="w-4 h-4 text-destructive" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <StoryDialog open={open} setOpen={setOpen} editing={editing} form={form} setForm={setForm} levels={levels} onSave={save} />
+    </div>
+  );
+};
+
+const StoryDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: any) => {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const pdfRef = useRef<HTMLInputElement>(null);
+  const htmlRef = useRef<HTMLInputElement>(null);
+
+  const uploadPdf = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name)) {
+      toast({ title: "الملف يجب أن يكون PDF", variant: "destructive" });
+      return;
+    }
+    setUploading(true); setProgress(30);
+    try {
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}/${file.name.replace(/[^\w.\-]/g, "_")}`;
+      const { error } = await supabase.storage.from("stories").upload(path, file, {
+        cacheControl: "3600", upsert: true, contentType: "application/pdf",
+      });
+      if (error) throw error;
+      setProgress(100);
+      setForm({ ...form, content_kind: "pdf", file_url: path });
+      toast({ title: "تم رفع ملف القصة" });
+    } catch (e: any) {
+      toast({ title: "فشل الرفع", description: translateError(e), variant: "destructive" });
+    } finally {
+      setUploading(false);
+      if (pdfRef.current) pdfRef.current.value = "";
+    }
+  };
+
+  const uploadHtml = async (files: FileList | null) => {
+    const file = files?.[0];
+    if (!file) return;
+    if (!/\.html?$/i.test(file.name)) {
+      toast({ title: "الملف يجب أن يكون HTML", variant: "destructive" });
+      return;
+    }
+    try {
+      const text = await file.text();
+      setForm({ ...form, content_kind: "html", html_code: text });
+      toast({ title: "تم تحميل ملف HTML" });
+    } catch (e: any) {
+      toast({ title: "فشل القراءة", description: translateError(e), variant: "destructive" });
+    } finally {
+      if (htmlRef.current) htmlRef.current.value = "";
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent dir="rtl" className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5 text-accent" />
+            {editing ? "تعديل القصة" : "إضافة قصة جديدة"}
+          </DialogTitle>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div>
+            <Label>اسم القصة *</Label>
+            <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="مثال: قصة الأرنب الصغير" />
+          </div>
+          <div>
+            <Label>المستوى *</Label>
+            <Select value={form.level_id} onValueChange={(v) => setForm({ ...form, level_id: v })}>
+              <SelectTrigger><SelectValue placeholder="اختر المستوى" /></SelectTrigger>
+              <SelectContent>
+                {levels.map((l: any) => <SelectItem key={l.id} value={l.id}>{l.title}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label>نوع المحتوى *</Label>
+            <Select value={form.content_kind} onValueChange={(v) => setForm({ ...form, content_kind: v })}>
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pdf">ملف PDF</SelectItem>
+                <SelectItem value="html">قصة تفاعلية (HTML)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {form.content_kind === "pdf" ? (
+            <div>
+              <Label className="flex items-center gap-2"><Upload className="w-4 h-4" /> ملف القصة (PDF) *</Label>
+              <div className="mt-2 border-2 border-dashed border-primary/30 rounded-2xl p-6 bg-primary-soft/30 text-center">
+                <p className="text-sm text-muted-foreground mb-3">ارفع ملف PDF واحد للقصة أو الرواية.</p>
+                <Button type="button" variant="outline" size="sm" disabled={uploading} onClick={() => pdfRef.current?.click()}>
+                  <Upload className="w-4 h-4" /> اختر ملف PDF
+                </Button>
+                <input ref={pdfRef} type="file" accept="application/pdf,.pdf" className="hidden" onChange={(e) => uploadPdf(e.target.files)} />
+                {uploading && (
+                  <div className="mt-3">
+                    <Progress value={progress} className="h-2" />
+                    <p className="text-xs text-muted-foreground mt-1">جاري الرفع... {progress}%</p>
+                  </div>
+                )}
+                {!uploading && form.file_url && (
+                  <div className="mt-3 inline-flex items-center gap-2 bg-mint-soft text-mint-foreground px-3 py-1.5 rounded-full text-xs font-bold">
+                    <CheckCircle2 className="w-4 h-4" /> تم ربط الملف
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div>
+              <Label className="flex items-center gap-2"><Upload className="w-4 h-4" /> ملف HTML أو الكود *</Label>
+              <div className="mt-2 border-2 border-dashed border-primary/30 rounded-2xl p-6 bg-primary-soft/30 text-center">
+                <p className="text-sm text-muted-foreground mb-3">ارفع ملف <code className="bg-background px-1 rounded">.html</code> مكتمل (بصور/أنماط مضمّنة) أو الصق الكود أدناه.</p>
+                <Button type="button" variant="outline" size="sm" onClick={() => htmlRef.current?.click()}>
+                  <Upload className="w-4 h-4" /> اختر ملف HTML
+                </Button>
+                <input ref={htmlRef} type="file" accept=".html,.htm" className="hidden" onChange={(e) => uploadHtml(e.target.files)} />
+              </div>
+              <Textarea
+                value={form.html_code}
+                onChange={(e) => setForm({ ...form, html_code: e.target.value })}
+                dir="ltr" rows={6} className="font-mono text-xs mt-3"
+                placeholder="<html>...</html>"
+              />
+              {form.html_code && (
+                <div className="mt-3 aspect-video bg-muted rounded-xl overflow-hidden border-2 border-primary/20">
+                  <iframe srcDoc={form.html_code} title="معاينة" sandbox="allow-scripts" className="w-full h-full" style={{ border: 0 }} />
+                </div>
+              )}
+            </div>
+          )}
+
+          <div>
+            <Label>رابط صورة الغلاف (اختياري)</Label>
+            <Input value={form.cover_url} onChange={(e) => setForm({ ...form, cover_url: e.target.value })} dir="ltr" placeholder="https://..." />
+          </div>
+          <div>
+            <Label>الوصف (اختياري)</Label>
+            <Textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={2} />
+          </div>
+          <div>
+            <Label>ترتيب العرض</Label>
+            <Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: e.target.value })} />
+          </div>
+          <div className="flex items-center gap-2">
+            <input id="story-published" type="checkbox" checked={form.published}
+              onChange={(e) => setForm({ ...form, published: e.target.checked })} className="w-4 h-4" />
+            <Label htmlFor="story-published" className="cursor-pointer">منشورة (تظهر للمستخدمين)</Label>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={uploading}>إلغاء</Button>
+          <Button variant="hero" onClick={onSave} disabled={uploading}>{editing ? "حفظ التعديلات" : "إضافة"}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
 
 const TestimonialsSection = () => {
   const perm = useSectionPerm("testimonials");

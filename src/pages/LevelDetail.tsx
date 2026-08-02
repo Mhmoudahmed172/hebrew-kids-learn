@@ -131,10 +131,11 @@ const LevelDetail = () => {
         </div>
 
         <Tabs defaultValue="videos" className="w-full" dir="rtl">
-          <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full max-w-4xl mx-auto mb-8 h-auto gap-1">
+          <TabsList className="grid grid-cols-3 sm:grid-cols-5 w-full max-w-3xl mx-auto mb-8 h-auto gap-1">
             <TabsTrigger value="videos" className="gap-2 py-3"><VideoIcon className="w-4 h-4" /> فيديوهات ({videos.length})</TabsTrigger>
             <TabsTrigger value="songs" className="gap-2 py-3"><Music className="w-4 h-4" /> أغاني ({songs.length})</TabsTrigger>
             <TabsTrigger value="games" className="gap-2 py-3"><Gamepad2 className="w-4 h-4" /> ألعاب ({games.length})</TabsTrigger>
+            <TabsTrigger value="stories" className="gap-2 py-3"><BookOpen className="w-4 h-4" /> قصص ({stories.length})</TabsTrigger>
             <TabsTrigger value="quizzes" className="gap-2 py-3"><ClipboardCheck className="w-4 h-4" /> اختبارات ({quizzes.length})</TabsTrigger>
             <TabsTrigger value="stories" className="gap-2 py-3"><BookOpen className="w-4 h-4" /> قصص وروايات ({stories.length})</TabsTrigger>
           </TabsList>
@@ -232,6 +233,40 @@ const LevelDetail = () => {
                       </div>
                       <h3 className="font-display text-lg mb-1 flex items-center gap-2">{g.title} {allowed && <Play className="w-4 h-4" />}</h3>
                       {g.description && <p className="text-sm text-muted-foreground line-clamp-2">{g.description}</p>}
+                    </Link>
+                  );
+                })}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="stories">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {stories.length === 0 ? <p className="col-span-full text-center text-muted-foreground py-20">لا توجد قصص أو روايات بعد.</p> :
+                stories.map((s) => {
+                  const allowed = !levelLocked;
+                  return (
+                    <Link
+                      key={s.id}
+                      to={`/level/${slug}/story/${s.id}`}
+                      onClick={(e) => blockIfLocked(e, allowed)}
+                      className={allowed ? cardBase : lockedCard}
+                      aria-disabled={!allowed}
+                    >
+                      {!allowed && <LockBadge />}
+                      <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-4 bg-gradient-to-br from-accent to-primary flex items-center justify-center">
+                        {s.cover_url ? (
+                          <img src={s.cover_url} alt={s.title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                        ) : (
+                          <BookOpen className="w-16 h-16 text-primary-foreground" />
+                        )}
+                      </div>
+                      <h3 className="font-display text-lg mb-1 flex items-center gap-2">
+                        {s.title}
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold bg-muted text-muted-foreground rounded-full px-2 py-0.5">
+                          <FileText className="w-3 h-3" /> {s.content_kind === "html" ? "تفاعلية" : "PDF"}
+                        </span>
+                      </h3>
+                      {s.description && <p className="text-sm text-muted-foreground line-clamp-2">{s.description}</p>}
                     </Link>
                   );
                 })}

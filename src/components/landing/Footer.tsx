@@ -27,7 +27,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <img src={logo} alt="عبري ببساطة" width={44} height={44} className="w-11 h-11 rounded-full ring-2 ring-accent/40 object-cover bg-white" />
+              <img src={logo} alt="عبري ببساطة" width={44} height={44} loading="lazy" decoding="async" className="w-11 h-11 rounded-full ring-2 ring-accent/40 object-cover bg-white" />
               <span className="font-display font-extrabold text-xl">عبري ببساطة</span>
             </div>
             <p className="text-background/70 leading-relaxed text-sm">

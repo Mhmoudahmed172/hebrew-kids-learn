@@ -459,6 +459,59 @@ export type Database = {
           },
         ]
       }
+      stories: {
+        Row: {
+          content_kind: string
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          file_url: string | null
+          html_code: string | null
+          id: string
+          level_id: string | null
+          published: boolean
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_kind?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          html_code?: string | null
+          id?: string
+          level_id?: string | null
+          published?: boolean
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_kind?: string
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_url?: string | null
+          html_code?: string | null
+          id?: string
+          level_id?: string | null
+          published?: boolean
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       testimonials: {
         Row: {
           avatar_color: string | null
