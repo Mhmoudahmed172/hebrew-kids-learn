@@ -2367,7 +2367,9 @@ const StoryDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: 
       setForm({ ...form, content_kind: "pdf", file_url: path });
       toast({ title: "تم رفع ملف القصة" });
     } catch (e: any) {
-      toast({ title: "فشل الرفع", description: translateError(e), variant: "destructive" });
+      console.error("uploadPdf error:", e);
+      const desc = import.meta.env.DEV ? (e?.message || JSON.stringify(e)) : translateError(e);
+      toast({ title: "فشل الرفع", description: desc, variant: "destructive" });
     } finally {
       setUploading(false);
       if (pdfRef.current) pdfRef.current.value = "";
