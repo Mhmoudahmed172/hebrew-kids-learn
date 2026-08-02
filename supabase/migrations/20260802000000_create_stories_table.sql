@@ -68,3 +68,9 @@ USING (bucket_id = 'stories' AND public.has_role(auth.uid(), 'admin'));
 CREATE POLICY "Admin Delete Stories Objects"
 ON storage.objects FOR DELETE
 USING (bucket_id = 'stories' AND public.has_role(auth.uid(), 'admin'));
+
+-- Automatically grant 'stories' permission to staff users who have entries in user_permissions
+INSERT INTO public.user_permissions (user_id, section, can_view, can_edit, can_delete, can_add)
+SELECT DISTINCT user_id, 'stories', true, true, true, true
+FROM public.user_permissions
+ON CONFLICT (user_id, section) DO NOTHING;

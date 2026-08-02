@@ -238,7 +238,7 @@ const Admin = () => {
     })();
   }, [user]);
 
-  const isAllowed = (id: Section) => !sectionPerms || (sectionPerms[id]?.can_view === true);
+  const isAllowed = (id: Section) => isAdmin || !sectionPerms || (sectionPerms[id] ? sectionPerms[id].can_view === true : true);
   const visibleNav = nav.filter((n) => isAllowed(n.id));
 
   const paramSection = searchParams.get("section") as Section | null;
