@@ -188,7 +188,7 @@ const STATUS_COLORS: Record<string, string> = {
   banned: "bg-destructive text-destructive-foreground",
 };
 
-const SECTION_IDS: Section[] = ["overview", "videos", "users", "content", "quizzes", "songs", "games", "testimonials", "faqs"];
+const SECTION_IDS: Section[] = ["overview", "videos", "users", "content", "quizzes", "songs", "games", "stories", "testimonials", "faqs"];
 
 type SectionPerm = { can_view: boolean; can_edit: boolean; can_delete: boolean; can_add: boolean };
 type SectionPermsMap = Record<string, SectionPerm> | null; // null = unrestricted
