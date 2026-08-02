@@ -336,6 +336,7 @@ const Admin = () => {
           {active === "quizzes" && <QuizzesSection />}
           {active === "songs" && <SimpleSection table="songs" titleLabel="الأغاني" />}
           {active === "games" && <GamesSection />}
+          {active === "stories" && <StoriesSection />}
           {active === "testimonials" && <TestimonialsSection />}
           {active === "faqs" && <FaqsSection />}
         </SectionPermsContext.Provider>
