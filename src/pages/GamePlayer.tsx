@@ -26,6 +26,10 @@ const legacyEmbedUrl = (input: string): string => {
   } catch { return ""; }
 };
 
+// عرض منطقي ثابت للعبة — نصغّرها بصرياً على الجوال حتى تظهر كاملة دون قص
+const GAME_BASE_WIDTH = 900;
+const GAME_BASE_HEIGHT = 675; // 4:3
+
 const GamePlayer = () => {
   const { slug, gameId } = useParams();
   const navigate = useNavigate();
@@ -34,6 +38,31 @@ const GamePlayer = () => {
   const [games, setGames] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [iframeLoading, setIframeLoading] = useState(true);
+  const stageRef = useRef<HTMLDivElement>(null);
+  const frameWrapRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  // احسب معامل التصغير حسب عرض الحاوية (مهم للجوال)
+  useEffect(() => {
+    const el = stageRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.clientWidth;
+      if (!w) return;
+      setScale(Math.min(1, w / GAME_BASE_WIDTH));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener("orientationchange", update);
+    return () => { ro.disconnect(); window.removeEventListener("orientationchange", update); };
+  }, [loading, gameId]);
+
+  const goFullscreen = () => {
+    const el = frameWrapRef.current?.querySelector("iframe") as HTMLIFrameElement | null;
+    (el as any)?.requestFullscreen?.();
+  };
+
 
   useEffect(() => {
     (async () => {
