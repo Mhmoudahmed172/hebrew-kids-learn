@@ -32,6 +32,7 @@ const STAFF_SECTIONS: { id: string; label: string; icon: any; desc: string }[] =
   { id: "quizzes", label: "الاختبارات", icon: ClipboardCheck, desc: "إدارة الاختبارات والأسئلة" },
   { id: "songs", label: "الأغاني", icon: Music, desc: "المحتوى الصوتي للأطفال" },
   { id: "games", label: "الألعاب", icon: Gamepad2, desc: "الألعاب التفاعلية" },
+  { id: "stories", label: "القصص والروايات", icon: BookOpen, desc: "القصص المصورة والتفاعلية" },
   { id: "testimonials", label: "آراء العملاء", icon: MessageSquare, desc: "شهادات الأهل" },
   { id: "faqs", label: "الأسئلة الشائعة", icon: HelpCircle, desc: "صفحة الأسئلة والأجوبة" },
 ];
@@ -44,6 +45,7 @@ type LevelData = {
   songs: { id: string; title: string }[];
   quizzes: { id: string; title: string }[];
   games: { id: string; title: string }[];
+  stories: { id: string; title: string }[];
 };
 
 export default function UserPermissions() {
@@ -71,7 +73,7 @@ export default function UserPermissions() {
     if (!userId) return;
     (async () => {
       setLoading(true);
-      const [{ data: p }, { data: r }, { data: pm }, { data: lv }, { data: vd }, { data: sg }, { data: qz }, { data: gm }] = await Promise.all([
+      const [{ data: p }, { data: r }, { data: pm }, { data: lv }, { data: vd }, { data: sg }, { data: qz }, { data: gm }, { data: st }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", userId),
         supabase.from("user_permissions").select("*").eq("user_id", userId),
@@ -80,6 +82,7 @@ export default function UserPermissions() {
         supabase.from("songs").select("id,title,level_id,sort_order").order("sort_order"),
         supabase.from("quizzes").select("id,title,level_id").order("created_at"),
         supabase.from("games").select("id,title,level_id,sort_order").order("sort_order"),
+        supabase.from("stories").select("id,title,level_id,sort_order").order("sort_order"),
       ]);
 
       setProfile(p);
@@ -97,6 +100,7 @@ export default function UserPermissions() {
         songs: (sg || []).filter((x: any) => x.level_id === L.id),
         quizzes: (qz || []).filter((x: any) => x.level_id === L.id),
         games: (gm || []).filter((x: any) => x.level_id === L.id),
+        stories: (st || []).filter((x: any) => x.level_id === L.id),
       }));
       setLevels(built);
       setLoading(false);

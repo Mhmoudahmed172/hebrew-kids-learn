@@ -4,6 +4,7 @@ import AboutUs from "@/components/landing/AboutUs";
 import Features from "@/components/landing/Features";
 import HowItWorks from "@/components/landing/HowItWorks";
 import Levels from "@/components/landing/Levels";
+import Stories from "@/components/landing/Stories";
 import Pricing from "@/components/landing/Pricing";
 import Testimonials from "@/components/landing/Testimonials";
 import FinalCTA from "@/components/landing/FinalCTA";
@@ -27,6 +28,7 @@ const Index = () => {
         <Features />
         <HowItWorks />
         <Levels />
+        <Stories />
         <Pricing />
         <Testimonials />
         <FAQ />

@@ -16,6 +16,7 @@ const Navbar = () => {
     { label: "من نحن", href: "/#about" },
     { label: "مميزاتنا", href: "/#features" },
     { label: "خريطة المغامرة", href: "/#levels" },
+    { label: "القصص والروايات", href: "/#stories" },
     { label: "الباقات", href: "/#pricing" },
     { label: "آراء العائلات", href: "/#testimonials" },
     { label: "الأسئلة الشائعة", href: "/#faq" },

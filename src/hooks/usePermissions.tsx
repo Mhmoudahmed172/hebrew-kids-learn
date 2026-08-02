@@ -65,7 +65,7 @@ export const usePermissions = () => {
    * - its own key must be viewable
    * - AND its parent level must be viewable
    */
-  const canPlay = useCallback((kind: "video" | "song" | "quiz" | "game", contentId: string, levelId?: string | null): boolean => {
+  const canPlay = useCallback((kind: "video" | "song" | "quiz" | "game" | "story", contentId: string, levelId?: string | null): boolean => {
     if (isAdmin) return true;
     if (levelId && firstLevelId && levelId === firstLevelId) return true;
     if (!user) return false;

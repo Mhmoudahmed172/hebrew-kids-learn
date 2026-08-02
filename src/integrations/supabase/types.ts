@@ -118,6 +118,59 @@ export type Database = {
           },
         ]
       }
+      stories: {
+        Row: {
+          content_html: string | null
+          cover_url: string | null
+          created_at: string
+          description: string | null
+          file_type: string
+          file_url: string
+          id: string
+          level_id: string | null
+          published: boolean
+          sort_order: number | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          content_html?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_type?: string
+          file_url: string
+          id?: string
+          level_id?: string | null
+          published?: boolean
+          sort_order?: number | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          content_html?: string | null
+          cover_url?: string | null
+          created_at?: string
+          description?: string | null
+          file_type?: string
+          file_url?: string
+          id?: string
+          level_id?: string | null
+          published?: boolean
+          sort_order?: number | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stories_level_id_fkey"
+            columns: ["level_id"]
+            isOneToOne: false
+            referencedRelation: "levels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       kid_invite_codes: {
         Row: {
           code: string

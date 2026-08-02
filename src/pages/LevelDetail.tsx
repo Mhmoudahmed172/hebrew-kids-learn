@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, Lock } from "lucide-react";
+import { ArrowRight, Play, Video as VideoIcon, Music, Gamepad2, ClipboardCheck, Lock, BookOpen, FileText } from "lucide-react";
 import LockedContent from "@/components/LockedContent";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -10,6 +11,7 @@ import { getSignedVideoUrl } from "@/lib/videoUrl";
 import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
+import { StoryViewerModal, StoryItem } from "@/components/StoryViewerModal";
 
 
 const LevelDetail = () => {
@@ -21,6 +23,8 @@ const LevelDetail = () => {
   const [songs, setSongs] = useState<any[]>([]);
   const [games, setGames] = useState<any[]>([]);
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [stories, setStories] = useState<any[]>([]);
+  const [activeStory, setActiveStory] = useState<StoryItem | null>(null);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
 
@@ -30,16 +34,18 @@ const LevelDetail = () => {
       const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
       setLevel(lv);
       if (lv) {
-        const [v, s, g, q] = await Promise.all([
+        const [v, s, g, q, st] = await Promise.all([
           supabase.from("videos").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("songs").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("games").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("quizzes").select("*, quiz_questions(count)").eq("level_id", lv.id).eq("published", true),
+          supabase.from("stories").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
         ]);
         setVideos(v.data || []);
         setSongs(s.data || []);
         setGames(g.data || []);
         setQuizzes(q.data || []);
+        setStories(st.data || []);
 
         // اجلب روابط معاينة موقّتة لكل فيديو (للغلاف فقط)
         const vids = v.data || [];
@@ -125,11 +131,12 @@ const LevelDetail = () => {
         </div>
 
         <Tabs defaultValue="videos" className="w-full" dir="rtl">
-          <TabsList className="grid grid-cols-4 w-full max-w-2xl mx-auto mb-8 h-auto">
+          <TabsList className="grid grid-cols-2 sm:grid-cols-5 w-full max-w-4xl mx-auto mb-8 h-auto gap-1">
             <TabsTrigger value="videos" className="gap-2 py-3"><VideoIcon className="w-4 h-4" /> فيديوهات ({videos.length})</TabsTrigger>
             <TabsTrigger value="songs" className="gap-2 py-3"><Music className="w-4 h-4" /> أغاني ({songs.length})</TabsTrigger>
             <TabsTrigger value="games" className="gap-2 py-3"><Gamepad2 className="w-4 h-4" /> ألعاب ({games.length})</TabsTrigger>
             <TabsTrigger value="quizzes" className="gap-2 py-3"><ClipboardCheck className="w-4 h-4" /> اختبارات ({quizzes.length})</TabsTrigger>
+            <TabsTrigger value="stories" className="gap-2 py-3"><BookOpen className="w-4 h-4" /> قصص وروايات ({stories.length})</TabsTrigger>
           </TabsList>
 
           <TabsContent value="videos">
@@ -263,9 +270,58 @@ const LevelDetail = () => {
                   );
                 })}
             </div>
+          <TabsContent value="stories">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {stories.length === 0 ? (
+                <p className="col-span-full text-center text-muted-foreground py-20">لا توجد قصص لهذا المستوى بعد.</p>
+              ) : (
+                stories.map((st) => {
+                  const allowed = !permsLoading && canPlay("story", st.id, level.id);
+                  const isPdf = st.file_type?.toLowerCase() === "pdf";
+                  return (
+                    <div
+                      key={st.id}
+                      onClick={(e) => {
+                        if (!allowed) blockIfLocked(e, false);
+                        else setActiveStory(st);
+                      }}
+                      className={allowed ? `${cardBase} cursor-pointer` : lockedCard}
+                    >
+                      {!allowed && <LockBadge />}
+                      <div className="relative aspect-[16/9] bg-gradient-to-br from-primary/10 via-accent/10 to-pink/10 rounded-2xl overflow-hidden mb-4 flex items-center justify-center">
+                        {st.cover_url ? (
+                          <img src={st.cover_url} alt={st.title} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center p-4">
+                            {isPdf ? <FileText className="w-12 h-12 text-primary mb-2" /> : <BookOpen className="w-12 h-12 text-primary mb-2" />}
+                          </div>
+                        )}
+                        <Badge variant={isPdf ? "default" : "secondary"} className="absolute top-2 right-2 text-xs">
+                          {isPdf ? "PDF" : "HTML تفاعلية"}
+                        </Badge>
+                      </div>
+                      <h3 className="font-display text-lg mb-1 flex items-center gap-2">
+                        {st.title} {allowed && <BookOpen className="w-4 h-4 text-primary" />}
+                      </h3>
+                      {st.description && <p className="text-sm text-muted-foreground line-clamp-2">{st.description}</p>}
+                      <Button variant="hero" size="sm" className="mt-4 w-full gap-2" disabled={!allowed}>
+                        {allowed ? <><BookOpen className="w-4 h-4" /> اقرأ القصة</> : <><Lock className="w-4 h-4" /> مقفلة</>}
+                      </Button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </TabsContent>
         </Tabs>
       </section>
+
+      {/* Story Viewer Modal */}
+      <StoryViewerModal
+        story={activeStory}
+        open={!!activeStory}
+        onClose={() => setActiveStory(null)}
+      />
       <Footer />
     </main>
   );
