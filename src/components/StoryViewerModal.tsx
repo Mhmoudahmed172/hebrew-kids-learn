@@ -200,11 +200,9 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
               <BookOpen className="w-16 h-16 text-muted-foreground/50 mb-3 animate-bounce" />
               <p className="font-display text-lg">صيغة القصة غير معروفة</p>
-              <Button variant="hero" className="mt-4 gap-2" onClick={handleDownload}>
-                <Download className="w-4 h-4" /> تنزيل الملف
-              </Button>
             </div>
           )}
+
         </div>
       </DialogContent>
     </Dialog>
