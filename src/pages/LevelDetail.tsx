@@ -279,7 +279,7 @@ const LevelDetail = () => {
               ) : (
                 stories.map((st) => {
                   const allowed = !permsLoading && canPlay("story", st.id, level.id);
-                  const isPdf = st.file_type?.toLowerCase() === "pdf";
+                  const isPdf = (st.file_type ?? st.content_kind)?.toLowerCase() === "pdf";
                   return (
                     <div
                       key={st.id}

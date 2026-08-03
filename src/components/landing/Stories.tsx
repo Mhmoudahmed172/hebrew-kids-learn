@@ -98,7 +98,7 @@ export default function Stories() {
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredStories.map((story) => {
-              const isPdf = story.file_type?.toLowerCase() === "pdf";
+              const isPdf = (story.file_type ?? story.content_kind)?.toLowerCase() === "pdf";
               return (
                 <div
                   key={story.id}
