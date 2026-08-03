@@ -113,13 +113,7 @@ const StoryReader = () => {
                   style={{ border: 0 }}
                 />
               ) : fileUrl ? (
-                <iframe
-                  key={current.id}
-                  src={`${fileUrl}#view=FitH&toolbar=1`}
-                  title={current.title}
-                  className="w-full h-full block bg-white"
-                  style={{ border: 0 }}
-                />
+                <PdfPageViewer url={fileUrl} title={current.title} />
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-muted-foreground">
                   <FileText className="w-10 h-10" />
@@ -128,20 +122,7 @@ const StoryReader = () => {
               )}
             </div>
 
-            {allowed && fileUrl && (
-              <div className="flex flex-wrap gap-2 mt-3">
-                <Button variant="outline" size="sm" asChild>
-                  <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                    <Maximize2 className="w-4 h-4" /> فتح بملء الشاشة
-                  </a>
-                </Button>
-                <Button variant="ghost" size="sm" asChild>
-                  <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink className="w-4 h-4" /> إذا لم يظهر الملف اضغط هنا
-                  </a>
-                </Button>
-              </div>
-            )}
+
 
             <div className="mt-4">
               <h1 className="font-display text-2xl lg:text-3xl mb-2">{current.title}</h1>
