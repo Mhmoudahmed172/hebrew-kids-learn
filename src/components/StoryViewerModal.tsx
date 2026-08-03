@@ -10,8 +10,10 @@ export type StoryItem = {
   title: string;
   description?: string | null;
   cover_url?: string | null;
-  file_url: string;
-  file_type: "pdf" | "html" | string;
+  file_url?: string | null;
+  file_type?: "pdf" | "html" | string;
+  content_kind?: "pdf" | "html" | string;
+  html_code?: string | null;
   content_html?: string | null;
   level_id?: string | null;
 };
@@ -30,15 +32,16 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
   useEffect(() => {
     setPdfUrl(null);
     if (!story || !open) return;
-    const kind = story.file_type?.toLowerCase();
+    const kind = ((story as any).file_type ?? (story as any).content_kind ?? "")?.toLowerCase();
     if (kind !== "pdf" || !story.file_url || story.file_url === "inline") return;
     getSignedStoryUrl(story.file_url).then(setPdfUrl);
   }, [story?.id, story?.file_url, story?.file_type, open]);
 
   if (!story) return null;
 
-  const isPdf = story.file_type?.toLowerCase() === "pdf";
-  const isHtml = story.file_type?.toLowerCase() === "html";
+  const kind = ((story as any).file_type ?? (story as any).content_kind ?? "")?.toLowerCase();
+  const isPdf = kind === "pdf";
+  const isHtml = kind === "html";
   const viewUrl = pdfUrl || (isPdf && /^https?:\/\//i.test(story.file_url) ? story.file_url : null);
 
   const handleDownload = () => {
@@ -177,11 +180,11 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
               </div>
             )
           ) : isHtml ? (
-            story.content_html ? (
+            (story.content_html ?? (story as any).html_code) ? (
               <div
                 className="w-full h-full overflow-y-auto p-6 sm:p-10 leading-relaxed font-sans text-foreground"
                 style={{ fontSize: `${fontSize}px` }}
-                dangerouslySetInnerHTML={{ __html: story.content_html }}
+                dangerouslySetInnerHTML={{ __html: (story.content_html ?? (story as any).html_code) }}
               />
             ) : (
               <iframe

@@ -2207,14 +2207,15 @@ const StoriesSection = () => {
     const payload = {
       title: form.title.trim(),
       description: (form.description || "").trim() || null,
-      file_type: form.content_kind,
-      file_url: form.content_kind === "pdf" ? form.file_url : "inline",
-      content_html: form.content_kind === "html" ? form.html_code : null,
+      content_kind: form.content_kind,
+      file_url: form.content_kind === "pdf" ? form.file_url : null,
+      html_code: form.content_kind === "html" ? form.html_code : null,
       cover_url: (form.cover_url || "").trim() || null,
       level_id: form.level_id,
       sort_order: Number(form.sort_order) || 0,
       published: form.published,
     };
+
     const { error } = editing
       ? await supabase.from("stories").update(payload).eq("id", editing.id)
       : await supabase.from("stories").insert(payload);
