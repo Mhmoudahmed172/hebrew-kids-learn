@@ -22,9 +22,10 @@ const PdfPageViewer = ({ url, title }: { url: string; title?: string }) => {
 
     (async () => {
       try {
-        const pdfjs: any = await import("pdfjs-dist");
-        const worker = await import("pdfjs-dist/build/pdf.worker.mjs?url");
+        const pdfjs: any = await import("pdfjs-dist/legacy/build/pdf.mjs");
+        const worker = await import("pdfjs-dist/legacy/build/pdf.worker.mjs?url");
         pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+
 
         const pdf = await pdfjs.getDocument({ url }).promise;
         if (cancelled) return;
