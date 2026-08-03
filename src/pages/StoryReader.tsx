@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { ArrowRight, ArrowLeft, BookOpen, FileText, ExternalLink, Maximize2 } from "lucide-react";
+import { ArrowRight, ArrowLeft, BookOpen, FileText } from "lucide-react";
+import PdfPageViewer from "@/components/PdfPageViewer";
+
 import LockedContent from "@/components/LockedContent";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
