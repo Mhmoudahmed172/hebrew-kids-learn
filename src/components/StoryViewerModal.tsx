@@ -130,28 +130,8 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
               </div>
             )}
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleDownload}
-              className="gap-1.5 rounded-full text-xs"
-              title="تحميل القصة"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">تحميل</span>
-            </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => viewUrl && window.open(viewUrl, "_blank")}
-              className="rounded-full w-8 h-8"
-              title="فتح في نافذة جديدة"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </Button>
+
 
             <Button
               type="button"
