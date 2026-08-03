@@ -46,18 +46,8 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
   const isHtml = kind === "html";
   const viewUrl = pdfUrl || (isPdf && /^https?:\/\//i.test(story.file_url) ? story.file_url : null);
 
-  const handleDownload = () => {
-    const url = viewUrl || story.file_url;
-    if (!url || url === "inline") return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${story.title}.${isPdf ? "pdf" : "html"}`;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
