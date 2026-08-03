@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, FileText, Download, ExternalLink, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { BookOpen, FileText, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { getSignedStoryUrl } from "@/lib/storyUrl";
+import PdfPageViewer from "@/components/PdfPageViewer";
+
 
 export type StoryItem = {
   id: string;
@@ -44,18 +46,8 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
   const isHtml = kind === "html";
   const viewUrl = pdfUrl || (isPdf && /^https?:\/\//i.test(story.file_url) ? story.file_url : null);
 
-  const handleDownload = () => {
-    const url = viewUrl || story.file_url;
-    if (!url || url === "inline") return;
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `${story.title}.${isPdf ? "pdf" : "html"}`;
-    a.target = "_blank";
-    a.rel = "noopener noreferrer";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-  };
+
+
 
   return (
     <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
@@ -128,28 +120,8 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
               </div>
             )}
 
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={handleDownload}
-              className="gap-1.5 rounded-full text-xs"
-              title="تحميل القصة"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">تحميل</span>
-            </Button>
 
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              onClick={() => viewUrl && window.open(viewUrl, "_blank")}
-              className="rounded-full w-8 h-8"
-              title="فتح في نافذة جديدة"
-            >
-              <ExternalLink className="w-4 h-4" />
-            </Button>
+
 
             <Button
               type="button"
@@ -168,17 +140,14 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
         <div className="flex-1 w-full h-full min-h-0 bg-muted/20 relative overflow-hidden flex flex-col">
           {isPdf ? (
             viewUrl ? (
-              <iframe
-                src={`${viewUrl}#toolbar=1`}
-                className="w-full h-full border-0 rounded-b-3xl"
-                title={story.title}
-              />
+              <PdfPageViewer url={viewUrl} title={story.title} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                 <FileText className="w-16 h-16 text-muted-foreground/50 mb-3 animate-pulse" />
                 <p className="font-display text-lg">جاري تحضير القصة...</p>
               </div>
             )
+
           ) : isHtml ? (
             (story.content_html ?? (story as any).html_code) ? (
               <div
@@ -198,11 +167,9 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
               <BookOpen className="w-16 h-16 text-muted-foreground/50 mb-3 animate-bounce" />
               <p className="font-display text-lg">صيغة القصة غير معروفة</p>
-              <Button variant="hero" className="mt-4 gap-2" onClick={handleDownload}>
-                <Download className="w-4 h-4" /> تنزيل الملف
-              </Button>
             </div>
           )}
+
         </div>
       </DialogContent>
     </Dialog>
