@@ -170,17 +170,14 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
         <div className="flex-1 w-full h-full min-h-0 bg-muted/20 relative overflow-hidden flex flex-col">
           {isPdf ? (
             viewUrl ? (
-              <iframe
-                src={`${viewUrl}#toolbar=1`}
-                className="w-full h-full border-0 rounded-b-3xl"
-                title={story.title}
-              />
+              <PdfPageViewer url={viewUrl} title={story.title} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full p-8 text-center">
                 <FileText className="w-16 h-16 text-muted-foreground/50 mb-3 animate-pulse" />
                 <p className="font-display text-lg">جاري تحضير القصة...</p>
               </div>
             )
+
           ) : isHtml ? (
             (story.content_html ?? (story as any).html_code) ? (
               <div
