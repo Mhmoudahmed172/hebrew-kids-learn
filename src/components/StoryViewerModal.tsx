@@ -2,8 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, FileText, Download, ExternalLink, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { BookOpen, FileText, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { getSignedStoryUrl } from "@/lib/storyUrl";
+import PdfPageViewer from "@/components/PdfPageViewer";
+
 
 export type StoryItem = {
   id: string;
