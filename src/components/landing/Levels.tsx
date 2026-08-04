@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCachedData } from "@/hooks/useCachedData";
 import { Star, Lock, BookOpen, Sparkles, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,14 +23,14 @@ const PATH_BAND_HEIGHT = PIN_Y_BOTTOM + 12; // SVG band covering all pin centers
 const ROW_GAP = 96; // vertical space between rows for connector
 
 const Levels = () => {
-  const [levels, setLevels] = useState<any[]>([]);
   const { user, isAdmin } = useAuth();
   const { canView, loading: permsLoading } = usePermissions();
+  const { data: levelsData } = useCachedData<any[]>("levels:published", async () => {
+    const { data } = await supabase.from("levels").select("*").eq("published", true).order("sort_order");
+    return data || [];
+  });
+  const levels = levelsData || [];
 
-  useEffect(() => {
-    supabase.from("levels").select("*").eq("published", true).order("sort_order")
-      .then(({ data }) => setLevels(data || []));
-  }, []);
 
   const rows: any[][] = [];
   for (let i = 0; i < levels.length; i += PER_ROW) {

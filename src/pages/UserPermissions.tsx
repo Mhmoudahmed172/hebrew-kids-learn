@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/select";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateCache } from "@/lib/dataCache";
 import { useAuth } from "@/hooks/useAuth";
 
 type Perm = { can_view: boolean; can_edit: boolean; can_delete: boolean; can_add: boolean };
@@ -166,6 +167,7 @@ export default function UserPermissions() {
       toast({ title: "❌ فشل الحفظ", description: translateError(error), variant: "destructive" });
       return;
     }
+    invalidateCache(`user_permissions:${userId}`);
     toast({ title: "✅ تم حفظ الصلاحيات بنجاح" });
   };
 

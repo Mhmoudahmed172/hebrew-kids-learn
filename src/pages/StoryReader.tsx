@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getSignedStoryUrl } from "@/lib/storyUrl";
+import { cachedQuery } from "@/lib/dataCache";
+
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
@@ -24,18 +26,21 @@ const StoryReader = () => {
   useEffect(() => {
     (async () => {
       if (!slug) return;
-      const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
-      setLevel(lv);
-      if (lv) {
+      const bundle = await cachedQuery(`story-bundle:${slug}`, async () => {
+        const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
+        if (!lv) return { lv: null, items: [] as any[] };
         const { data } = await supabase
           .from("stories").select("*")
           .eq("level_id", lv.id).eq("published", true)
           .order("sort_order");
-        setStories(data || []);
-      }
+        return { lv, items: data || [] };
+      });
+      setLevel(bundle.lv);
+      setStories(bundle.items);
       setLoading(false);
     })();
   }, [slug]);
+
 
   const current = stories.find((s) => s.id === storyId);
 

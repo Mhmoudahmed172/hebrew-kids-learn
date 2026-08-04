@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
 import { Star, Quote } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useCachedData } from "@/hooks/useCachedData";
 
 type T = {
   id: string;
@@ -13,18 +13,14 @@ type T = {
 };
 
 const Testimonials = () => {
-  const [items, setItems] = useState<T[]>([]);
-
-  useEffect(() => {
-    supabase
-      .from("testimonials")
-      .select("*")
-      .eq("published", true)
-      .order("sort_order")
-      .then(({ data }) => setItems((data as T[]) || []));
-  }, []);
+  const { data } = useCachedData<T[]>("testimonials:published", async () => {
+    const { data } = await supabase.from("testimonials").select("*").eq("published", true).order("sort_order");
+    return (data as T[]) || [];
+  });
+  const items = data || [];
 
   if (items.length === 0) return null;
+
 
   // كرر الكروت لضمان حلقة لا نهائية سلسة
   const loop = [...items, ...items];
