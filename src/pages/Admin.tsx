@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { toast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateCache } from "@/lib/dataCache";
 import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.webp";
 import {
@@ -637,6 +638,7 @@ const VideosSection = () => {
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("videos").select("*, levels(title, slug)").order("sort_order");
     setVideos(data || []);
     const { data: lv } = await supabase.from("levels").select("*").order("sort_order");
@@ -911,6 +913,7 @@ const UsersSection = () => {
   };
 
   const load = async () => {
+    invalidateCache();
     const { data: profiles } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
     const { data: rolesData } = await supabase.from("user_roles").select("*");
     const { data: emailsRes } = await supabase.functions.invoke("admin-update-user", { body: { action: "list" } });
@@ -1292,6 +1295,7 @@ const LevelsSection = () => {
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("levels").select("*").order("sort_order");
     setItems(data || []);
   };
@@ -1428,6 +1432,7 @@ const QuizzesSection = () => {
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("quizzes").select("*, quiz_questions(*), levels(title)").order("created_at", { ascending: false });
     setQuizzes(data || []);
     const { data: lv } = await supabase.from("levels").select("*").order("sort_order");
@@ -1622,6 +1627,7 @@ const SimpleSection = ({ table, titleLabel, hasDescription }: { table: "songs" |
 
 
   const load = async () => {
+    invalidateCache();
     const { data } = await (supabase.from(table) as any).select("*, levels(title)").order("created_at", { ascending: false });
     setItems(data || []);
   };
@@ -1818,6 +1824,7 @@ const GamesSection = () => {
   const [preview, setPreview] = useState<any | null>(null);
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("games").select("*, levels(title)").order("created_at", { ascending: false });
     setItems(data || []);
   };
@@ -2178,6 +2185,7 @@ const StoriesSection = () => {
   const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("stories").select("*, levels(title)").order("sort_order");
     setItems(data || []);
   };
@@ -2514,6 +2522,7 @@ const TestimonialsSection = () => {
   const setF = (k: string, v: string) => setFilters((s) => ({ ...s, [k]: v }));
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("testimonials").select("*").order("sort_order");
     setItems(data || []);
   };
@@ -2622,6 +2631,7 @@ const FaqsSection = () => {
   const categories = Array.from(new Set(items.map((i) => i.category).filter(Boolean)));
 
   const load = async () => {
+    invalidateCache();
     const { data } = await supabase.from("faqs").select("*").order("sort_order");
     setItems(data || []);
   };
