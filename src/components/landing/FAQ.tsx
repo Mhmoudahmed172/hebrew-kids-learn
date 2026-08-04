@@ -1,22 +1,18 @@
-import { useEffect, useState } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { supabase } from "@/integrations/supabase/client";
+import { useCachedData } from "@/hooks/useCachedData";
 
 type F = { id: string; question: string; answer: string };
 
 const FAQ = () => {
-  const [faqs, setFaqs] = useState<F[]>([]);
-
-  useEffect(() => {
-    supabase
-      .from("faqs")
-      .select("*")
-      .eq("published", true)
-      .order("sort_order")
-      .then(({ data }) => setFaqs((data as F[]) || []));
-  }, []);
+  const { data } = useCachedData<F[]>("faqs:published", async () => {
+    const { data } = await supabase.from("faqs").select("*").eq("published", true).order("sort_order");
+    return (data as F[]) || [];
+  });
+  const faqs = data || [];
 
   if (faqs.length === 0) return null;
+
 
   return (
     <section id="faq" className="py-24 bg-muted/40">
