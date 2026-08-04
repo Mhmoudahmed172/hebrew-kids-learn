@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCachedData } from "@/hooks/useCachedData";
 import { Star, Lock, BookOpen, Sparkles, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
