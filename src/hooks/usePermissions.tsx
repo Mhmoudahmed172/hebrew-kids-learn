@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
+import { cachedQuery } from "@/lib/dataCache";
 
 type Perm = { can_view: boolean; can_edit: boolean; can_delete: boolean };
 
@@ -15,14 +16,17 @@ export const usePermissions = () => {
     if (authLoading) return;
 
     (async () => {
-      const { data } = await supabase
-        .from("levels")
-        .select("id")
-        .eq("published", true)
-        .order("sort_order")
-        .limit(1)
-        .maybeSingle();
-      setFirstLevelId(data?.id ?? null);
+      const id = await cachedQuery<string | null>("levels:first-published", async () => {
+        const { data } = await supabase
+          .from("levels")
+          .select("id")
+          .eq("published", true)
+          .order("sort_order")
+          .limit(1)
+          .maybeSingle();
+        return data?.id ?? null;
+      });
+      setFirstLevelId(id);
     })();
   }, [authLoading]);
 
@@ -37,19 +41,27 @@ export const usePermissions = () => {
 
     setLoading(true);
     (async () => {
-      const { data } = await supabase
-        .from("user_permissions")
-        .select("section,can_view,can_edit,can_delete")
-        .eq("user_id", user.id);
+      const rows = await cachedQuery<any[]>(
+        `user_permissions:${user.id}`,
+        async () => {
+          const { data } = await supabase
+            .from("user_permissions")
+            .select("section,can_view,can_edit,can_delete")
+            .eq("user_id", user.id);
+          return data || [];
+        },
+        60 * 1000 // 1 minute – permissions should react quickly
+      );
       const map: Record<string, Perm> = {};
-      (data || []).forEach((r: any) => {
+      rows.forEach((r: any) => {
         map[r.section] = { can_view: r.can_view, can_edit: r.can_edit, can_delete: r.can_delete };
       });
       setPerms(map);
-      setHasAny((data || []).length > 0);
+      setHasAny(rows.length > 0);
       setLoading(false);
     })();
   }, [user, authLoading]);
+
 
   /** Whether a single section key (e.g. "level:<id>", "video:<id>") is viewable. */
   const canView = useCallback((key: string): boolean => {
