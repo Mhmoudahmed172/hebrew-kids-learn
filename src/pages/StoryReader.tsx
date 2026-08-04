@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getSignedStoryUrl } from "@/lib/storyUrl";
+import { cachedQuery } from "@/lib/dataCache";
+
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 
