@@ -8,6 +8,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { usePermissions } from "@/hooks/usePermissions";
 import { getSignedVideoUrl } from "@/lib/videoUrl";
+import { cachedQuery } from "@/lib/dataCache";
+
 import { toast } from "sonner";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
