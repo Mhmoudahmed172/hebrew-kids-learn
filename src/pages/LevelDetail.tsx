@@ -31,9 +31,9 @@ const LevelDetail = () => {
   useEffect(() => {
     (async () => {
       if (!slug) return;
-      const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
-      setLevel(lv);
-      if (lv) {
+      const bundle = await cachedQuery(`level-bundle:${slug}`, async () => {
+        const { data: lv } = await supabase.from("levels").select("*").eq("slug", slug).maybeSingle();
+        if (!lv) return { lv: null, v: [], s: [], g: [], q: [], st: [] };
         const [v, s, g, q, st] = await Promise.all([
           supabase.from("videos").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
           supabase.from("songs").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
@@ -41,16 +41,20 @@ const LevelDetail = () => {
           supabase.from("quizzes").select("*, quiz_questions(count)").eq("level_id", lv.id).eq("published", true),
           supabase.from("stories").select("*").eq("level_id", lv.id).eq("published", true).order("sort_order"),
         ]);
-        setVideos(v.data || []);
-        setSongs(s.data || []);
-        setGames(g.data || []);
-        setQuizzes(q.data || []);
-        setStories(st.data || []);
+        return { lv, v: v.data || [], s: s.data || [], g: g.data || [], q: q.data || [], st: st.data || [] };
+      });
+
+      setLevel(bundle.lv);
+      if (bundle.lv) {
+        setVideos(bundle.v);
+        setSongs(bundle.s);
+        setGames(bundle.g);
+        setQuizzes(bundle.q);
+        setStories(bundle.st);
 
         // اجلب روابط معاينة موقّتة لكل فيديو (للغلاف فقط)
-        const vids = v.data || [];
         const entries = await Promise.all(
-          vids.map(async (vd: any) => {
+          bundle.v.map(async (vd: any) => {
             if (vd.thumbnail_url) return [vd.id, ""] as const;
             const url = await getSignedVideoUrl(vd.video_url, 60 * 30);
             return [vd.id, url || ""] as const;
@@ -61,6 +65,7 @@ const LevelDetail = () => {
       setLoading(false);
     })();
   }, [slug]);
+
 
   if (loading) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-primary/5 via-background to-accent/10">
