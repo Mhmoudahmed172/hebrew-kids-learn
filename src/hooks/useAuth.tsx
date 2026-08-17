@@ -25,45 +25,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+    let cancelled = false;
+
+    const fetchRoles = (userId: string) => {
+      supabase.from("user_roles").select("role").eq("user_id", userId)
+        .then(({ data, error }) => {
+          if (cancelled) return;
+          if (error) {
+            console.error("[auth] failed to load roles:", error.message);
+            setRoles([]);
+            return;
+          }
+          setRoles((data ?? []).map((r) => r.role as Role));
+        });
+    };
+
+    const applySession = (s: Session | null, deferRoles: boolean) => {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        setTimeout(() => {
-          supabase.from("user_roles").select("role").eq("user_id", s.user.id)
-            .then(({ data }) => setRoles((data ?? []).map((r: any) => r.role)));
-        }, 0);
-        if (s.access_token) {
-          document.cookie = `sb-access-token=${s.access_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
-        }
-        if (s.refresh_token) {
-          document.cookie = `sb-refresh-token=${s.refresh_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
-        }
+        const uid = s.user.id;
+        if (deferRoles) setTimeout(() => fetchRoles(uid), 0);
+        else fetchRoles(uid);
       } else {
         setRoles([]);
-        document.cookie = "sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       }
-    });
+    };
+
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => applySession(s, true));
+
     supabase.auth.getSession().then(({ data: { session: s } }) => {
-      setSession(s);
-      setUser(s?.user ?? null);
-      if (s?.user) {
-        supabase.from("user_roles").select("role").eq("user_id", s.user.id)
-          .then(({ data }) => setRoles((data ?? []).map((r: any) => r.role)));
-        if (s.access_token) {
-          document.cookie = `sb-access-token=${s.access_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
-        }
-        if (s.refresh_token) {
-          document.cookie = `sb-refresh-token=${s.refresh_token}; path=/; max-age=${s.expires_in}; SameSite=Lax`;
-        }
-      } else {
-        document.cookie = "sb-access-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        document.cookie = "sb-refresh-token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      }
+      applySession(s, false);
       setLoading(false);
     });
-    return () => sub.subscription.unsubscribe();
+
+    return () => { cancelled = true; sub.subscription.unsubscribe(); };
   }, []);
 
   return (
