@@ -5,7 +5,9 @@ import path from "path";
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: "jsdom",
+    // DOM unit tests must not depend on an optional native canvas binary.
+    // Real iframe execution and PDF rendering are verified in Chromium.
+    environment: "happy-dom",
     globals: true,
     setupFiles: ["./src/test/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
