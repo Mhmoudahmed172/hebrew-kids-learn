@@ -24,7 +24,7 @@ The broken startup was caused by jsdom loading a missing optional native canvas 
 - **Tests:** 19 passed: 18 focused regressions plus the existing placeholder. **10 TODOs**, explicitly not verified fixes.
 - **Changed-file lint:** Passed for configuration, setup and new tests.
 - **Full-project lint:** Failed with **179 errors and 17 warnings**, in existing application/configuration files. No broad cleanup was attempted. Common issues include explicit `any` types, hook warnings and a `require()` import in Tailwind configuration.
-- **Automatic verification:** Latest available preview report, 29 October 2026 06:10:08 UTC, says **build OK**, with no reported type errors. This is the available automatic signal, not a separately recorded command-level typecheck result.
+- **Automatic verification:** Latest available preview report, 30 October 2026 09:58:42 UTC, says **build OK**, with no reported type errors. This is the available automatic signal, not a separately recorded command-level typecheck result.
 - **Production build:** Not independently invoked. This workspace performs builds/typechecks automatically and prohibits manually duplicating them; the report does not independently identify a fresh production-mode command. Therefore a separate `build` command and standalone typecheck are **not verified**.
 - **Browser baseline:** Home renders; signed-out `/admin` redirects to `/login`; zero page runtime errors during these checks. This does **not** verify authenticated admin editing, real games/stories, videos, PDF rendering or student progress.
 
