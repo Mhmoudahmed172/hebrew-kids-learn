@@ -1942,7 +1942,7 @@ const GamesSection = () => {
               <Card key={g.id} className="overflow-hidden group hover:shadow-medium transition-bounce">
                 <div className="relative aspect-video bg-muted overflow-hidden">
                   {html ? (
-                    <iframe {...(asUrl ? { src: html } : { srcDoc: html })} title={g.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full pointer-events-none" style={{ border: 0 }} />
+                    <iframe {...(asUrl ? { src: html } : { srcDoc: html })} title={g.title} sandbox="allow-scripts allow-popups allow-forms" className="w-full h-full pointer-events-none" style={{ border: 0 }} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-muted-foreground">
                       <Gamepad2 className="w-10 h-10" />
@@ -1998,7 +1998,7 @@ const GamesSection = () => {
           <DialogHeader><DialogTitle>{preview?.title}</DialogTitle></DialogHeader>
           {preview && (
             <div className="aspect-video bg-muted rounded-xl overflow-hidden">
-              <iframe {...(/^https?:\/\//i.test((preview.url || "").trim()) ? { src: preview.url } : { srcDoc: preview.url || "" })} title={preview.title} sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
+              <iframe {...(/^https?:\/\//i.test((preview.url || "").trim()) ? { src: preview.url } : { srcDoc: preview.url || "" })} title={preview.title} sandbox="allow-scripts allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} allow="fullscreen; autoplay" allowFullScreen />
             </div>
           )}
         </DialogContent>
@@ -2119,9 +2119,9 @@ const GameDialog = ({ open, setOpen, editing, form, setForm, levels, onSave }: a
               <Label className="flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> معاينة مباشرة</Label>
               <div className="aspect-video bg-muted rounded-xl overflow-hidden border-2 border-primary/20">
                 {isUrl ? (
-                  <iframe src={form.url} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
+                  <iframe src={form.url} title="معاينة" sandbox="allow-scripts allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
                 ) : (
-                  <iframe srcDoc={previewHtml} title="معاينة" sandbox="allow-scripts allow-same-origin allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
+                  <iframe srcDoc={previewHtml} title="معاينة" sandbox="allow-scripts allow-popups allow-forms" className="w-full h-full" style={{ border: 0 }} />
                 )}
               </div>
             </div>
