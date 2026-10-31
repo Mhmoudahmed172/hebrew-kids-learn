@@ -1,4 +1,4 @@
-import { render, act } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import IsolatedStoryHtml, { buildStoryDocument } from "./IsolatedStoryHtml";
 
