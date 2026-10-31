@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { BookOpen, FileText, Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { getSignedStoryUrl } from "@/lib/storyUrl";
 import PdfPageViewer from "@/components/PdfPageViewer";
+import IsolatedStoryHtml from "@/components/IsolatedStoryHtml";
 
 
 export type StoryItem = {
@@ -150,17 +151,13 @@ export const StoryViewerModal: React.FC<StoryViewerModalProps> = ({ story, open,
 
           ) : isHtml ? (
             (story.content_html ?? (story as any).html_code) ? (
-              <div
-                className="w-full h-full overflow-y-auto p-6 sm:p-10 leading-relaxed font-sans text-foreground"
-                style={{ fontSize: `${fontSize}px` }}
-                dangerouslySetInnerHTML={{ __html: (story.content_html ?? (story as any).html_code) }}
-              />
+              <IsolatedStoryHtml html={story.content_html ?? story.html_code ?? ""} title={story.title} fontSize={fontSize} />
             ) : (
               <iframe
                 src={story.file_url}
                 className="w-full h-full border-0 rounded-b-3xl bg-white"
                 title={story.title}
-                sandbox="allow-scripts allow-same-origin"
+                sandbox="allow-scripts"
               />
             )
           ) : (
