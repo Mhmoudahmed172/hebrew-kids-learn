@@ -15,6 +15,13 @@
       "when": 1793436931302,
       "tag": "0001_restrict_video_storage_read",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793622256417,
+      "tag": "0002_remove_unapproved_video_null_level_exception",
+      "breakpoints": true
     }
   ]
 }
