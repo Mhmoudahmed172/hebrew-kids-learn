@@ -1,5 +1,6 @@
 # Security review roadmap
 
+- [ ] Prepare current student-privacy Group 1 review only: live read-only evidence, minimal proposal/rollback, isolated regressions, and evidence for deferred audit findings; wait for explicit approval before application.
 - [x] Repair test startup without framework upgrades.
 - [x] Add focused regression tests for existing cache/auth behavior and security boundaries.
 - [x] Run tests and lint; report type/build verification availability.
